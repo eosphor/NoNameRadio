@@ -14,10 +14,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.eosphor.nonameradio.compose.screens.MainScreen
+import com.eosphor.nonameradio.compose.screens.PlayerFullScreen
 import com.eosphor.nonameradio.compose.screens.StationListScreen
 import com.eosphor.nonameradio.compose.screens.StationsScreen
 import com.eosphor.nonameradio.compose.theme.RadioDroidTheme
 import com.eosphor.nonameradio.compose.viewmodels.MainScreenViewModel
+import com.eosphor.nonameradio.compose.viewmodels.PlayerFullViewModel
 import com.eosphor.nonameradio.compose.viewmodels.StationListViewModel
 import com.eosphor.nonameradio.compose.viewmodels.StationsScreenViewModel
 
@@ -69,7 +71,7 @@ fun RadioDroidApp() {
             StationsScreen(
                 viewModel = viewModel,
                 onStationClick = { station ->
-                    // TODO: Handle station click - show play options
+                    navController.navigate("player_full")
                 },
                 onStationLongClick = { station ->
                     // TODO: Handle station long click - show context menu
@@ -79,6 +81,22 @@ fun RadioDroidApp() {
                 },
                 onRefresh = {
                     viewModel.refreshStations()
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        
+        composable("player_full") {
+            val viewModel: PlayerFullViewModel = viewModel()
+            PlayerFullScreen(
+                viewModel = viewModel,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onStationClick = { station ->
+                    // TODO: Handle station click
                 }
             )
         }

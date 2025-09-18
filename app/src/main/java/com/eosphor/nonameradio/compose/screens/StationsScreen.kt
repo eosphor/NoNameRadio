@@ -25,7 +25,8 @@ fun StationsScreen(
     onStationClick: (DataRadioStation) -> Unit = {},
     onStationLongClick: (DataRadioStation) -> Unit = {},
     onRetryClick: () -> Unit = {},
-    onRefresh: () -> Unit = {}
+    onRefresh: () -> Unit = {},
+    onNavigateBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -37,10 +38,16 @@ fun StationsScreen(
         if (uiState.searchEnabled) {
             SearchBar(
                 query = uiState.searchQuery,
-                onQueryChange = viewModel::updateSearchQuery,
-                onSearch = { viewModel.searchStations(it) },
+                onQueryChange = { query ->
+                    viewModel.updateSearchQuery(query)
+                },
+                onSearch = { query ->
+                    viewModel.updateSearchQuery(query)
+                },
                 active = uiState.isSearchActive,
-                onActiveChange = viewModel::setSearchActive,
+                onActiveChange = { active ->
+                    // Handle search active state change
+                },
                 placeholder = { Text("Search stations...") },
                 leadingIcon = {
                     Icon(
@@ -50,7 +57,9 @@ fun StationsScreen(
                 },
                 trailingIcon = {
                     if (uiState.searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.clearSearch() }) {
+                        IconButton(onClick = { 
+                            viewModel.updateSearchQuery("")
+                        }) {
                             Icon(
                                 imageVector = Icons.Default.Clear,
                                 contentDescription = "Clear"
@@ -95,11 +104,15 @@ fun StationsScreen(
             
             else -> {
                 StationsList(
-                    stations = uiState.stations,
-                    onStationClick = onStationClick,
-                    onStationLongClick = onStationLongClick,
+                    stations = uiState.filteredStations,
+                    onStationClick = { station ->
+                        onStationClick(station)
+                    },
+                    onStationLongClick = { station ->
+                        onStationLongClick(station)
+                    },
                     isRefreshing = uiState.isRefreshing,
-                    onRefresh = onRefresh
+                    onRefresh = { viewModel.refreshStations() }
                 )
             }
         }

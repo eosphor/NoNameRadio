@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 
 data class StationsScreenUiState(
     val stations: List<DataRadioStation> = emptyList(),
+    val filteredStations: List<DataRadioStation> = emptyList(),
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val hasError: Boolean = false,
@@ -18,53 +19,64 @@ data class StationsScreenUiState(
     val searchEnabled: Boolean = false,
     val searchQuery: String = "",
     val isSearchActive: Boolean = false,
-    val searchStyle: StationsFilter.SearchStyle = StationsFilter.SearchStyle.ByName
+    val searchStyle: StationsFilter.SearchStyle = StationsFilter.SearchStyle.ByName,
+    val totalStations: Int = 0,
+    val filteredCount: Int = 0
 )
 
 class StationsScreenViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(StationsScreenUiState())
     val uiState: StateFlow<StationsScreenUiState> = _uiState.asStateFlow()
 
-    private var stationsFilter: StationsFilter? = null
     private var allStations: List<DataRadioStation> = emptyList()
 
-    fun loadStations(url: String, context: android.content.Context) {
+    init {
+        loadStations()
+    }
+
+    fun loadStations() {
+        _uiState.value = _uiState.value.copy(isLoading = true, hasError = false)
+        
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, hasError = false)
-            
             try {
-                // TODO: Implement actual station loading logic
-                // This should integrate with the existing StationsFilter
-                val stations = loadStationsFromUrl(url)
-                allStations = stations
+                // TODO: Load stations from repository
+                // For now, simulate loading with empty list
+                allStations = emptyList()
                 _uiState.value = _uiState.value.copy(
-                    stations = stations,
                     isLoading = false,
-                    hasError = false
+                    stations = allStations,
+                    totalStations = allStations.size,
+                    filteredStations = allStations
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     hasError = true,
-                    errorMessage = e.message ?: "Unknown error"
+                    errorMessage = e.message ?: "Failed to load stations"
                 )
             }
         }
     }
 
     fun refreshStations() {
+        _uiState.value = _uiState.value.copy(isRefreshing = true, hasError = false)
+        
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isRefreshing = true)
-            
             try {
-                // TODO: Implement refresh logic
-                // This should reload stations from the current URL
-                _uiState.value = _uiState.value.copy(isRefreshing = false)
+                // TODO: Refresh stations from repository
+                // For now, simulate refresh
+                allStations = emptyList()
+                _uiState.value = _uiState.value.copy(
+                    isRefreshing = false,
+                    stations = allStations,
+                    totalStations = allStations.size,
+                    filteredStations = allStations
+                )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isRefreshing = false,
                     hasError = true,
-                    errorMessage = e.message ?: "Refresh failed"
+                    errorMessage = e.message ?: "Failed to refresh stations"
                 )
             }
         }
@@ -72,58 +84,59 @@ class StationsScreenViewModel : ViewModel() {
 
     fun updateSearchQuery(query: String) {
         _uiState.value = _uiState.value.copy(searchQuery = query)
+        filterStations(query)
+    }
+
+    fun updateSearchStyle(style: StationsFilter.SearchStyle) {
+        _uiState.value = _uiState.value.copy(searchStyle = style)
+        filterStations(_uiState.value.searchQuery)
+    }
+
+    fun toggleSearch() {
+        _uiState.value = _uiState.value.copy(searchEnabled = !_uiState.value.searchEnabled)
         
-        if (query.isNotEmpty()) {
-            searchStations(query)
-        } else {
-            // Show all stations when search is cleared
-            _uiState.value = _uiState.value.copy(stations = allStations)
+        if (!_uiState.value.searchEnabled) {
+            _uiState.value = _uiState.value.copy(
+                searchQuery = "",
+                filteredStations = allStations,
+                filteredCount = allStations.size
+            )
         }
     }
 
-    fun searchStations(query: String) {
-        viewModelScope.launch {
-            try {
-                // TODO: Implement search logic using StationsFilter
-                val filteredStations = allStations.filter { station ->
-                    station.Name?.contains(query, ignoreCase = true) == true ||
-                    station.Country?.contains(query, ignoreCase = true) == true ||
-                    station.TagsAll?.contains(query, ignoreCase = true) == true
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(hasError = false, errorMessage = "")
+    }
+
+    private fun filterStations(query: String) {
+        if (query.isEmpty()) {
+            _uiState.value = _uiState.value.copy(
+                filteredStations = allStations,
+                filteredCount = allStations.size
+            )
+            return
+        }
+
+        val filtered = allStations.filter { station ->
+            when (_uiState.value.searchStyle) {
+                StationsFilter.SearchStyle.ByName -> {
+                    station.Name?.contains(query, ignoreCase = true) == true
                 }
-                
-                _uiState.value = _uiState.value.copy(stations = filteredStations)
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    hasError = true,
-                    errorMessage = e.message ?: "Search failed"
-                )
+                StationsFilter.SearchStyle.ByLanguageExact -> {
+                    station.Language?.equals(query, ignoreCase = true) == true
+                }
+                StationsFilter.SearchStyle.ByCountryCodeExact -> {
+                    station.Country?.equals(query, ignoreCase = true) == true
+                }
+                StationsFilter.SearchStyle.ByTagExact -> {
+                    station.TagsAll?.equals(query, ignoreCase = true) == true
+                }
             }
         }
-    }
 
-    fun clearSearch() {
         _uiState.value = _uiState.value.copy(
-            searchQuery = "",
-            stations = allStations,
-            isSearchActive = false
+            filteredStations = filtered,
+            filteredCount = filtered.size
         )
-    }
-
-    fun setSearchActive(active: Boolean) {
-        _uiState.value = _uiState.value.copy(isSearchActive = active)
-    }
-
-    fun setSearchEnabled(enabled: Boolean) {
-        _uiState.value = _uiState.value.copy(searchEnabled = enabled)
-    }
-
-    fun setSearchStyle(style: StationsFilter.SearchStyle) {
-        _uiState.value = _uiState.value.copy(searchStyle = style)
-    }
-
-    private suspend fun loadStationsFromUrl(url: String): List<DataRadioStation> {
-        // TODO: Implement actual loading from URL
-        // This should use the existing DataRadioStation.DecodeJson logic
-        return emptyList()
     }
 }
