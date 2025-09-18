@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -56,17 +57,29 @@ fun RadioStationItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Station icon
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(station.IconUrl)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = "Station icon",
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                contentScale = ContentScale.Crop
-            )
+            if (station.IconUrl.isNullOrEmpty()) {
+                // Show default icon when no URL is provided
+                Icon(
+                    Icons.Default.Radio,
+                    contentDescription = "Default station icon",
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(station.IconUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "Station icon",
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }
             
             Spacer(modifier = Modifier.width(12.dp))
             
