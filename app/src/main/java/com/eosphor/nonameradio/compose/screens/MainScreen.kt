@@ -31,7 +31,8 @@ fun MainScreen(
     viewModel: MainScreenViewModel = viewModel(),
     onNavigateToStationList: () -> Unit = {},
     onNavigateToStations: () -> Unit = {},
-    onNavigateToHistory: () -> Unit = {}
+    onNavigateToHistory: () -> Unit = {},
+    onNavigateToRecordings: () -> Unit = {}
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     var selectedDrawerItem by remember { mutableStateOf("all_stations") }
@@ -112,6 +113,10 @@ fun MainScreen(
                             // Handle navigation to history
                             if (item == "history") {
                                 onNavigateToHistory()
+                            }
+                            // Handle navigation to recordings
+                            if (item == "recordings") {
+                                onNavigateToRecordings()
                             }
                         }
                     ),
@@ -261,6 +266,12 @@ private fun getDefaultNavigationItems(
             icon = Icons.Default.History,
             isSelected = selectedItem == "history",
             onClick = { onNavigate("history") }
+        ),
+        NavigationItem(
+            title = "Записи",
+            icon = Icons.Default.Mic,
+            isSelected = selectedItem == "recordings",
+            onClick = { onNavigate("recordings") }
         ),
         NavigationItem(
             title = "Поиск",

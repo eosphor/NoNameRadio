@@ -195,6 +195,9 @@ class MainScreenViewModel : ViewModel() {
             "history" -> {
                 // Показать историю - навигация будет обработана в MainActivity
             }
+            "recordings" -> {
+                // Показать записи - навигация будет обработана в MainActivity
+            }
             "search" -> {
                 // Показать поиск
             }

@@ -16,12 +16,14 @@ import androidx.navigation.compose.rememberNavController
 import com.eosphor.nonameradio.compose.screens.HistoryScreen
 import com.eosphor.nonameradio.compose.screens.MainScreen
 import com.eosphor.nonameradio.compose.screens.PlayerFullScreen
+import com.eosphor.nonameradio.compose.screens.RecordingsScreen
 import com.eosphor.nonameradio.compose.screens.StationListScreen
 import com.eosphor.nonameradio.compose.screens.StationsScreen
 import com.eosphor.nonameradio.compose.theme.RadioDroidTheme
 import com.eosphor.nonameradio.compose.viewmodels.HistoryScreenViewModel
 import com.eosphor.nonameradio.compose.viewmodels.MainScreenViewModel
 import com.eosphor.nonameradio.compose.viewmodels.PlayerFullViewModel
+import com.eosphor.nonameradio.compose.viewmodels.RecordingsScreenViewModel
 import com.eosphor.nonameradio.compose.viewmodels.StationListViewModel
 import com.eosphor.nonameradio.compose.viewmodels.StationsScreenViewModel
 
@@ -57,6 +59,9 @@ fun RadioDroidApp() {
                 },
                 onNavigateToHistory = {
                     navController.navigate("history")
+                },
+                onNavigateToRecordings = {
+                    navController.navigate("recordings")
                 }
             )
         }
@@ -102,6 +107,19 @@ fun RadioDroidApp() {
                 },
                 onStationClick = { station ->
                     navController.navigate("player_full")
+                }
+            )
+        }
+        
+        composable("recordings") {
+            val viewModel: RecordingsScreenViewModel = viewModel()
+            RecordingsScreen(
+                viewModel = viewModel,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onRecordingClick = { recording ->
+                    // TODO: Handle recording click - open audio file
                 }
             )
         }
