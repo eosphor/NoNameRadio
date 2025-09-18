@@ -62,6 +62,8 @@ jobs:
       run: |
         echo "Java version:"
         java -version
+        echo "JAVA_HOME:"
+        echo $JAVA_HOME
         echo "Gradle version:"
         ./gradlew --version
         echo "Android SDK:"
