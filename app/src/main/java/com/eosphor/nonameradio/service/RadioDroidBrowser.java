@@ -25,8 +25,10 @@ import androidx.annotation.Nullable;
 import androidx.media.MediaBrowserServiceCompat;
 import androidx.preference.PreferenceManager;
 
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
+import coil.Coil;
+import coil.ImageLoader;
+import coil.request.ImageRequest;
+import coil.target.Target;
 
 import com.eosphor.nonameradio.R;
 import com.eosphor.nonameradio.RadioDroidApp;
@@ -41,9 +43,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import jp.wasabeef.picasso.transformations.CropCircleTransformation;
-import jp.wasabeef.picasso.transformations.CropSquareTransformation;
-import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
+
 
 import static com.eosphor.nonameradio.Utils.resourceToUri;
 
@@ -94,31 +94,37 @@ public class RadioDroidBrowser {
 
                 Target imageLoadTarget = new Target() {
                     @Override
-                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                        stationIdToIcon.put(station.StationUuid, bitmap);
+                    public void onSuccess(Drawable result) {
+                        if (result instanceof BitmapDrawable) {
+                            Bitmap bitmap = ((BitmapDrawable) result).getBitmap();
+                            stationIdToIcon.put(station.StationUuid, bitmap);
+                        }
                         countDownLatch.countDown();
                     }
 
                     @Override
-                    public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-                        onBitmapLoaded(((BitmapDrawable) errorDrawable).getBitmap(), null);
+                    public void onError(Drawable error) {
+                        if (error instanceof BitmapDrawable) {
+                            Bitmap bitmap = ((BitmapDrawable) error).getBitmap();
+                            stationIdToIcon.put(station.StationUuid, bitmap);
+                        }
                         countDownLatch.countDown();
                     }
 
                     @Override
-                    public void onPrepareLoad(Drawable placeHolderDrawable) {
-
+                    public void onStart(Drawable placeholder) {
+                        // Placeholder handling if needed
                     }
                 };
                 imageLoadTargets.add(imageLoadTarget);
 
-                Picasso.get().load((!station.hasIcon() ? resourceToUri(resources, R.drawable.ic_launcher).toString() : station.IconUrl))
-                        .transform(new CropSquareTransformation())
+                ImageRequest request = new ImageRequest.Builder(context)
+                        .data(!station.hasIcon() ? resourceToUri(resources, R.drawable.ic_launcher).toString() : station.IconUrl)
                         .error(R.drawable.ic_launcher)
-                        .transform(Utils.useCircularIcons(context) ? new CropCircleTransformation() : new CropSquareTransformation())
-                        .transform(new RoundedCornersTransformation(12, 2, RoundedCornersTransformation.CornerType.ALL))
-                        .resize(128, 128)
-                        .into(imageLoadTarget);
+                        .size(128, 128)
+                        .target(imageLoadTarget)
+                        .build();
+                Coil.imageLoader(context).enqueue(request);
             }
 
             super.onPreExecute();
@@ -140,9 +146,8 @@ public class RadioDroidBrowser {
         protected void onPostExecute(Void aVoid) {
             Context context = contextRef.get();
             if (context != null) {
-                for (Target target : imageLoadTargets) {
-                    Picasso.get().cancelRequest(target);
-                }
+                // Coil automatically handles request cancellation when targets are garbage collected
+                imageLoadTargets.clear();
             }
 
             List<MediaBrowserCompat.MediaItem> mediaItems = new ArrayList<>();

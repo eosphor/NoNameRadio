@@ -17,9 +17,10 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.NetworkPolicy;
-import com.squareup.picasso.Picasso;
+import coil.Coil;
+import coil.ImageLoader;
+import coil.request.ImageRequest;
+import coil.request.CachePolicy;
 
 import com.eosphor.nonameradio.BuildConfig;
 import com.eosphor.nonameradio.IPlayerService;
@@ -283,28 +284,34 @@ public class PlayerServiceUtil {
         final float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 70, r.getDisplayMetrics());
         final Drawable stationImagePlaceholder = AppCompatResources.getDrawable(holder.getContext(), R.drawable.ic_photo_24dp);
 
-        Callback imageLoadCallback = new Callback() {
-            @Override
-            public void onSuccess() {
-            }
-
-            @Override
-            public void onError(Exception e) {
-                Picasso.get()
-                        .load(fromUrl)
-                        .placeholder(stationImagePlaceholder)
-                        .resize((int) px, 0)
-                        .networkPolicy(NetworkPolicy.NO_CACHE)
-                        .into(holder);
-            }
-        };
-
-        Picasso.get()
-                .load(fromUrl)
+        // First try with cache
+        ImageRequest request = new ImageRequest.Builder(mainContext)
+                .data(fromUrl)
                 .placeholder(stationImagePlaceholder)
-                .resize((int) px, 0)
-                .networkPolicy(NetworkPolicy.OFFLINE)
-                .into(holder, imageLoadCallback);
+                .size((int) px, (int) px)
+                .diskCachePolicy(CachePolicy.ENABLED)
+                .networkCachePolicy(CachePolicy.ENABLED)
+                .target(holder)
+                .listener(
+                        null, // onStart
+                        null, // onCancel
+                        null, // onSuccess
+                        (request1, result) -> {
+                            // On error, try without cache
+                            ImageRequest fallbackRequest = new ImageRequest.Builder(mainContext)
+                                    .data(fromUrl)
+                                    .placeholder(stationImagePlaceholder)
+                                    .size((int) px, (int) px)
+                                    .diskCachePolicy(CachePolicy.DISABLED)
+                                    .networkCachePolicy(CachePolicy.DISABLED)
+                                    .target(holder)
+                                    .build();
+                            Coil.imageLoader(mainContext).enqueue(fallbackRequest);
+                            return null;
+                        }
+                )
+                .build();
+        Coil.imageLoader(mainContext).enqueue(request);
     }
 
     public static ShoutcastInfo getShoutcastInfo() {

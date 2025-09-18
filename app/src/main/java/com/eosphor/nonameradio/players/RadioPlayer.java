@@ -22,6 +22,15 @@ import com.eosphor.nonameradio.players.exoplayer.ExoPlayerWrapper;
 import com.eosphor.nonameradio.players.mediaplayer.MediaPlayerWrapper;
 import com.eosphor.nonameradio.recording.Recordable;
 import com.eosphor.nonameradio.recording.RecordableListener;
+import com.eosphor.nonameradio.repository.PlayStationRepository;
+
+import javax.inject.Inject;
+import dagger.hilt.android.AndroidEntryPoint;
+
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.CoroutineScopeKt;
+import kotlinx.coroutines.Dispatchers;
+import kotlinx.coroutines.Job;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,7 +70,10 @@ public class RadioPlayer implements PlayerWrapper.PlayListener, Recordable {
 
     private StreamLiveInfo lastLiveInfo;
 
-    private PlayStationTask playStationTask;
+    private PlayStationRepository playStationRepository;
+    
+    private CoroutineScope coroutineScope;
+    private Job playStationJob;
 
     private Runnable bufferCheckRunnable = new Runnable() {
         @Override
@@ -78,6 +90,13 @@ public class RadioPlayer implements PlayerWrapper.PlayListener, Recordable {
 
     public RadioPlayer(Context mainContext) {
         this.mainContext = mainContext;
+        
+        // Получаем PlayStationRepository через RadioDroidApp
+        RadioDroidApp app = (RadioDroidApp) mainContext.getApplicationContext();
+        this.playStationRepository = app.getPlayStationRepository();
+        
+        // Создаем CoroutineScope для управления корутинами
+        this.coroutineScope = CoroutineScopeKt.CoroutineScope(Dispatchers.getMain());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             // ExoPlayer has its own thread for cpu intensive tasks
@@ -121,23 +140,29 @@ public class RadioPlayer implements PlayerWrapper.PlayListener, Recordable {
     public final void play(final DataRadioStation station, final boolean isAlarm) {
         setState(PlayState.PrePlaying, -1);
 
-        playStationTask = new PlayStationTask(station, mainContext,
-                (url) -> RadioPlayer.this.play(station.playableUrl, station.Name, isAlarm),
-                (executionResult) -> {
-                    RadioPlayer.this.playStationTask = null;
+        playStationJob = playStationRepository.getPlayableUrlAsync(
+            station, 
+            mainContext,
+            coroutineScope,
+            (url) -> {
+                RadioPlayer.this.play(url, station.Name, isAlarm);
+                return kotlin.Unit.INSTANCE;
+            },
+            (executionResult) -> {
+                RadioPlayer.this.playStationJob = null;
 
-                    if (executionResult == PlayStationTask.ExecutionResult.FAILURE) {
-                        RadioPlayer.this.onPlayerError(R.string.error_station_load);
-                    }
-                });
-
-        playStationTask.execute();
+                if (executionResult == PlayStationRepository.ExecutionResult.FAILURE) {
+                    RadioPlayer.this.onPlayerError(R.string.error_station_load);
+                }
+                return kotlin.Unit.INSTANCE;
+            }
+        );
     }
 
     private void cancelStationLinkRetrieval() {
-        if (playStationTask != null) {
-            playStationTask.cancel(true);
-            playStationTask = null;
+        if (playStationJob != null) {
+            playStationJob.cancel(null);
+            playStationJob = null;
         }
     }
 
@@ -182,6 +207,12 @@ public class RadioPlayer implements PlayerWrapper.PlayListener, Recordable {
 
     public final void destroy() {
         stop();
+        
+        // Отменяем все корутины
+        if (playStationJob != null) {
+            playStationJob.cancel(null);
+            playStationJob = null;
+        }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             Looper looper = playerThread.getLooper();

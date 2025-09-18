@@ -52,8 +52,10 @@ import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
 
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
+import coil.Coil;
+import coil.ImageLoader;
+import coil.request.ImageRequest;
+import coil.target.Target;
 
 import com.eosphor.nonameradio.ActivityMain;
 import com.eosphor.nonameradio.BuildConfig;
@@ -1051,34 +1053,39 @@ public class PlayerService extends JobIntentService implements RadioPlayer.Playe
             return;
         }
 
-        Picasso.get()
-                .load(currentStation.IconUrl)
-                .resize((int) px, 0)
-                .into(new Target() {
+        ImageRequest request = new ImageRequest.Builder(itsContext)
+                .data(currentStation.IconUrl)
+                .size((int) px, (int) px)
+                .target(new Target() {
                     @Override
-                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                        final boolean useCircularIcons = Utils.useCircularIcons(itsContext);
-                        if (!useCircularIcons)
-                            radioIcon = new BitmapDrawable(getResources(), bitmap);
-                        else {
-                            // Icon is not circular with this code. So we need to create custom notification view and then use RoundedBitmapDrawable there
-                            RoundedBitmapDrawable rb = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
-                            rb.setCircular(true);
-                            radioIcon = new BitmapDrawable(getResources(), rb.getBitmap());
+                    public void onStart(Drawable placeholder) {
+                        // onPrepareLoad equivalent
+                    }
+
+                    @Override
+                    public void onSuccess(@NonNull Drawable result) {
+                        if (result instanceof BitmapDrawable) {
+                            Bitmap bitmap = ((BitmapDrawable) result).getBitmap();
+                            final boolean useCircularIcons = Utils.useCircularIcons(itsContext);
+                            if (!useCircularIcons)
+                                radioIcon = new BitmapDrawable(getResources(), bitmap);
+                            else {
+                                // Icon is not circular with this code. So we need to create custom notification view and then use RoundedBitmapDrawable there
+                                RoundedBitmapDrawable rb = RoundedBitmapDrawableFactory.create(getResources(), bitmap);
+                                rb.setCircular(true);
+                                radioIcon = new BitmapDrawable(getResources(), rb.getBitmap());
+                            }
+                            updateNotification();
                         }
-                        updateNotification();
                     }
 
                     @Override
-                    public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-
+                    public void onError(Drawable error) {
+                        // onBitmapFailed equivalent
                     }
-
-                    @Override
-                    public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-                    }
-                });
+                })
+                .build();
+        Coil.imageLoader(itsContext).enqueue(request);
     }
 
     private void warnAboutMeteredConnection(PlayerType playerType) {

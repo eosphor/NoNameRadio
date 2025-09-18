@@ -10,8 +10,14 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.multidex.MultiDexApplication;
 import androidx.preference.PreferenceManager;
 
-import com.squareup.picasso.OkHttp3Downloader;
-import com.squareup.picasso.Picasso;
+import coil.Coil;
+import coil.ImageLoader;
+import coil.request.CachePolicy;
+
+import dagger.hilt.android.HiltAndroidApp;
+
+import io.appmetrica.analytics.AppMetrica;
+import io.appmetrica.analytics.AppMetricaConfig;
 
 import com.eosphor.nonameradio.alarm.RadioAlarmManager;
 import com.eosphor.nonameradio.history.TrackHistoryRepository;
@@ -20,6 +26,7 @@ import com.eosphor.nonameradio.station.live.metadata.TrackMetadataSearcher;
 import com.eosphor.nonameradio.proxy.ProxySettings;
 import com.eosphor.nonameradio.recording.RecordingsManager;
 import com.eosphor.nonameradio.utils.TvChannelManager;
+import com.eosphor.nonameradio.repository.PlayStationRepository;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +39,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+@HiltAndroidApp
 public class RadioDroidApp extends MultiDexApplication {
 
     private HistoryManager historyManager;
@@ -48,6 +56,8 @@ public class RadioDroidApp extends MultiDexApplication {
     private CastHandler castHandler;
 
     private TrackMetadataSearcher trackMetadataSearcher;
+
+    private PlayStationRepository playStationRepository;
 
     private ConnectionPool connectionPool;
     private OkHttpClient httpClient;
@@ -80,16 +90,25 @@ public class RadioDroidApp extends MultiDexApplication {
     public void onCreate() {
         super.onCreate();
 
+        // Инициализация AppMetrica
+        AppMetricaConfig config = AppMetricaConfig.newConfigBuilder("620825a5-2d14-47ce-af59-acb3618c547e")
+                .withLogs()
+                .build();
+        AppMetrica.activate(this, config);
+
         GoogleProviderHelper.use(getBaseContext());
 
         connectionPool = new ConnectionPool();
 
         rebuildHttpClient();
 
-        Picasso.Builder builder = new Picasso.Builder(this);
-        builder.downloader(new OkHttp3Downloader(newHttpClientForPicasso()));
-        Picasso picassoInstance = builder.build();
-        Picasso.setSingletonInstance(picassoInstance);
+        // Инициализация Coil
+        ImageLoader imageLoader = new ImageLoader.Builder(this)
+                .okHttpClient(httpClient)
+                .diskCachePolicy(CachePolicy.ENABLED)
+                .memoryCachePolicy(CachePolicy.ENABLED)
+                .build();
+        Coil.setImageLoader(imageLoader);
 
         CountryCodeDictionary.getInstance().load(this);
         CountryFlagsLoader.getInstance();
@@ -113,6 +132,8 @@ public class RadioDroidApp extends MultiDexApplication {
         castHandler = new CastHandler();
 
         trackMetadataSearcher = new TrackMetadataSearcher(httpClient);
+
+        playStationRepository = new PlayStationRepository(httpClient);
 
         recordingsManager.updateRecordingsList();
     }
@@ -167,6 +188,10 @@ public class RadioDroidApp extends MultiDexApplication {
         return trackMetadataSearcher;
     }
 
+    public PlayStationRepository getPlayStationRepository() {
+        return playStationRepository;
+    }
+
     public OkHttpClient getHttpClient() {
         return httpClient;
     }
@@ -205,25 +230,5 @@ public class RadioDroidApp extends MultiDexApplication {
             }
         }
         return true;
-    }
-
-    private OkHttpClient newHttpClientForPicasso() {
-        File cache = new File(getCacheDir(), "picasso-cache");
-        if (!cache.exists()) {
-            //noinspection ResultOfMethodCallIgnored
-            cache.mkdirs();
-        }
-
-        OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .addInterceptor(new UserAgentInterceptor("RadioDroid2/" + BuildConfig.VERSION_NAME))
-                .cache(new Cache(cache, Integer.MAX_VALUE));
-
-        if (testsInterceptor != null) {
-            builder.addInterceptor(testsInterceptor);
-        }
-
-        setCurrentOkHttpProxy(builder);
-
-        return builder.build();
     }
 }

@@ -16,8 +16,10 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
+import coil.Coil;
+import coil.ImageLoader;
+import coil.request.ImageRequest;
+import coil.target.Target;
 
 import com.eosphor.nonameradio.ActivityMain;
 import com.eosphor.nonameradio.R;
@@ -29,9 +31,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import jp.wasabeef.picasso.transformations.CropCircleTransformation;
-import jp.wasabeef.picasso.transformations.CropSquareTransformation;
-import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
+import coil.Coil;
+import coil.ImageLoader;
+import coil.request.ImageRequest;
+import coil.target.Target;
 import okhttp3.OkHttpClient;
 
 import static com.eosphor.nonameradio.Utils.resourceToUri;
@@ -417,12 +420,12 @@ public class DataRadioStation implements Parcelable {
 	}
 
     public void prepareShortcut(Context ctx, ShortcutReadyListener cb) {
-        Picasso.get()
-                .load((!hasIcon() ? resourceToUri(ctx.getResources(), R.drawable.ic_launcher).toString() : IconUrl))
+        ImageRequest request = new ImageRequest.Builder(ctx)
+                .data(!hasIcon() ? resourceToUri(ctx.getResources(), R.drawable.ic_launcher).toString() : IconUrl)
                 .error(R.drawable.ic_launcher)
-                .transform(Utils.useCircularIcons(ctx) ? new CropCircleTransformation() : new CropSquareTransformation())
-                .transform(new RoundedCornersTransformation(12, 2, RoundedCornersTransformation.CornerType.ALL))
-                .into(new RadioIconTarget(ctx, this, cb));
+                .target(new RadioIconTarget(ctx, this, cb))
+                .build();
+        Coil.imageLoader(ctx).enqueue(request);
     }
 
     class RadioIconTarget implements Target {
@@ -438,26 +441,31 @@ public class DataRadioStation implements Parcelable {
         }
 
         @Override
-        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-            if (Build.VERSION.SDK_INT >= 25) {
-                Intent playByUUIDintent = new Intent(MediaSessionCallback.ACTION_PLAY_STATION_BY_UUID, null, ctx, ActivityMain.class)
-                        .putExtra(MediaSessionCallback.EXTRA_STATION_UUID, station.StationUuid);
-                ShortcutInfo shortcut = new ShortcutInfo.Builder(ctx.getApplicationContext(), ctx.getPackageName() + "/" + station.StationUuid)
-                        .setShortLabel(station.Name)
-                        .setIcon(Icon.createWithBitmap(bitmap))
-                        .setIntent(playByUUIDintent)
-                        .build();
-                cb.onShortcutReadyListener(shortcut);
+        public void onSuccess(Drawable result) {
+            if (result instanceof BitmapDrawable) {
+                Bitmap bitmap = ((BitmapDrawable) result).getBitmap();
+                if (Build.VERSION.SDK_INT >= 25) {
+                    Intent playByUUIDintent = new Intent(MediaSessionCallback.ACTION_PLAY_STATION_BY_UUID, null, ctx, ActivityMain.class)
+                            .putExtra(MediaSessionCallback.EXTRA_STATION_UUID, station.StationUuid);
+                    ShortcutInfo shortcut = new ShortcutInfo.Builder(ctx.getApplicationContext(), ctx.getPackageName() + "/" + station.StationUuid)
+                            .setShortLabel(station.Name)
+                            .setIcon(Icon.createWithBitmap(bitmap))
+                            .setIntent(playByUUIDintent)
+                            .build();
+                    cb.onShortcutReadyListener(shortcut);
+                }
             }
         }
 
         @Override
-        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-            onBitmapLoaded(((BitmapDrawable) errorDrawable).getBitmap(), null);
+        public void onError(Drawable errorDrawable) {
+            if (errorDrawable instanceof BitmapDrawable) {
+                onSuccess(errorDrawable);
+            }
         }
 
         @Override
-        public void onPrepareLoad(Drawable placeHolderDrawable) {
+        public void onStart(Drawable placeholder) {
 
         }
     }

@@ -38,7 +38,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.squareup.picasso.Picasso;
+import coil.Coil;
+import coil.ImageLoader;
+import coil.request.ImageRequest;
 
 import com.eosphor.nonameradio.history.TrackHistoryAdapter;
 import com.eosphor.nonameradio.history.TrackHistoryEntry;
@@ -574,10 +576,12 @@ public class FragmentPlayerFull extends Fragment {
                 LastFMApiKey.isEmpty()) {
             if (station.hasIcon()) {
                 // TODO: Check if we already have this station's icon loaded into image view
-                Picasso.get()
-                        .load(station.IconUrl)
+                ImageRequest request = new ImageRequest.Builder(requireContext())
+                        .data(station.IconUrl)
                         .error(R.drawable.ic_launcher)
-                        .into(artAndInfoPagerAdapter.imageViewArt);
+                        .target(artAndInfoPagerAdapter.imageViewArt)
+                        .build();
+                Coil.imageLoader(requireContext()).enqueue(request);
             } else {
                 artAndInfoPagerAdapter.imageViewArt.setImageResource(R.drawable.ic_launcher);
             }
@@ -664,10 +668,12 @@ public class FragmentPlayerFull extends Fragment {
                     DataRadioStation station = Utils.getCurrentOrLastStation(fragment.requireContext());
 
                     if (station != null && station.hasIcon()) {
-                        Picasso.get()
-                                .load(station.IconUrl)
+                        ImageRequest request = new ImageRequest.Builder(fragment.requireContext())
+                                .data(station.IconUrl)
                                 .error(R.drawable.ic_launcher)
-                                .into(fragment.artAndInfoPagerAdapter.imageViewArt);
+                                .target(fragment.artAndInfoPagerAdapter.imageViewArt)
+                                .build();
+                        Coil.imageLoader(fragment.requireContext()).enqueue(request);
                     } else {
                         fragment.artAndInfoPagerAdapter.imageViewArt.setImageResource(R.drawable.ic_launcher);
                     }
@@ -691,9 +697,11 @@ public class FragmentPlayerFull extends Fragment {
                         final String albumArtUrl = albumArts.get(0).url;
 
                         if (!TextUtils.isEmpty(albumArtUrl)) {
-                            Picasso.get()
-                                    .load(albumArtUrl)
-                                    .into(fragment.artAndInfoPagerAdapter.imageViewArt);
+                            ImageRequest request = new ImageRequest.Builder(fragment.requireContext())
+                                    .data(albumArtUrl)
+                                    .target(fragment.artAndInfoPagerAdapter.imageViewArt)
+                                    .build();
+                            Coil.imageLoader(fragment.requireContext()).enqueue(request);
 
                             if (!albumArtUrl.equals(trackHistoryEntry.stationIconUrl)) {
                                 fragment.trackHistoryRepository.setTrackArtUrl(trackHistoryEntry.uid, albumArtUrl);

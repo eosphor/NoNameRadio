@@ -25,7 +25,9 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatImageView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.squareup.picasso.Picasso;
+import coil.Coil;
+import coil.ImageLoader;
+import coil.request.ImageRequest;
 
 import com.eosphor.nonameradio.R;
 
@@ -57,11 +59,13 @@ public class TrackHistoryInfoDialog extends BottomSheetDialogFragment {
 
         Resources resource = requireContext().getResources();
         final float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 200, resource.getDisplayMetrics());
-        Picasso.get()
-                .load(historyEntry.artUrl)
+        ImageRequest request = new ImageRequest.Builder(requireContext())
+                .data(historyEntry.artUrl)
                 .placeholder(AppCompatResources.getDrawable(getContext(), R.drawable.ic_photo_24dp))
-                .resize((int) px, 0)
-                .into(imageViewTrackArt);
+                .size((int) px, (int) px)
+                .target(imageViewTrackArt)
+                .build();
+        Coil.imageLoader(requireContext()).enqueue(request);
 
         // TODO: Icons for date and duration
 
