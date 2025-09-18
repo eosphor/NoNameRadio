@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: 'dagger.hilt.android.plugin'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 def getAvailableLocales() {
     def tree = fileTree(dir: 'src/main/res', include: '**/strings.xml')
@@ -180,7 +181,7 @@ dependencies {
     implementation 'androidx.compose.material:material'
     implementation 'androidx.activity:activity-compose:1.9.3'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7'
-    implementation 'androidx.navigation:navigation-compose:2.8.4'
+    implementation 'androidx.navigation:navigation-compose:2.8.5'
     implementation 'io.coil-kt:coil-compose:2.7.0'
     implementation "androidx.compose.material:material-icons-extended"
     
@@ -200,12 +201,12 @@ dependencies {
     implementation "io.coil-kt:coil-compose:2.7.0"
     
     // Hilt для Dependency Injection
-    implementation "com.google.dagger:hilt-android:2.48"
-    kapt "com.google.dagger:hilt-compiler:2.48"
+    implementation "com.google.dagger:hilt-android:2.52"
+    kapt "com.google.dagger:hilt-compiler:2.52"
     
     // Kotlin Coroutines
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0"
     
     // Добавляем Coil для замены Picasso
     implementation "io.coil-kt:coil:2.7.0"
@@ -244,7 +245,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-common-java8:2.5.1"
+    implementation "androidx.lifecycle:lifecycle-common-java8:2.8.7"
 
     implementation 'androidx.paging:paging-runtime:3.1.1'
 
