@@ -1,4 +1,4 @@
-package net.programmierecke.radiodroid2
+package com.eosphor.nonameradio
 
 import android.content.Context
 import android.net.Uri
@@ -11,9 +11,10 @@ import com.google.android.gms.cast.framework.*
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.images.WebImage
-import net.programmierecke.radiodroid2.cast.CastAwareActivity
-import net.programmierecke.radiodroid2.service.PauseReason
-import net.programmierecke.radiodroid2.service.PlayerServiceUtil
+import com.eosphor.nonameradio.cast.CastAwareActivity
+import com.eosphor.nonameradio.service.PauseReason
+import com.eosphor.nonameradio.service.PlayerServiceUtil
+import com.eosphor.nonameradio.R
 
 private sealed class CastState {
     abstract fun setActivity(activity: CastAwareActivity?)

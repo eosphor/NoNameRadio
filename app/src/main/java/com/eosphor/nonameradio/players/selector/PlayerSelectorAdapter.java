@@ -51,8 +51,8 @@ public class PlayerSelectorAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         final ImageButton btnStop;
         final ImageButton btnMore;
         final TextView textViewNoConnection;
-        final AppCompatImageButton btnDecreaseVolume;
-        final AppCompatImageButton btnIncreaseVolume;
+        final ImageButton btnDecreaseVolume;
+        final ImageButton btnIncreaseVolume;
         final TextView textViewCurrentVolume;
 
         MPDServerData mpdServerData;

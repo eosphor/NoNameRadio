@@ -8,6 +8,8 @@ import com.google.android.gms.cast.framework.SessionProvider;
 import com.google.android.gms.cast.framework.media.CastMediaOptions;
 import com.google.android.gms.cast.framework.media.MediaIntentReceiver;
 import com.google.android.gms.cast.framework.media.NotificationOptions;
+import com.eosphor.nonameradio.ActivityMain;
+import com.eosphor.nonameradio.R;
 
 import java.util.ArrayList;
 import java.util.List;

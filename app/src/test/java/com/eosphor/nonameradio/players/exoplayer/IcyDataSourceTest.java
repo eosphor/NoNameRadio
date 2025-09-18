@@ -1,4 +1,4 @@
-package net.programmierecke.radiodroid2.players.exoplayer;
+package com.eosphor.nonameradio.players.exoplayer;
 
 import androidx.annotation.Nullable;
 
@@ -6,8 +6,8 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.TransferListener;
 
-import net.programmierecke.radiodroid2.station.live.ShoutcastInfo;
-import net.programmierecke.radiodroid2.station.live.StreamLiveInfo;
+import com.eosphor.nonameradio.station.live.ShoutcastInfo;
+import com.eosphor.nonameradio.station.live.StreamLiveInfo;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;

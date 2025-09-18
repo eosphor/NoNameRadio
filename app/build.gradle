@@ -127,6 +127,7 @@ android {
     }
     lint {
         abortOnError true
+        baseline = file("lint-baseline.xml")
     }
     namespace 'com.eosphor.nonameradio'
 
