@@ -41,6 +41,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
+      - name: Debug environment
+        run: |
+          echo "Java version:"
+          java -version
+          echo "Gradle version:"
+          ./gradlew --version
+          echo "Android SDK:"
+          echo $ANDROID_HOME
+
       - name: AVD cache
         uses: actions/cache@v4
         id: avd-cache
@@ -68,5 +77,6 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
+            echo "Starting instrumented tests..."
             adb uninstall com.eosphor.nonameradio || true
-            ./gradlew connectedFreeDebugAndroidTest --stacktrace --no-daemon
+            ./gradlew connectedFreeDebugAndroidTest --stacktrace --no-daemon --info

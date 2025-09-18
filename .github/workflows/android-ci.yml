@@ -46,8 +46,18 @@ jobs:
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       
+    - name: Debug environment
+      run: |
+        echo "Java version:"
+        java -version
+        echo "Gradle version:"
+        ./gradlew --version
+        echo "Android SDK:"
+        echo $ANDROID_HOME
+        ls -la $ANDROID_HOME
+      
     - name: Run unit tests
-      run: ./gradlew testFreeDebugUnitTest --stacktrace --no-daemon
+      run: ./gradlew testFreeDebugUnitTest --stacktrace --no-daemon --info
       
     - name: Build with Gradle
-      run: ./gradlew assembleFreeDebug assemblePlayDebug --stacktrace --no-daemon
+      run: ./gradlew assembleFreeDebug assemblePlayDebug --stacktrace --no-daemon --info
