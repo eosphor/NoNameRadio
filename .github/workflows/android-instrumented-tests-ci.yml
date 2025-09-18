@@ -23,12 +23,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-
-      - name: Setup Gradle 8.7
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.7'
-          cache-read-only: false
           
       - name: Cache Gradle dependencies
         uses: actions/cache@v4
@@ -36,7 +30,6 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-            .gradle
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
@@ -79,4 +72,4 @@ jobs:
           script: |
             echo "Starting instrumented tests..."
             adb uninstall com.eosphor.nonameradio || true
-            ./gradlew connectedFreeDebugAndroidTest --stacktrace --no-daemon --info
+            ./gradlew connectedFreeDebugAndroidTest --stacktrace --no-daemon
