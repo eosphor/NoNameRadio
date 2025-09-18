@@ -7,7 +7,7 @@
         android:orientation="vertical">
     <!--android:visibility="gone">-->
 
-    <net.programmierecke.radiodroid2.views.TagsView
+    <com.eosphor.nonameradio.views.TagsView
             android:id="@+id/viewTags"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -83,14 +83,14 @@
             android:layout_weight="1" />
 
         <ImageButton
-            android:id="@+id/buttonPlayInRadioDroid"
+            android:id="@+id/buttonPlayInNoNameRadio"
             style="@style/IconButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/detail_play_in_radiodroid"
             app:tint="?attr/iconsInItemBackgroundColor"
-            app:srcCompat="@drawable/ic_play_in_radiodroid" />
+            app:srcCompat="@drawable/ic_play_in_nonameradio" />
     </LinearLayout>
 
 </LinearLayout>

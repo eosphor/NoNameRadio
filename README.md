@@ -1,16 +1,74 @@
-<div align=center><img src="https://user-images.githubusercontent.com/38007519/39290477-e1bac174-4959-11e8-9229-836355a74a7c.png"/></div>
+# NoNameRadio
 
-# <div align=center>Android radio streaming app based on <a href="http://www.radio-browser.info" target="_blank">Radio Browser</a></div>
+**Современное Android-приложение для потокового воспроизведения радиостанций**
 
-<div align=center><a href="https://f-droid.org/repository/browse/?fdid=net.programmierecke.radiodroid2" target="_blank">
-<img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80"/></a>
-<a href="https://play.google.com/store/apps/details?id=net.programmierecke.radiodroid2" target="_blank">
-<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Get it on Google Play" height="80"/></a></div>
+NoNameRadio — это форк популярного приложения RadioDroid, предоставляющий доступ к тысячам интернет-радиостанций со всего мира через базу данных [Radio Browser](http://www.radio-browser.info).
 
+## ✨ Особенности
 
+- 🎵 **Огромная база радиостанций** — доступ к тысячам станций со всего мира
+- 🔍 **Умный поиск** — поиск по названию, жанру, стране или языку
+- ⭐ **Избранное** — сохраняйте любимые станции для быстрого доступа
+- ⏰ **Будильник** — просыпайтесь под любимую радиостанцию
+- 📱 **Material Design 3** — современный и интуитивный интерфейс
+- 🎧 **Фоновое воспроизведение** — слушайте радио, используя другие приложения
+- 📻 **Информация о треках** — отображение текущего трека (если поддерживается станцией)
+- 🌍 **Многоязычность** — поддержка множества языков
+- 📊 **Статистика** — отслеживание истории прослушивания
 
-### <div align=center>Please add issues or feature requests on github under issues.</div>
-### <div align=center>Download releases here https://github.com/segler-alex/RadioDroid/releases</div>
+## 🚀 Установка
 
-<div align=center><a href="http://www.gnu.org/licenses/gpl-3.0.html" target="_blank">
-<img src="http://www.gnu.org/graphics/gplv3-with-text-84x42.png" alt="GPLv3 Logo"/></a></div>
+### Из исходного кода
+```bash
+git clone https://github.com/eosphor/NoNameRadio.git
+cd NoNameRadio
+./gradlew assembleDebug
+```
+
+## 🛠 Технологии
+
+- **Kotlin** — основной язык разработки
+- **Jetpack Compose** — современный UI toolkit
+- **Material Design 3** — дизайн-система Google
+- **ExoPlayer** — медиаплеер для Android
+- **Room** — локальная база данных
+- **Retrofit** — HTTP-клиент для API
+- **Hilt** — dependency injection
+
+## 📋 Требования
+
+- Android 5.0 (API level 21) или выше
+- Подключение к интернету для потокового воспроизведения
+
+## 🤝 Участие в разработке
+
+Мы приветствуем вклад в развитие проекта! Если вы хотите помочь:
+
+1. Создайте форк репозитория
+2. Создайте ветку для новой функции (`git checkout -b feature/amazing-feature`)
+3. Зафиксируйте изменения (`git commit -m 'Add amazing feature'`)
+4. Отправьте изменения в ветку (`git push origin feature/amazing-feature`)
+5. Создайте Pull Request
+
+### Сообщения об ошибках
+
+Если вы нашли ошибку или хотите предложить новую функцию, пожалуйста, создайте [issue](https://github.com/eosphor/NoNameRadio/issues).
+
+## 📄 Лицензия
+
+Этот проект распространяется под лицензией GPL v3. Подробности в файле [LICENSE](LICENSE).
+
+## 🙏 Благодарности
+
+- Команде [Radio Browser](http://www.radio-browser.info) за предоставление API
+- Разработчикам оригинального RadioDroid за основу проекта
+- Всем участникам сообщества за вклад в развитие
+
+## 📞 Контакты
+
+- GitHub: [@eosphor](https://github.com/eosphor)
+- Issues: [GitHub Issues](https://github.com/eosphor/NoNameRadio/issues)
+
+---
+
+*NoNameRadio — слушайте мир без границ* 🌍🎵

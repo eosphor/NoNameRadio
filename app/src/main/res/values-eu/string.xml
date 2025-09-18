@@ -12,7 +12,7 @@
     <string name="detail_pause">Pausatu</string>
     <string name="detail_stop">Gelditu</string>
     <string name="detail_share">Partekatu</string>
-    <string name="detail_play_in_radiodroid">Erreproduzitu RadioDroiden</string>
+    <string name="detail_play_in_radiodroid">Erreproduzitu NoNameRadioen</string>
 
     <string name="action_links">Estekak</string>
     <string name="action_homepage">Hasierako orria</string>
@@ -58,7 +58,7 @@
     <string name="nav_item_settings">Ezarpenak</string>
     <string name="nav_item_alarm">Alarma</string>
 
-    <string name="about_text">Aplikazio honek irratien direktorio libre hau erabiltzen du:\nhttps://www.radio-browser.info\nEdozeinek gehitu dezake irrati-etxeak edo daudenak editatu. Interneten bidez igortzen duten irrati-etxeen wiki gisa funtzionatzen du.\n\nKontaktua\nsegler_alex@web.de\n\nIntzidentzien kudeaketa:\nhttps://github.com/segler-alex/RadioDroid/issues\n\nSoftware hau gustuko baduzu eta lagundu nahi baduzu aski duzu e-posta bat bidaltzea. Izan ere grafikoetan aritua den norbaiten laguntza behar dut aplikazioaren itxura atseginagoa egiteko :) Agian ikonoak, irudiak egiten dakien norbait... Baina baita ere programadoreak akatsak zuzendu eta funtzionalitate berriak gehitzeko. ;)\n¡ Funtzionalitate berrientzako ideiak ere ongi etorriak dira!\n\nAplikazio hau software librea da GPLv3 lizentziapean.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
+    <string name="about_text">Aplikazio honek irratien direktorio libre hau erabiltzen du:\nhttps://www.radio-browser.info\nEdozeinek gehitu dezake irrati-etxeak edo daudenak editatu. Interneten bidez igortzen duten irrati-etxeen wiki gisa funtzionatzen du.\n\nKontaktua\nsegler_alex@web.de\n\nIntzidentzien kudeaketa:\nhttps://github.com/segler-alex/NoNameRadio/issues\n\nSoftware hau gustuko baduzu eta lagundu nahi baduzu aski duzu e-posta bat bidaltzea. Izan ere grafikoetan aritua den norbaiten laguntza behar dut aplikazioaren itxura atseginagoa egiteko :) Agian ikonoak, irudiak egiten dakien norbait... Baina baita ere programadoreak akatsak zuzendu eta funtzionalitate berriak gehitzeko. ;)\n¡ Funtzionalitate berrientzako ideiak ere ongi etorriak dira!\n\nAplikazio hau software librea da GPLv3 lizentziapean.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
     <string name="about_version">Bertsioa: %1$s</string>
     <string name="detail_star">Gehitu gogokoetan</string>
     <string name="detail_unstar">Kendu gogokoetatik</string>
@@ -136,7 +136,7 @@
     <string name="settings_alarm">Alarma</string>
     <string name="settings_alarm_external">Ireki beste aplikazioa</string>
     <string name="settings_alarm_external_desc_on">Ireki alarma lehenetsitako aplikazioarekin</string>
-    <string name="settings_alarm_external_desc_off">Ireki alarma RadioDroidekin</string>
+    <string name="settings_alarm_external_desc_off">Ireki alarma NoNameRadioekin</string>
     <string name="settings_alarm_audio_player">Erreproduzitu audioa</string>
     <string name="settings_alarm_sleep_timer">Lotarako tenporizadorea</string>
     <string name="settings_alarm_sleep_timer_desc">Gelditu erreprodukzioa %1$s minutu eta gero</string>
@@ -146,7 +146,7 @@
     <string name="settings_auto_play_on_startup_off">Ez erreproduzitu azken irratik-etxea abioan</string>
     <string name="settings_play_external">Irekin kanpoko erreproduktorea</string>
     <string name="settings_play_external_desc_on">Erreproduzitu irrati-etxeak kanpoko erreproduzitzaile baten bidez</string>
-    <string name="settings_play_external_desc_off">Erreproduzitu irrati-etxeak RadioDroiden bidez</string>
+    <string name="settings_play_external_desc_off">Erreproduzitu irrati-etxeak NoNameRadioen bidez</string>
     <string name="settings_equalizer">Ekualizadorea</string>
 
     <string name="settings_connectivity">Konexioa</string>
@@ -270,7 +270,7 @@
 
     <string name="media_route_menu_title">GoogleCast</string>
     <string name="app_id">5A97BAE4</string>
-    <string name="app_name">RadioDroid</string>
+    <string name="app_name">NoNameRadio</string>
 
     <string name="settings_mpd">Musika erreproduzitzeko demonioa (Music Player Daemon, MPD)</string>
     <string name="settings_mpd_port">MPD-ren ataka</string>
@@ -289,7 +289,7 @@
 
     <string name="settings_other">Beste bat</string>
     <string name="settings_statistics">Estatistikak</string>
-    <string name="settings_about">RadioDroid-i buruz</string>
+    <string name="settings_about">NoNameRadio-i buruz</string>
 
     <string name="description_btn_skip_to_next">Hurrengora</string>
     <string name="description_btn_skip_to_previous">Aurrekora</string>

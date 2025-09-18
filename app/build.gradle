@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'com.google.devtools.ksp'
 
 def getAvailableLocales() {
     def tree = fileTree(dir: 'src/main/res', include: '**/strings.xml')
@@ -25,31 +26,38 @@ android {
 
     flavorDimensions "one"
 
-    compileSdkVersion 33
+    compileSdkVersion 34
 
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlin {
         jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of("11"))
+            languageVersion.set(JavaLanguageVersion.of("17"))
         }
     }
 
     buildFeatures {
+        compose true
         viewBinding true
+        buildConfig true
+        aidl true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.5.14'
     }
 
     defaultConfig {
-        applicationId "net.programmierecke.radiodroid2"
-        minSdkVersion 16
-        targetSdkVersion 33
+        applicationId "com.eosphor.nonameradio"
+        minSdkVersion 21
+        targetSdkVersion 34
 
-        versionCode 96
-        versionName "0.86"
+        versionCode 108
+        versionName "0.108"
 
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
@@ -63,14 +71,14 @@ android {
         // Define your application name here.
         // It must neither be present in /res/values/strings.xml
         // nor in /res/values/string_no_translate.xml
-        resValue 'string', 'app_name_untranslated', 'RadioDroid'
+        resValue 'string', 'app_name_untranslated', 'NoNameRadio'
 
         // There is no easy way to get available locales during runtime, and especially before
         // tests setup.
         def escapedLocales = getAvailableLocales().collect { "\"" + it + "\"" }
         buildConfigField "String[]", "AVAILABLE_LOCALES", String.format("{ %s }", escapedLocales.join(","))
 
-        testInstrumentationRunner "net.programmierecke.radiodroid2.tests.CustomTestRunner"
+        testInstrumentationRunner "com.eosphor.nonameradio.tests.CustomTestRunner"
 
         // The following argument makes the Android Test Orchestrator run its
         // "pm clear" command after each test invocation. This command ensures
@@ -92,6 +100,7 @@ android {
         // Store flags in subfolder to not pollute drawables
         // https://antonioleiva.com/android-multiple-resource-folders/
         main.res.srcDirs += ["src/main/res/drawable/flags"]
+        main.aidl.srcDirs = ['src/main/aidl']
 
         androidTest {
             resources.srcDirs += ['src/androidTest/resources']
@@ -119,7 +128,7 @@ android {
     lint {
         abortOnError true
     }
-    namespace 'net.programmierecke.radiodroid2'
+    namespace 'com.eosphor.nonameradio'
 
     testOptions {
         unitTests.all {
@@ -127,6 +136,15 @@ android {
         }
         animationsDisabled = true
         unitTests.returnDefaultValues = true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
     }
 }
 
@@ -140,7 +158,7 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
-    implementation 'com.google.android.material:material:1.8.0-beta01'
+    implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.preference:preference:1.2.0'
     implementation 'androidx.mediarouter:mediarouter:1.3.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
@@ -148,17 +166,33 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.tvprovider:tvprovider:1.0.0'
 
-    // Keep OkHttp 3.12.X to support Android 4.X, see https://developer.squareup.com/blog/okhttp-3-13-requires-android-5
-    //noinspection GradleDependency
-    implementation 'com.squareup.okhttp3:okhttp:3.12.13'
+    // Jetpack Compose BOM - обновлено до золотого стандарта с Material 3
+    implementation platform('androidx.compose:compose-bom:2025.01.00')
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.compose.material:material'
+    implementation 'androidx.activity:activity-compose:1.9.3'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7'
+    implementation 'androidx.navigation:navigation-compose:2.8.4'
+    implementation 'io.coil-kt:coil-compose:2.7.0'
+    
+    // Compose debugging tools
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
 
-    implementation 'com.google.code.gson:gson:2.9.1'
-    //noinspection GradleDependency 2.8 is newer than 2.71828'
-    implementation 'com.squareup.picasso:picasso:2.8'
     //noinspection GradleDependency
-    implementation 'jp.wasabeef:picasso-transformations:2.3.1'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+
+    implementation 'com.google.code.gson:gson:2.11.0'
+    // Временно возвращаем Picasso для совместимости с существующим кодом
+    implementation 'com.squareup.picasso:picasso:2.8'
+    implementation 'jp.wasabeef:picasso-transformations:2.4.0'
+    // Обновляем ExoPlayer до последней версии (совместимой с текущим кодом)
+    def exoplayerVersion = "2.19.1"
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayerVersion"
     implementation "com.google.android.exoplayer:exoplayer-hls:$exoplayerVersion"
+    implementation "com.google.android.exoplayer:exoplayer-ui:$exoplayerVersion"
     implementation "com.mikepenz:iconics-core:$iconicsVersion"
     implementation "com.mikepenz:iconics-views:$iconicsVersion"
     implementation 'com.mikepenz:google-material-typeface:3.0.1.4.original-kotlin@aar'
@@ -166,19 +200,25 @@ dependencies {
     implementation 'com.github.rustamg:file-dialogs:1.0'
     implementation 'info.debatty:java-string-similarity:2.0.0'
     implementation 'me.xdrop:fuzzywuzzy:1.4.0'
-    //noinspection GradleDependency
-    implementation 'com.github.zawadz88.materialpopupmenu:material-popup-menu:3.4.0'
+    // MaterialPopupMenu заменен на стандартный PopupMenu с Material Design 2
     implementation 'com.github.ByteHamster:SearchPreference:v2.3.0'
 
-    implementation 'androidx.room:room-runtime:2.4.3'
+    // Обновляем Room до актуальной версии
+    def roomVersion = "2.6.1"
+    implementation "androidx.room:room-runtime:$roomVersion"
+    implementation "androidx.room:room-ktx:$roomVersion"
+    ksp "androidx.room:room-compiler:$roomVersion"
+
     androidTestImplementation("androidx.test.espresso:espresso-contrib:3.4.0") {
         exclude group: 'org.checkerframework', module: 'checker'
     }
-    annotationProcessor 'androidx.room:room-compiler:2.4.3'
 
+    // Обновляем Lifecycle компоненты
+    def lifecycleVersion = "2.8.7"
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-common-java8:2.5.1"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
 
     implementation 'androidx.paging:paging-runtime:3.1.1'
 

@@ -19,6 +19,7 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="com.android.providers.tv.permission.WRITE_EPG_DATA" />
@@ -41,7 +42,7 @@
         android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="s">
         <provider
-            android:authorities="net.programmierecke.radiodroid2.fileprovider"
+            android:authorities="com.eosphor.nonameradio.fileprovider"
             android:name="androidx.core.content.FileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
@@ -60,14 +61,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.media.action.MEDIA_PLAY_FROM_SEARCH" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        
+        <!-- Compose Activity (временно отключена) -->
+        <activity
+            android:name=".compose.ComposeMainActivity"
+            android:label="@string/app_name"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar">
+        </activity>
         <service
-            android:name="net.programmierecke.radiodroid2.service.PlayerService"
+            android:name="com.eosphor.nonameradio.service.PlayerService"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback"
             android:permission="android.permission.BIND_JOB_SERVICE">
@@ -83,13 +92,13 @@
             tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
-            android:name="net.programmierecke.radiodroid2.service.RadioDroidBrowserService"
+            android:name="com.eosphor.nonameradio.service.RadioDroidBrowserService"
             </intent-filter>
         </service>
 -->
 
         <receiver
-            android:name="net.programmierecke.radiodroid2.alarm.AlarmReceiver"
+            android:name="com.eosphor.nonameradio.alarm.AlarmReceiver"
             android:exported="true"
             android:enabled="true">
             <intent-filter>
@@ -107,7 +116,7 @@
         </receiver>
 
         <receiver
-            android:name="net.programmierecke.radiodroid2.BootReceiver"
+            android:name="com.eosphor.nonameradio.BootReceiver"
             android:exported="true"
             android:enabled="true">
             <intent-filter>

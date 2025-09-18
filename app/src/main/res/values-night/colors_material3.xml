@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material 3 Dark Theme Colors -->
+    
+    <!-- Primary Colors -->
+    <color name="md_theme_dark_primary">#A8C8EC</color>
+    <color name="md_theme_dark_onPrimary">#0F2F52</color>
+    <color name="md_theme_dark_primaryContainer">#284569</color>
+    <color name="md_theme_dark_onPrimaryContainer">#D1E4FF</color>
+    
+    <!-- Secondary Colors -->
+    <color name="md_theme_dark_secondary">#BFC6DC</color>
+    <color name="md_theme_dark_onSecondary">#293041</color>
+    <color name="md_theme_dark_secondaryContainer">#3F4759</color>
+    <color name="md_theme_dark_onSecondaryContainer">#DBE2F9</color>
+    
+    <!-- Tertiary Colors -->
+    <color name="md_theme_dark_tertiary">#DEBCDF</color>
+    <color name="md_theme_dark_onTertiary">#402843</color>
+    <color name="md_theme_dark_tertiaryContainer">#583E5B</color>
+    <color name="md_theme_dark_onTertiaryContainer">#FBD7FC</color>
+    
+    <!-- Error Colors -->
+    <color name="md_theme_dark_error">#FFB4AB</color>
+    <color name="md_theme_dark_errorContainer">#93000A</color>
+    <color name="md_theme_dark_onError">#690005</color>
+    <color name="md_theme_dark_onErrorContainer">#FFDAD6</color>
+    
+    <!-- Background Colors -->
+    <color name="md_theme_dark_background">#10131A</color>
+    <color name="md_theme_dark_onBackground">#E3E2E6</color>
+    
+    <!-- Surface Colors -->
+    <color name="md_theme_dark_surface">#10131A</color>
+    <color name="md_theme_dark_onSurface">#E3E2E6</color>
+    <color name="md_theme_dark_surfaceVariant">#44474F</color>
+    <color name="md_theme_dark_onSurfaceVariant">#C4C7CF</color>
+    
+    <!-- Outline Colors -->
+    <color name="md_theme_dark_outline">#8E9199</color>
+    <color name="md_theme_dark_outlineVariant">#44474F</color>
+    
+    <!-- Inverse Colors -->
+    <color name="md_theme_dark_inverseOnSurface">#10131A</color>
+    <color name="md_theme_dark_inverseSurface">#E3E2E6</color>
+    <color name="md_theme_dark_inversePrimary">#3F5F85</color>
+    
+    <!-- Surface Container Colors -->
+    <color name="md_theme_dark_surfaceDim">#10131A</color>
+    <color name="md_theme_dark_surfaceBright">#363A41</color>
+    <color name="md_theme_dark_surfaceContainerLowest">#0B0E15</color>
+    <color name="md_theme_dark_surfaceContainerLow">#191C23</color>
+    <color name="md_theme_dark_surfaceContainer">#1D2027</color>
+    <color name="md_theme_dark_surfaceContainerHigh">#272A31</color>
+    <color name="md_theme_dark_surfaceContainerHighest">#32353C</color>
+</resources>
