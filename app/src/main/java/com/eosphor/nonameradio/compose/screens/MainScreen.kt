@@ -5,19 +5,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.eosphor.nonameradio.compose.components.*
 import com.eosphor.nonameradio.compose.theme.RadioDroidTheme
+import com.eosphor.nonameradio.compose.viewmodels.MainScreenViewModel
+import com.eosphor.nonameradio.station.DataRadioStation
 
 data class TabItem(
     val title: String,
@@ -28,52 +27,75 @@ data class TabItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: MainScreenViewModel = viewModel(),
+    onNavigateToStationList: () -> Unit = {}
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     var selectedDrawerItem by remember { mutableStateOf("all_stations") }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     
-    // Пример данных для плеера
-    val playerState by remember {
-        mutableStateOf(
-            PlayerState(
-                stationName = "Radio Example",
-                stationCountry = "Germany",
-                stationFavicon = null,
-                isPlaying = false,
-                isFavorite = false,
-                volume = 0.7f,
-                bitrate = "128 kbps",
-                codec = "MP3"
-            )
-        )
-    }
+    // Состояние UI из ViewModel
+    val uiState by viewModel.uiState.collectAsState()
     
     // Табы как в оригинальном приложении
     val tabs = listOf(
         TabItem(
             title = "Все станции",
             icon = Icons.Default.Home,
-            content = { AllStationsContent() }
+            content = { 
+                AllStationsContent(
+                    stations = uiState.allStations,
+                    isLoading = uiState.isLoading,
+                    onPlayClick = { station -> viewModel.playStation(station) },
+                    onFavoriteClick = { station -> viewModel.toggleFavorite(station) },
+                    onItemClick = { station -> viewModel.selectStation(station) }
+                )
+            }
         ),
         TabItem(
             title = "Избранное",
             icon = Icons.Default.Favorite,
-            content = { FavoritesContent() }
+            content = { 
+                FavoritesContent(
+                    stations = uiState.favoriteStations,
+                    isLoading = uiState.isLoading,
+                    onPlayClick = { station -> viewModel.playStation(station) },
+                    onFavoriteClick = { station -> viewModel.toggleFavorite(station) },
+                    onItemClick = { station -> viewModel.selectStation(station) }
+                )
+            }
         ),
         TabItem(
             title = "История",
             icon = Icons.Default.Settings,
-            content = { HistoryContent() }
+            content = { 
+                HistoryContent(
+                    stations = uiState.historyStations,
+                    isLoading = uiState.isLoading,
+                    onPlayClick = { station -> viewModel.playStation(station) },
+                    onFavoriteClick = { station -> viewModel.toggleFavorite(station) },
+                    onItemClick = { station -> viewModel.selectStation(station) }
+                )
+            }
         ),
         TabItem(
             title = "Поиск",
             icon = Icons.Default.Search,
-            content = { SearchContent() }
+            content = { 
+                SearchContent(
+                    searchQuery = uiState.searchQuery,
+                    searchResults = uiState.searchResults,
+                    isSearching = uiState.isSearching,
+                    onSearchQueryChange = { query -> viewModel.updateSearchQuery(query) },
+                    onPlayClick = { station -> viewModel.playStation(station) },
+                    onFavoriteClick = { station -> viewModel.toggleFavorite(station) },
+                    onItemClick = { station -> viewModel.selectStation(station) }
+                )
+            }
         )
     )
-    
+
     RadioDroidTheme {
         ModalNavigationDrawer(
             drawerState = drawerState,
@@ -83,7 +105,7 @@ fun MainScreen(
                         selectedItem = selectedDrawerItem,
                         onNavigate = { item ->
                             selectedDrawerItem = item
-                            // Здесь можно добавить логику навигации
+                            viewModel.navigateToSection(item)
                         }
                     ),
                     onItemClick = { item ->
@@ -104,7 +126,7 @@ fun MainScreen(
                         navigationIcon = {
                             IconButton(
                                 onClick = {
-                                    // Открытие drawer
+                                    // Открытие drawer через coroutine scope
                                 }
                             ) {
                                 Icon(
@@ -115,13 +137,11 @@ fun MainScreen(
                         },
                         actions = {
                             IconButton(
-                                onClick = {
-                                    // Поиск
-                                }
+                                onClick = onNavigateToStationList
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "Search"
+                                    imageVector = Icons.Default.List,
+                                    contentDescription = "Список станций"
                                 )
                             }
                         },
@@ -136,21 +156,24 @@ fun MainScreen(
                 bottomBar = {
                     Column {
                         // Плеер внизу экрана
-                        PlayerBottomSheet(
-                            playerState = playerState,
-                            onPlayPauseClick = {
-                                // Логика воспроизведения/паузы
-                            },
-                            onFavoriteClick = {
-                                // Логика добавления в избранное
-                            },
-                            onVolumeChange = { volume ->
-                                // Логика изменения громкости
-                            },
-                            onExpandClick = {
-                                // Логика расширения плеера
-                            }
-                        )
+                        uiState.currentStation?.let { station ->
+                            PlayerBottomSheet(
+                                playerState = PlayerState(
+                                    stationName = station.Name ?: "Unknown",
+                                    stationCountry = station.Country ?: "",
+                                    stationFavicon = station.IconUrl,
+                                    isPlaying = uiState.isPlaying,
+                                    isFavorite = false, // TODO: Get from favorites
+                                    volume = 1f,
+                                    bitrate = station.Bitrate?.toString() ?: "",
+                                    codec = station.Codec ?: ""
+                                ),
+                                onPlayPauseClick = { viewModel.togglePlayPause() },
+                                onFavoriteClick = { viewModel.toggleFavorite(station) },
+                                onVolumeChange = { /* TODO: Implement volume control */ },
+                                onExpandClick = { /* TODO: Implement expand */ }
+                            )
+                        }
                         
                         // Нижняя навигация
                         NavigationBar(
@@ -199,91 +222,190 @@ fun MainScreen(
 }
 
 @Composable
-private fun AllStationsContent() {
-    // Пример списка станций
-    val sampleStations = remember {
-        listOf(
-            RadioStation(
-                name = "Radio Example 1",
-                country = "Germany",
-                language = "German",
-                tags = "pop,rock,music",
-                bitrate = 128,
-                codec = "MP3",
-                favicon = null,
-                isFavorite = false,
-                isPlaying = false
-            ),
-            RadioStation(
-                name = "Radio Example 2",
-                country = "France",
-                language = "French",
-                tags = "jazz,classical",
-                bitrate = 192,
-                codec = "AAC",
-                favicon = null,
-                isFavorite = true,
-                isPlaying = false
-            )
-        )
-    }
-    
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(vertical = 8.dp)
-    ) {
-        items(sampleStations) { station ->
-            RadioStationItem(
-                station = station,
-                onPlayClick = {
-                    // Логика воспроизведения
-                },
-                onFavoriteClick = {
-                    // Логика избранного
-                },
-                onItemClick = {
-                    // Логика клика по элементу
-                }
-            )
+private fun AllStationsContent(
+    stations: List<DataRadioStation>,
+    isLoading: Boolean,
+    onPlayClick: (DataRadioStation) -> Unit,
+    onFavoriteClick: (DataRadioStation) -> Unit,
+    onItemClick: (DataRadioStation) -> Unit
+) {
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(vertical = 8.dp)
+        ) {
+            items(stations) { station ->
+                RadioStationItem(
+                    station = RadioStation(
+                        name = station.Name ?: "Unknown",
+                        country = station.Country ?: "",
+                        language = station.Language ?: "",
+                        tags = station.TagsAll ?: "",
+                        bitrate = station.Bitrate,
+                        codec = station.Codec ?: "",
+                        favicon = station.IconUrl,
+                        isFavorite = false, // Будет обновлено через ViewModel
+                        isPlaying = false   // Будет обновлено через ViewModel
+                    ),
+                    onPlayClick = { onPlayClick(station) },
+                    onFavoriteClick = { onFavoriteClick(station) },
+                    onItemClick = { onItemClick(station) }
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun FavoritesContent() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "Избранные станции",
-            style = MaterialTheme.typography.headlineMedium
-        )
+private fun FavoritesContent(
+    stations: List<DataRadioStation>,
+    isLoading: Boolean,
+    onPlayClick: (DataRadioStation) -> Unit,
+    onFavoriteClick: (DataRadioStation) -> Unit,
+    onItemClick: (DataRadioStation) -> Unit
+) {
+    if (stations.isEmpty() && !isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Default.FavoriteBorder,
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Нет избранных станций",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+        }
+    } else {
+        AllStationsContent(stations, isLoading, onPlayClick, onFavoriteClick, onItemClick)
     }
 }
 
 @Composable
-private fun HistoryContent() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "История воспроизведения",
-            style = MaterialTheme.typography.headlineMedium
-        )
+private fun HistoryContent(
+    stations: List<DataRadioStation>,
+    isLoading: Boolean,
+    onPlayClick: (DataRadioStation) -> Unit,
+    onFavoriteClick: (DataRadioStation) -> Unit,
+    onItemClick: (DataRadioStation) -> Unit
+) {
+    if (stations.isEmpty() && !isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "История пуста",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+        }
+    } else {
+        AllStationsContent(stations, isLoading, onPlayClick, onFavoriteClick, onItemClick)
     }
 }
 
 @Composable
-private fun SearchContent() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+private fun SearchContent(
+    searchQuery: String,
+    searchResults: List<DataRadioStation>,
+    isSearching: Boolean,
+    onSearchQueryChange: (String) -> Unit,
+    onPlayClick: (DataRadioStation) -> Unit,
+    onFavoriteClick: (DataRadioStation) -> Unit,
+    onItemClick: (DataRadioStation) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxSize()
     ) {
-        Text(
-            text = "Поиск станций",
-            style = MaterialTheme.typography.headlineMedium
+        // Поле поиска
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = onSearchQueryChange,
+            label = { Text("Поиск станций") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search"
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            singleLine = true
         )
+        
+        // Результаты поиска
+        if (isSearching) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (searchQuery.isNotEmpty() && searchResults.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Ничего не найдено",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+        } else if (searchResults.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(vertical = 8.dp)
+            ) {
+                items(searchResults) { station ->
+                    RadioStationItem(
+                        station = RadioStation(
+                            name = station.Name ?: "Unknown",
+                            country = station.Country ?: "",
+                            language = station.Language ?: "",
+                            tags = station.TagsAll ?: "",
+                            bitrate = station.Bitrate,
+                            codec = station.Codec ?: "",
+                            favicon = station.IconUrl,
+                            isFavorite = false,
+                            isPlaying = false
+                        ),
+                        onPlayClick = { onPlayClick(station) },
+                        onFavoriteClick = { onFavoriteClick(station) },
+                        onItemClick = { onItemClick(station) }
+                    )
+                }
+            }
+        }
     }
 }
