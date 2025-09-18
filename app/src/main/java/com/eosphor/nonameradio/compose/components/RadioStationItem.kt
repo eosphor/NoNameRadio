@@ -77,7 +77,13 @@ fun RadioStationItem(
                     modifier = Modifier
                         .size(48.dp)
                         .clip(RoundedCornerShape(4.dp)),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    onSuccess = {
+                        android.util.Log.d("RadioStationItem", "Image loaded successfully: ${station.IconUrl}")
+                    },
+                    onError = { error ->
+                        android.util.Log.e("RadioStationItem", "Image load error: ${station.IconUrl}, error: ${error.result.throwable}")
+                    }
                 )
             }
             

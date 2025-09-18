@@ -42,6 +42,10 @@ class StationsScreenViewModel : ViewModel() {
                 // TODO: Load stations from repository
                 // For now, simulate loading with mock data
                 allStations = createMockStations()
+                android.util.Log.d("StationsScreenViewModel", "Loaded ${allStations.size} stations")
+                allStations.forEach { station ->
+                    android.util.Log.d("StationsScreenViewModel", "Station: ${station.Name}, IconUrl: ${station.IconUrl}")
+                }
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     stations = allStations,
@@ -149,7 +153,7 @@ class StationsScreenViewModel : ViewModel() {
                 Language = "English"
                 Bitrate = 128
                 Codec = "MP3"
-                IconUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/BBC_Radio_1.svg/1200px-BBC_Radio_1.svg.png"
+                IconUrl = "https://picsum.photos/120/120?random=1"
                 TagsAll = "pop, music, entertainment"
                 StreamUrl = "http://stream.live.vc.bbcmedia.co.uk/bbc_radio_one"
             },
@@ -160,7 +164,7 @@ class StationsScreenViewModel : ViewModel() {
                 Language = "French"
                 Bitrate = 128
                 Codec = "MP3"
-                IconUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/France_Inter_2018.svg/1200px-France_Inter_2018.svg.png"
+                IconUrl = "https://picsum.photos/120/120?random=2"
                 TagsAll = "talk, news, culture"
                 StreamUrl = "http://direct.franceinter.fr/live/franceinter-midfi.mp3"
             },
@@ -171,7 +175,7 @@ class StationsScreenViewModel : ViewModel() {
                 Language = "German"
                 Bitrate = 128
                 Codec = "MP3"
-                IconUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Deutschlandfunk_Logo.svg/1200px-Deutschlandfunk_Logo.svg.png"
+                IconUrl = "https://picsum.photos/120/120?random=3"
                 TagsAll = "news, talk, culture"
                 StreamUrl = "https://st01.sslstream.dlf.de/dlf/01/128/mp3/stream.mp3"
             },
@@ -182,7 +186,7 @@ class StationsScreenViewModel : ViewModel() {
                 Language = "French"
                 Bitrate = 128
                 Codec = "MP3"
-                IconUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/CBC_Radio_Canada_logo.svg/1200px-CBC_Radio_Canada_logo.svg.png"
+                IconUrl = "https://picsum.photos/120/120?random=4"
                 TagsAll = "news, talk, music"
                 StreamUrl = "https://rcavlive.akamaized.net/hls/live/704025/xcanrcav/master.m3u8"
             },
@@ -193,7 +197,7 @@ class StationsScreenViewModel : ViewModel() {
                 Language = "English"
                 Bitrate = 128
                 Codec = "MP3"
-                IconUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/ABC_Classic_FM_logo.svg/1200px-ABC_Classic_FM_logo.svg.png"
+                IconUrl = "https://picsum.photos/120/120?random=5"
                 TagsAll = "classical, music, culture"
                 StreamUrl = "https://live-radio01.mediahubaustralia.com/2FCW/mp3/"
             },
@@ -204,7 +208,7 @@ class StationsScreenViewModel : ViewModel() {
                 Language = "Italian"
                 Bitrate = 128
                 Codec = "MP3"
-                IconUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Radio_Italia_logo.svg/1200px-Radio_Italia_logo.svg.png"
+                IconUrl = "https://picsum.photos/120/120?random=6"
                 TagsAll = "pop, music, italian"
                 StreamUrl = "https://streaming.radioitalia.it/radioitalia/radioitalia/playlist.m3u8"
             },
@@ -215,7 +219,7 @@ class StationsScreenViewModel : ViewModel() {
                 Language = "Spanish"
                 Bitrate = 128
                 Codec = "MP3"
-                IconUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/RNE_logo.svg/1200px-RNE_logo.svg.png"
+                IconUrl = "https://picsum.photos/120/120?random=7"
                 TagsAll = "news, talk, culture"
                 StreamUrl = "https://crtve-rne1.cast.addradio.de/crtve/rne1/mp3/high"
             },
@@ -226,7 +230,7 @@ class StationsScreenViewModel : ViewModel() {
                 Language = "Dutch"
                 Bitrate = 128
                 Codec = "MP3"
-                IconUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/NOS_Logo.svg/1200px-NOS_Logo.svg.png"
+                IconUrl = "https://picsum.photos/120/120?random=8"
                 TagsAll = "news, talk, music"
                 StreamUrl = "https://icecast.omroep.nl/radio1-bb-mp3"
             },
@@ -237,7 +241,7 @@ class StationsScreenViewModel : ViewModel() {
                 Language = "Portuguese"
                 Bitrate = 128
                 Codec = "MP3"
-                IconUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Radio_Globo_logo.svg/1200px-Radio_Globo_logo.svg.png"
+                IconUrl = "https://picsum.photos/120/120?random=9"
                 TagsAll = "pop, music, brazilian"
                 StreamUrl = "https://radiostream.globo.com/globo_sp.aac"
             },
@@ -248,7 +252,7 @@ class StationsScreenViewModel : ViewModel() {
                 Language = "Russian"
                 Bitrate = 128
                 Codec = "MP3"
-                IconUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Radio_Moscow_logo.svg/1200px-Radio_Moscow_logo.svg.png"
+                IconUrl = "https://picsum.photos/120/120?random=10"
                 TagsAll = "news, talk, russian"
                 StreamUrl = "https://icecast.vgtrk.cdnvideo.ru/rmfmmp3"
             }

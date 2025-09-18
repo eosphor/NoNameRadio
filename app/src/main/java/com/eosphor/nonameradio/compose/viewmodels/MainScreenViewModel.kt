@@ -42,16 +42,20 @@ class MainScreenViewModel : ViewModel() {
                 
                 // Пример данных станций
                 val sampleStations = listOf(
-                    createSampleStation("Radio Example 1", "Germany", "German", "pop,rock,music", 128, "MP3"),
-                    createSampleStation("Radio Example 2", "France", "French", "jazz,classical", 192, "AAC"),
-                    createSampleStation("BBC Radio 1", "United Kingdom", "English", "pop,rock,chart", 128, "AAC"),
-                    createSampleStation("Radio Paradise", "USA", "English", "eclectic,rock,alternative", 320, "MP3"),
-                    createSampleStation("Radio Swiss Jazz", "Switzerland", "German", "jazz,smooth", 128, "AAC"),
-                    createSampleStation("FIP", "France", "French", "eclectic,world,jazz", 128, "MP3"),
-                    createSampleStation("KEXP", "USA", "English", "alternative,indie,rock", 128, "MP3"),
-                    createSampleStation("Radio Caroline", "United Kingdom", "English", "rock,classic", 128, "MP3")
+                    createSampleStation("BBC Radio 1", "United Kingdom", "English", "pop,rock,chart", 128, "AAC", "https://picsum.photos/120/120?random=1"),
+                    createSampleStation("Radio France Inter", "France", "French", "eclectic,world,jazz", 128, "MP3", "https://picsum.photos/120/120?random=2"),
+                    createSampleStation("Deutschlandfunk", "Germany", "German", "news,talk,culture", 128, "MP3", "https://picsum.photos/120/120?random=3"),
+                    createSampleStation("Radio Canada", "Canada", "French", "news,talk,music", 128, "MP3", "https://picsum.photos/120/120?random=4"),
+                    createSampleStation("ABC Classic FM", "Australia", "English", "classical,music,culture", 128, "MP3", "https://picsum.photos/120/120?random=5"),
+                    createSampleStation("Radio Italia", "Italy", "Italian", "pop,music,italian", 128, "MP3", "https://picsum.photos/120/120?random=6"),
+                    createSampleStation("RNE Radio Nacional", "Spain", "Spanish", "news,talk,culture", 128, "MP3", "https://picsum.photos/120/120?random=7"),
+                    createSampleStation("NOS Radio 1", "Netherlands", "Dutch", "news,talk,music", 128, "MP3", "https://picsum.photos/120/120?random=8")
                 )
                 
+                android.util.Log.d("MainScreenViewModel", "Loaded ${sampleStations.size} stations")
+                sampleStations.forEach { station ->
+                    android.util.Log.d("MainScreenViewModel", "Station: ${station.Name}, IconUrl: ${station.IconUrl}")
+                }
                 _uiState.value = _uiState.value.copy(
                     allStations = sampleStations,
                     isLoading = false
@@ -72,7 +76,8 @@ class MainScreenViewModel : ViewModel() {
         language: String,
         tags: String,
         bitrate: Int,
-        codec: String
+        codec: String,
+        iconUrl: String? = null
     ): DataRadioStation {
         return DataRadioStation().apply {
             Name = name
@@ -82,7 +87,7 @@ class MainScreenViewModel : ViewModel() {
             Bitrate = bitrate
             Codec = codec
             StationUuid = java.util.UUID.randomUUID().toString()
-            IconUrl = null
+            IconUrl = iconUrl
         }
     }
     
