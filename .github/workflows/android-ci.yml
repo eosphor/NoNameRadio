@@ -23,6 +23,9 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+        
     - name: Setup Gradle 8.7
       uses: gradle/actions/setup-gradle@v4
       with:
@@ -43,5 +46,8 @@ jobs:
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       
+    - name: Run unit tests
+      run: ./gradlew testFreeDebugUnitTest --stacktrace --no-daemon
+      
     - name: Build with Gradle
-      run: ./gradlew build --stacktrace --no-daemon
+      run: ./gradlew assembleFreeDebug assemblePlayDebug --stacktrace --no-daemon

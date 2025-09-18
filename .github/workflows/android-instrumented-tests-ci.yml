@@ -69,4 +69,4 @@ jobs:
           disable-animations: true
           script: |
             adb uninstall com.eosphor.nonameradio || true
-            ./gradlew connectedFreeDebugAndroidTest
+            ./gradlew connectedFreeDebugAndroidTest --stacktrace --no-daemon
