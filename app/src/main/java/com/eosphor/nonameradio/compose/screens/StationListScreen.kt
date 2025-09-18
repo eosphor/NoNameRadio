@@ -162,17 +162,9 @@ fun StationListScreen(
                                 key = { station -> station.StationUuid ?: station.hashCode() }
                             ) { station ->
                                 RadioStationItem(
-                                    station = RadioStation(
-                                        name = station.Name ?: "Unknown",
-                                        country = station.Country ?: "",
-                                        language = station.Language ?: "",
-                                        tags = station.TagsAll ?: "",
-                                        bitrate = station.Bitrate,
-                                        codec = station.Codec ?: "",
-                                        favicon = station.IconUrl,
-                                        isFavorite = station.StationUuid in uiState.favoriteStationIds,
-                                        isPlaying = station.StationUuid == uiState.currentPlayingStationId
-                                    ),
+                                    station = station,
+                                    isFavorite = station.StationUuid in uiState.favoriteStationIds,
+                                    isPlaying = station.StationUuid == uiState.currentPlayingStationId,
                                     onPlayClick = { 
                                         viewModel.playStation(station)
                                         onStationClick(station)
@@ -180,7 +172,7 @@ fun StationListScreen(
                                     onFavoriteClick = { 
                                         viewModel.toggleFavorite(station) 
                                     },
-                                    onItemClick = { 
+                                    onClick = { 
                                         onStationClick(station) 
                                     }
                                 )

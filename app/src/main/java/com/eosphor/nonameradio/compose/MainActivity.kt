@@ -15,9 +15,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.eosphor.nonameradio.compose.screens.MainScreen
 import com.eosphor.nonameradio.compose.screens.StationListScreen
+import com.eosphor.nonameradio.compose.screens.StationsScreen
 import com.eosphor.nonameradio.compose.theme.RadioDroidTheme
 import com.eosphor.nonameradio.compose.viewmodels.MainScreenViewModel
 import com.eosphor.nonameradio.compose.viewmodels.StationListViewModel
+import com.eosphor.nonameradio.compose.viewmodels.StationsScreenViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +47,9 @@ fun RadioDroidApp() {
                 viewModel = viewModel,
                 onNavigateToStationList = {
                     navController.navigate("station_list")
+                },
+                onNavigateToStations = {
+                    navController.navigate("stations")
                 }
             )
         }
@@ -55,6 +60,25 @@ fun RadioDroidApp() {
                 viewModel = viewModel,
                 onNavigateBack = {
                     navController.popBackStack()
+                }
+            )
+        }
+        
+        composable("stations") {
+            val viewModel: StationsScreenViewModel = viewModel()
+            StationsScreen(
+                viewModel = viewModel,
+                onStationClick = { station ->
+                    // TODO: Handle station click - show play options
+                },
+                onStationLongClick = { station ->
+                    // TODO: Handle station long click - show context menu
+                },
+                onRetryClick = {
+                    // TODO: Handle retry
+                },
+                onRefresh = {
+                    viewModel.refreshStations()
                 }
             )
         }

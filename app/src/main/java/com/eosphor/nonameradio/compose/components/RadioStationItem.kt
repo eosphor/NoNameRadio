@@ -25,33 +25,25 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.eosphor.nonameradio.compose.theme.TagBackground
 import com.eosphor.nonameradio.compose.theme.TagBackgroundDark
-
-data class RadioStation(
-    val name: String,
-    val country: String,
-    val language: String,
-    val tags: String,
-    val bitrate: Int,
-    val codec: String,
-    val favicon: String?,
-    val isFavorite: Boolean = false,
-    val isPlaying: Boolean = false
-)
+import com.eosphor.nonameradio.station.DataRadioStation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RadioStationItem(
-    station: RadioStation,
-    onPlayClick: () -> Unit,
-    onFavoriteClick: () -> Unit,
-    onItemClick: () -> Unit,
+    station: DataRadioStation,
+    onClick: () -> Unit = {},
+    onLongClick: () -> Unit = {},
+    onPlayClick: () -> Unit = {},
+    onFavoriteClick: () -> Unit = {},
+    isPlaying: Boolean = false,
+    isFavorite: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
-            .clickable { onItemClick() },
+            .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -63,10 +55,10 @@ fun RadioStationItem(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Иконка радиостанции
+            // Station icon
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(station.favicon)
+                    .data(station.IconUrl)
                     .crossfade(true)
                     .build(),
                 contentDescription = "Station icon",
@@ -78,13 +70,13 @@ fun RadioStationItem(
             
             Spacer(modifier = Modifier.width(12.dp))
             
-            // Информация о станции
+            // Station information
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                // Название станции
+                // Station name
                 Text(
-                    text = station.name,
+                    text = station.Name ?: "Unknown Station",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
@@ -94,9 +86,9 @@ fun RadioStationItem(
                 
                 Spacer(modifier = Modifier.height(4.dp))
                 
-                // Страна и язык
+                // Country and language
                 Text(
-                    text = "${station.country} • ${station.language}",
+                    text = "${station.Country ?: "Unknown"} • ${station.Language ?: "Unknown"}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     maxLines = 1,
@@ -105,19 +97,22 @@ fun RadioStationItem(
                 
                 Spacer(modifier = Modifier.height(4.dp))
                 
-                // Битрейт и кодек
+                // Bitrate and codec
+                val bitrate = station.Bitrate ?: 0
+                val codec = station.Codec ?: "Unknown"
                 Text(
-                    text = "${station.bitrate} kbps • ${station.codec}",
+                    text = "$bitrate kbps • $codec",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     fontSize = 11.sp
                 )
                 
-                // Теги
-                if (station.tags.isNotEmpty()) {
+                // Tags
+                val tags = station.TagsAll ?: ""
+                if (tags.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(6.dp))
                     
-                    val tagsList = station.tags.split(",").take(3)
+                    val tagsList = tags.split(",").take(3)
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
@@ -145,33 +140,33 @@ fun RadioStationItem(
                 }
             }
             
-            // Кнопки управления
+            // Control buttons
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Кнопка воспроизведения
+                // Play button
                 IconButton(
                     onClick = onPlayClick,
                     modifier = Modifier.size(40.dp)
                 ) {
                     Icon(
-                        imageVector = if (station.isPlaying) Icons.Default.Check else Icons.Default.PlayArrow,
-                        contentDescription = if (station.isPlaying) "Stop" else "Play",
+                        imageVector = if (isPlaying) Icons.Default.Check else Icons.Default.PlayArrow,
+                        contentDescription = if (isPlaying) "Stop" else "Play",
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(24.dp)
                     )
                 }
                 
-                // Кнопка избранного
+                // Favorite button
                 IconButton(
                     onClick = onFavoriteClick,
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
-                        imageVector = if (station.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = if (station.isFavorite) "Remove from favorites" else "Add to favorites",
-                        tint = if (station.isFavorite) Color.Red else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                        tint = if (isFavorite) Color.Red else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         modifier = Modifier.size(20.dp)
                     )
                 }

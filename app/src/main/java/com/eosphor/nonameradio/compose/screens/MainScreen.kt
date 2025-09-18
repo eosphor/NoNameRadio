@@ -29,7 +29,8 @@ data class TabItem(
 fun MainScreen(
     modifier: Modifier = Modifier,
     viewModel: MainScreenViewModel = viewModel(),
-    onNavigateToStationList: () -> Unit = {}
+    onNavigateToStationList: () -> Unit = {},
+    onNavigateToStations: () -> Unit = {}
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     var selectedDrawerItem by remember { mutableStateOf("all_stations") }
@@ -206,6 +207,17 @@ fun MainScreen(
                             }
                         }
                     }
+                },
+                floatingActionButton = {
+                    FloatingActionButton(
+                        onClick = onNavigateToStations,
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Radio,
+                            contentDescription = "Browse Stations"
+                        )
+                    }
                 }
             ) { paddingValues ->
                 // Контент выбранного таба
@@ -243,20 +255,10 @@ private fun AllStationsContent(
         ) {
             items(stations) { station ->
                 RadioStationItem(
-                    station = RadioStation(
-                        name = station.Name ?: "Unknown",
-                        country = station.Country ?: "",
-                        language = station.Language ?: "",
-                        tags = station.TagsAll ?: "",
-                        bitrate = station.Bitrate,
-                        codec = station.Codec ?: "",
-                        favicon = station.IconUrl,
-                        isFavorite = false, // Будет обновлено через ViewModel
-                        isPlaying = false   // Будет обновлено через ViewModel
-                    ),
+                    station = station,
                     onPlayClick = { onPlayClick(station) },
                     onFavoriteClick = { onFavoriteClick(station) },
-                    onItemClick = { onItemClick(station) }
+                    onClick = { onItemClick(station) }
                 )
             }
         }
@@ -389,20 +391,10 @@ private fun SearchContent(
             ) {
                 items(searchResults) { station ->
                     RadioStationItem(
-                        station = RadioStation(
-                            name = station.Name ?: "Unknown",
-                            country = station.Country ?: "",
-                            language = station.Language ?: "",
-                            tags = station.TagsAll ?: "",
-                            bitrate = station.Bitrate,
-                            codec = station.Codec ?: "",
-                            favicon = station.IconUrl,
-                            isFavorite = false,
-                            isPlaying = false
-                        ),
+                        station = station,
                         onPlayClick = { onPlayClick(station) },
                         onFavoriteClick = { onFavoriteClick(station) },
-                        onItemClick = { onItemClick(station) }
+                        onClick = { onItemClick(station) }
                     )
                 }
             }
