@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.eosphor.nonameradio.compose.screens.CategoriesScreen
 import com.eosphor.nonameradio.compose.screens.HistoryScreen
 import com.eosphor.nonameradio.compose.screens.MainScreen
 import com.eosphor.nonameradio.compose.screens.PlayerFullScreen
@@ -20,6 +21,7 @@ import com.eosphor.nonameradio.compose.screens.RecordingsScreen
 import com.eosphor.nonameradio.compose.screens.StationListScreen
 import com.eosphor.nonameradio.compose.screens.StationsScreen
 import com.eosphor.nonameradio.compose.theme.RadioDroidTheme
+import com.eosphor.nonameradio.compose.viewmodels.CategoriesScreenViewModel
 import com.eosphor.nonameradio.compose.viewmodels.HistoryScreenViewModel
 import com.eosphor.nonameradio.compose.viewmodels.MainScreenViewModel
 import com.eosphor.nonameradio.compose.viewmodels.PlayerFullViewModel
@@ -62,6 +64,9 @@ fun RadioDroidApp() {
                 },
                 onNavigateToRecordings = {
                     navController.navigate("recordings")
+                },
+                onNavigateToCategories = { categoryRoute ->
+                    navController.navigate(categoryRoute)
                 }
             )
         }
@@ -107,6 +112,51 @@ fun RadioDroidApp() {
                 },
                 onStationClick = { station ->
                     navController.navigate("player_full")
+                }
+            )
+        }
+        
+        composable("categories/tags") {
+            val viewModel: CategoriesScreenViewModel = viewModel()
+            CategoriesScreen(
+                viewModel = viewModel,
+                searchStyle = com.eosphor.nonameradio.station.StationsFilter.SearchStyle.ByTagExact,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onCategoryClick = { category ->
+                    // TODO: Navigate to stations filtered by tag
+                    navController.navigate("stations")
+                }
+            )
+        }
+        
+        composable("categories/languages") {
+            val viewModel: CategoriesScreenViewModel = viewModel()
+            CategoriesScreen(
+                viewModel = viewModel,
+                searchStyle = com.eosphor.nonameradio.station.StationsFilter.SearchStyle.ByLanguageExact,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onCategoryClick = { category ->
+                    // TODO: Navigate to stations filtered by language
+                    navController.navigate("stations")
+                }
+            )
+        }
+        
+        composable("categories/countries") {
+            val viewModel: CategoriesScreenViewModel = viewModel()
+            CategoriesScreen(
+                viewModel = viewModel,
+                searchStyle = com.eosphor.nonameradio.station.StationsFilter.SearchStyle.ByCountryCodeExact,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onCategoryClick = { category ->
+                    // TODO: Navigate to stations filtered by country
+                    navController.navigate("stations")
                 }
             )
         }

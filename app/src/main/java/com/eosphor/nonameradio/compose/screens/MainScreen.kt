@@ -32,7 +32,8 @@ fun MainScreen(
     onNavigateToStationList: () -> Unit = {},
     onNavigateToStations: () -> Unit = {},
     onNavigateToHistory: () -> Unit = {},
-    onNavigateToRecordings: () -> Unit = {}
+    onNavigateToRecordings: () -> Unit = {},
+    onNavigateToCategories: (String) -> Unit = {}
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     var selectedDrawerItem by remember { mutableStateOf("all_stations") }
@@ -117,6 +118,10 @@ fun MainScreen(
                             // Handle navigation to recordings
                             if (item == "recordings") {
                                 onNavigateToRecordings()
+                            }
+                            // Handle navigation to categories
+                            if (item.startsWith("categories/")) {
+                                onNavigateToCategories(item)
                             }
                         }
                     ),
@@ -272,6 +277,24 @@ private fun getDefaultNavigationItems(
             icon = Icons.Default.Mic,
             isSelected = selectedItem == "recordings",
             onClick = { onNavigate("recordings") }
+        ),
+        NavigationItem(
+            title = "Теги",
+            icon = Icons.Default.Label,
+            isSelected = selectedItem == "categories/tags",
+            onClick = { onNavigate("categories/tags") }
+        ),
+        NavigationItem(
+            title = "Языки",
+            icon = Icons.Default.Language,
+            isSelected = selectedItem == "categories/languages",
+            onClick = { onNavigate("categories/languages") }
+        ),
+        NavigationItem(
+            title = "Страны",
+            icon = Icons.Default.Public,
+            isSelected = selectedItem == "categories/countries",
+            onClick = { onNavigate("categories/countries") }
         ),
         NavigationItem(
             title = "Поиск",

@@ -198,6 +198,15 @@ class MainScreenViewModel : ViewModel() {
             "recordings" -> {
                 // Показать записи - навигация будет обработана в MainActivity
             }
+            "categories/tags" -> {
+                // Показать теги - навигация будет обработана в MainActivity
+            }
+            "categories/languages" -> {
+                // Показать языки - навигация будет обработана в MainActivity
+            }
+            "categories/countries" -> {
+                // Показать страны - навигация будет обработана в MainActivity
+            }
             "search" -> {
                 // Показать поиск
             }
