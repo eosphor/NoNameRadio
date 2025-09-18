@@ -60,8 +60,21 @@
         <activity
             android:name=".ActivityMain"
             android:label="@string/app_name"
-            android:exported="true"
+            android:exported="false"
             android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.media.action.MEDIA_PLAY_FROM_SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        
+        <!-- Compose Activity (основная) -->
+        <activity
+            android:name="com.eosphor.nonameradio.compose.MainActivity"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -71,15 +84,6 @@
                 <action android:name="android.media.action.MEDIA_PLAY_FROM_SEARCH" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
-        
-        <!-- Compose Activity (временно отключена) -->
-        <activity
-            android:name="com.eosphor.nonameradio.compose.MainActivity"
-            android:label="@string/app_name"
-            android:exported="false"
-            android:launchMode="singleTop"
-            android:theme="@style/Theme.Material3.DayNight.NoActionBar">
         </activity>
         <service
             android:name="com.eosphor.nonameradio.service.PlayerService"

@@ -28,8 +28,24 @@ class MainScreenViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(MainScreenUiState())
     val uiState: StateFlow<MainScreenUiState> = _uiState.asStateFlow()
     
+    private var historyManager: com.eosphor.nonameradio.HistoryManager? = null
+    
     init {
         loadInitialData()
+    }
+    
+    fun initializeHistoryManager(historyManager: com.eosphor.nonameradio.HistoryManager) {
+        this.historyManager = historyManager
+        android.util.Log.d("MainScreenViewModel", "HistoryManager initialized")
+        // Загружаем историю из HistoryManager
+        loadHistoryFromManager()
+    }
+    
+    private fun loadHistoryFromManager() {
+        historyManager?.let { manager ->
+            val historyStations = manager.getList()
+            _uiState.value = _uiState.value.copy(historyStations = historyStations)
+        }
     }
     
     private fun loadInitialData() {
@@ -98,17 +114,17 @@ class MainScreenViewModel : ViewModel() {
                 isPlaying = true
             )
             
-            // Добавляем в историю
-            val currentHistory = _uiState.value.historyStations.toMutableList()
-            currentHistory.removeAll { it.StationUuid == station.StationUuid }
-            currentHistory.add(0, station)
-            if (currentHistory.size > 50) {
-                currentHistory.removeAt(currentHistory.size - 1)
+            // Добавляем в историю через HistoryManager
+            historyManager?.let { manager ->
+                android.util.Log.d("MainScreenViewModel", "Adding station to history: ${station.Name}")
+                manager.add(station)
+                android.util.Log.d("MainScreenViewModel", "History now has ${manager.getList().size} stations")
+            } ?: run {
+                android.util.Log.w("MainScreenViewModel", "HistoryManager is null, cannot add station to history")
             }
             
-            _uiState.value = _uiState.value.copy(
-                historyStations = currentHistory
-            )
+            // Обновляем локальный список истории
+            loadHistoryFromManager()
         }
     }
     

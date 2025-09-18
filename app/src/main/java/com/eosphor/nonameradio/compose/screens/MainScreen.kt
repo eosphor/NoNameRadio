@@ -42,6 +42,13 @@ fun MainScreen(
     // Состояние UI из ViewModel
     val uiState by viewModel.uiState.collectAsState()
     
+    // Инициализация HistoryManager
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        val app = context.applicationContext as com.eosphor.nonameradio.RadioDroidApp
+        viewModel.initializeHistoryManager(app.getHistoryManager())
+    }
+    
     // Табы как в оригинальном приложении
     val tabs = listOf(
         TabItem(

@@ -160,3 +160,8 @@ INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=396.201,715.1
 INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=221.236,661.202 gbl=221.236,661.202 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-221.236,-661.202 last=-221.236,-661.202 Δ 221.236,661.202) : no target window (:0, )
 INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=236.76,514.023 gbl=236.76,514.023 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-236.76,-514.023 last=-236.76,-514.023 Δ 236.76,514.023) : no target window (:0, )
 INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=338.037,617.241 gbl=338.037,617.241 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-338.037,-617.241 last=-338.037,-617.241 Δ 338.037,617.241) : no target window (:0, )
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=273.478,368.77 gbl=273.478,368.77 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-273.478,-368.77 last=-273.478,-368.77 Δ 273.478,368.77) : no target window (:0, )
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=484.229,767.434 gbl=484.229,767.434 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-484.229,-767.434 last=-484.229,-767.434 Δ 484.229,767.434) : no target window (:0, )
+INFO         | Created VkInstance:0xb121d9000 for application:'' engine:''.
+INFO         | Destroyed VkInstance:0xb121d9000 for application:'' engine:''.
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=467.357,237.088 gbl=467.357,237.088 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-467.357,-237.088 last=-467.357,-237.088 Δ 467.357,237.088) : no target window (:0, )
