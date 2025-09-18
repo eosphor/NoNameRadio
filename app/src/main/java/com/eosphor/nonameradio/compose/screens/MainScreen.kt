@@ -30,7 +30,8 @@ fun MainScreen(
     modifier: Modifier = Modifier,
     viewModel: MainScreenViewModel = viewModel(),
     onNavigateToStationList: () -> Unit = {},
-    onNavigateToStations: () -> Unit = {}
+    onNavigateToStations: () -> Unit = {},
+    onNavigateToHistory: () -> Unit = {}
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     var selectedDrawerItem by remember { mutableStateOf("all_stations") }
@@ -104,9 +105,14 @@ fun MainScreen(
                 NavigationDrawer(
                     navigationItems = getDefaultNavigationItems(
                         selectedItem = selectedDrawerItem,
-                        onNavigate = { item ->
+                        onNavigate = { item: String ->
                             selectedDrawerItem = item
                             viewModel.navigateToSection(item)
+                            
+                            // Handle navigation to history
+                            if (item == "history") {
+                                onNavigateToHistory()
+                            }
                         }
                     ),
                     onItemClick = { item ->
@@ -231,6 +237,50 @@ fun MainScreen(
             }
         }
     }
+}
+
+private fun getDefaultNavigationItems(
+    selectedItem: String,
+    onNavigate: (String) -> Unit
+): List<NavigationItem> {
+    return listOf(
+        NavigationItem(
+            title = "Все станции",
+            icon = Icons.Default.Home,
+            isSelected = selectedItem == "all_stations",
+            onClick = { onNavigate("all_stations") }
+        ),
+        NavigationItem(
+            title = "Избранное",
+            icon = Icons.Default.Favorite,
+            isSelected = selectedItem == "favorites",
+            onClick = { onNavigate("favorites") }
+        ),
+        NavigationItem(
+            title = "История",
+            icon = Icons.Default.History,
+            isSelected = selectedItem == "history",
+            onClick = { onNavigate("history") }
+        ),
+        NavigationItem(
+            title = "Поиск",
+            icon = Icons.Default.Search,
+            isSelected = selectedItem == "search",
+            onClick = { onNavigate("search") }
+        ),
+        NavigationItem(
+            title = "Настройки",
+            icon = Icons.Default.Settings,
+            isSelected = selectedItem == "settings",
+            onClick = { onNavigate("settings") }
+        ),
+        NavigationItem(
+            title = "О программе",
+            icon = Icons.Default.Info,
+            isSelected = selectedItem == "about",
+            onClick = { onNavigate("about") }
+        )
+    )
 }
 
 @Composable
@@ -401,3 +451,4 @@ private fun SearchContent(
         }
     }
 }
+
