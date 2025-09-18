@@ -381,7 +381,7 @@ public class ItemAdapterStation
             holder.buttonBookmark = holder.viewDetails.findViewById(R.id.buttonBookmark);
             holder.buttonAddAlarm = holder.viewDetails.findViewById(R.id.buttonAddAlarm);
             holder.buttonCreateShortcut = holder.viewDetails.findViewById(R.id.buttonCreateShortcut);
-            holder.buttonPlayInternalOrExternal = holder.viewDetails.findViewById(R.id.buttonPlayInRadioDroid);
+            holder.buttonPlayInternalOrExternal = holder.viewDetails.findViewById(R.id.buttonPlayInNoNameRadio);
 
             holder.buttonVisitWebsite.setOnClickListener(new View.OnClickListener() {
                 @Override

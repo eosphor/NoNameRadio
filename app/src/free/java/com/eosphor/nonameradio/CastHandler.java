@@ -1,10 +1,10 @@
-package net.programmierecke.radiodroid2;
+package com.eosphor.nonameradio;
 
 import android.content.Context;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import net.programmierecke.radiodroid2.cast.CastAwareActivity;
+import com.eosphor.nonameradio.cast.CastAwareActivity;
 
 public class CastHandler {
 
