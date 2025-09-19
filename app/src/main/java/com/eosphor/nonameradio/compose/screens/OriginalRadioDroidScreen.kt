@@ -169,107 +169,148 @@ fun OriginalRadioDroidScreen(
             )
         }
     ) {
-        Column(
-            modifier = modifier.fillMaxSize()
-        ) {
-            // Top App Bar (точно как в оригинале)
-            TopAppBar(
-                title = { 
-                    Text(
-                        text = when (selectedDrawerItem) {
-                            "stations" -> "Stations"
-                            "starred" -> "Starred"
-                            "history" -> "History"
-                            "alarm" -> "Alarm"
-                            "settings" -> "Settings"
-                            else -> "RadioDroid"
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = when (selectedDrawerItem) {
+                                "stations" -> "Stations"
+                                "starred" -> "Starred"
+                                "history" -> "History"
+                                "alarm" -> "Alarm"
+                                "settings" -> "Settings"
+                                else -> "RadioDroid"
+                            }
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { /* Drawer opens via ModalNavigationDrawer */ }) {
+                            Icon(Icons.Default.Menu, contentDescription = "Menu")
                         }
+                    },
+                    actions = {
+                        if (uiState.isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        IconButton(onClick = { /* TODO: Search */ }) {
+                            Icon(Icons.Default.Search, contentDescription = "Search")
+                        }
+                        IconButton(onClick = { /* TODO: More options */ }) {
+                            Icon(Icons.Default.MoreVert, contentDescription = "More")
+                        }
+                    }
+                )
+            },
+            bottomBar = {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    // Bottom player shown when there is a current station
+                    OriginalBottomPlayer(
+                        currentStation = uiState.currentStation,
+                        isPlaying = uiState.isPlaying,
+                        onPlayPauseClick = {
+                            if (uiState.isPlaying) {
+                                viewModel.pauseStation()
+                            } else {
+                                uiState.currentStation?.let { station -> viewModel.playStation(station) }
+                            }
+                        },
+                        onExpandClick = { /* TODO: Expand to full player */ },
+                        modifier = Modifier
+                            .fillMaxWidth()
                     )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = { 
-                            // Drawer will be opened by ModalNavigationDrawer automatically
-                        }
+
+                    // Bottom Navigation (как в оригинале)
+                    NavigationBar {
+                        NavigationBarItem(
+                            selected = selectedDrawerItem == "stations",
+                            onClick = { selectedDrawerItem = "stations" },
+                            icon = { Icon(Icons.Default.List, contentDescription = null) },
+                            label = { Text("Stations") }
+                        )
+                        NavigationBarItem(
+                            selected = selectedDrawerItem == "history",
+                            onClick = { selectedDrawerItem = "history" },
+                            icon = { Icon(Icons.Default.History, contentDescription = null) },
+                            label = { Text("History") }
+                        )
+                        NavigationBarItem(
+                            selected = selectedDrawerItem == "recordings",
+                            onClick = { onNavigateToRecordings() },
+                            icon = { Icon(Icons.Default.Mic, contentDescription = null) },
+                            label = { Text("Recordings") }
+                        )
+                        NavigationBarItem(
+                            selected = false,
+                            onClick = { /* Open drawer categories or navigate to tags by default */ selectedDrawerItem = "stations" },
+                            icon = { Icon(Icons.Default.Tag, contentDescription = null) },
+                            label = { Text("Tags") }
+                        )
+                    }
+                }
+            }
+        ) { innerPadding ->
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                if (selectedDrawerItem == "stations") {
+                    ScrollableTabRow(
+                        selectedTabIndex = selectedTabIndex,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        tabs.forEachIndexed { index, tab ->
+                            Tab(
+                                selected = selectedTabIndex == index,
+                                onClick = { selectedTabIndex = index },
+                                icon = { Icon(tab.icon, contentDescription = null) },
+                                text = { Text(tab.title) }
+                            )
+                        }
                     }
-                },
-                actions = {
-                    if (uiState.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    IconButton(onClick = { /* TODO: Search */ }) {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
-                    }
-                    IconButton(onClick = { /* TODO: More options */ }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "More")
-                    }
-                }
-            )
 
-            // Tab Layout (точно как в оригинале)
-            if (selectedDrawerItem == "stations") {
-                ScrollableTabRow(
-                    selectedTabIndex = selectedTabIndex,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    tabs.forEachIndexed { index, tab ->
-                        Tab(
-                            selected = selectedTabIndex == index,
-                            onClick = { selectedTabIndex = index },
-                            icon = { Icon(tab.icon, contentDescription = null) },
-                            text = { Text(tab.title) }
-                        )
-                    }
-                }
-
-                // Tab Content
-                tabs[selectedTabIndex].content()
-            } else {
-                // Content for other drawer items
-                when (selectedDrawerItem) {
-                    "starred" -> {
-                        OriginalStationsScreen(
-                            stations = uiState.favoriteStations,
-                            isLoading = uiState.isLoading,
-                            onStationClick = { station -> viewModel.playStation(station) },
-                            onStationFavoriteClick = { station -> viewModel.toggleFavorite(station) },
-                            onRefresh = { viewModel.refreshFavorites() }
-                        )
-                    }
-                    "history" -> {
-                        OriginalHistoryScreen(
-                            stations = uiState.historyStations,
-                            onStationClick = { station -> viewModel.playStation(station) },
-                            onStationFavoriteClick = { station -> viewModel.toggleFavorite(station) }
-                        )
-                    }
-                    "alarm" -> {
-                        OriginalAlarmScreen()
-                    }
-                    "settings" -> {
-                        OriginalSettingsScreen()
+                    tabs[selectedTabIndex].content()
+                } else {
+                    when (selectedDrawerItem) {
+                        "starred" -> {
+                            OriginalStationsScreen(
+                                stations = uiState.favoriteStations,
+                                isLoading = uiState.isLoading,
+                                onStationClick = { station -> viewModel.playStation(station) },
+                                onStationFavoriteClick = { station -> viewModel.toggleFavorite(station) },
+                                onRefresh = { viewModel.refreshFavorites() }
+                            )
+                        }
+                        "history" -> {
+                            OriginalHistoryScreen(
+                                stations = uiState.historyStations,
+                                onStationClick = { station -> viewModel.playStation(station) },
+                                onStationFavoriteClick = { station -> viewModel.toggleFavorite(station) }
+                            )
+                        }
+                        "alarm" -> {
+                            OriginalAlarmScreen()
+                        }
+                        "settings" -> {
+                            OriginalSettingsScreen()
+                        }
+                        else -> {
+                            // Default content
+                            OriginalStationsScreen(
+                                stations = uiState.localStations,
+                                isLoading = uiState.isLoading,
+                                onStationClick = { station -> viewModel.playStation(station) },
+                                onStationFavoriteClick = { station -> viewModel.toggleFavorite(station) },
+                                onRefresh = { viewModel.refreshLocalStations() }
+                            )
+                        }
                     }
                 }
             }
         }
-
-        // Bottom Player (точно как BottomSheetBehavior в оригинале)
-        OriginalBottomPlayer(
-            currentStation = uiState.currentStation,
-            isPlaying = uiState.isPlaying,
-            onPlayPauseClick = { 
-                if (uiState.isPlaying) {
-                    viewModel.pauseStation()
-                } else {
-                    uiState.currentStation?.let { station -> viewModel.playStation(station) }
-                }
-            },
-            onExpandClick = { /* TODO: Expand to full player */ }
-        )
     }
 }
 

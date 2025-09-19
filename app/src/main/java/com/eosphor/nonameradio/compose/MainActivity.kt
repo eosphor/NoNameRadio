@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.eosphor.nonameradio.compose.screens.CategoriesScreen
+import com.eosphor.nonameradio.compose.screens.ExactOriginalScreen
 import com.eosphor.nonameradio.compose.screens.HistoryScreen
 import com.eosphor.nonameradio.compose.screens.OriginalRadioDroidScreen
 import com.eosphor.nonameradio.compose.screens.PlayerFullScreen
@@ -22,6 +23,7 @@ import com.eosphor.nonameradio.compose.screens.StationListScreen
 import com.eosphor.nonameradio.compose.screens.StationsScreen
 import com.eosphor.nonameradio.compose.theme.RadioDroidTheme
 import com.eosphor.nonameradio.compose.viewmodels.CategoriesScreenViewModel
+import com.eosphor.nonameradio.compose.viewmodels.ExactOriginalViewModel
 import com.eosphor.nonameradio.compose.viewmodels.HistoryScreenViewModel
 import com.eosphor.nonameradio.compose.viewmodels.MainScreenViewModel
 import com.eosphor.nonameradio.compose.viewmodels.PlayerFullViewModel
@@ -49,27 +51,27 @@ fun RadioDroidApp() {
         navController = navController,
         startDestination = "main"
     ) {
-        composable("main") {
-            val viewModel: com.eosphor.nonameradio.compose.viewmodels.OriginalRadioDroidViewModel = viewModel()
-            OriginalRadioDroidScreen(
-                viewModel = viewModel,
-                onNavigateToStationList = {
-                    navController.navigate("station_list")
-                },
-                onNavigateToStations = {
-                    navController.navigate("stations")
-                },
-                onNavigateToHistory = {
-                    navController.navigate("history")
-                },
-                onNavigateToRecordings = {
-                    navController.navigate("recordings")
-                },
-                onNavigateToCategories = { categoryRoute ->
-                    navController.navigate(categoryRoute)
+                composable("main") {
+                    val viewModel: com.eosphor.nonameradio.compose.viewmodels.ExactOriginalViewModel = viewModel()
+                    ExactOriginalScreen(
+                        viewModel = viewModel,
+                        onNavigateToStationList = {
+                            navController.navigate("station_list")
+                        },
+                        onNavigateToStations = {
+                            navController.navigate("stations")
+                        },
+                        onNavigateToHistory = {
+                            navController.navigate("history")
+                        },
+                        onNavigateToRecordings = {
+                            navController.navigate("recordings")
+                        },
+                        onNavigateToCategories = { categoryRoute ->
+                            navController.navigate(categoryRoute)
+                        }
+                    )
                 }
-            )
-        }
         
         composable("station_list") {
             val viewModel: StationListViewModel = viewModel()
