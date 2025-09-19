@@ -85,6 +85,10 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".LegacySettingsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
         <service
             android:name="com.eosphor.nonameradio.service.PlayerService"
             android:exported="true"

@@ -118,6 +118,10 @@ class RecordingsScreenViewModel : ViewModel() {
         )
     }
 
+    fun clearSelectedRecording() {
+        _uiState.value = _uiState.value.copy(selectedRecording = null)
+    }
+
     fun formatFileSize(bytes: Long): String {
         return when {
             bytes < 1024 -> "$bytes B"

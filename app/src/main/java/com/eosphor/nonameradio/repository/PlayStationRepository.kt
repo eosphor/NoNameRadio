@@ -43,25 +43,25 @@ class PlayStationRepository @Inject constructor(
                         val request = Request.Builder()
                             .url(station.StreamUrl)
                             .build()
-                            
-                        val response = httpClient.newCall(request).execute()
-                        
-                        if (response.isSuccessful) {
-                            val playlistContent = response.body?.string() ?: ""
-                            android.util.Log.d("PlayStationRepository", "M3U content: $playlistContent")
-                            
-                            // Ищем первую строку, которая не является комментарием и содержит URL
-                            val lines = playlistContent.split("\n")
-                            for (line in lines) {
-                                val trimmedLine = line.trim()
-                                if (trimmedLine.isNotEmpty() && !trimmedLine.startsWith("#") && 
-                                    (trimmedLine.startsWith("http://") || trimmedLine.startsWith("https://"))) {
-                                    android.util.Log.d("PlayStationRepository", "Found stream URL in M3U: $trimmedLine")
-                                    return@withContext Result.success(trimmedLine)
+
+                        httpClient.newCall(request).execute().use { response ->
+                            if (response.isSuccessful) {
+                                val playlistContent = response.body?.string() ?: ""
+                                android.util.Log.d("PlayStationRepository", "M3U content: $playlistContent")
+
+                                // Ищем первую строку, которая не является комментарием и содержит URL
+                                val lines = playlistContent.split("\n")
+                                for (line in lines) {
+                                    val trimmedLine = line.trim()
+                                    if (trimmedLine.isNotEmpty() && !trimmedLine.startsWith("#") &&
+                                        (trimmedLine.startsWith("http://") || trimmedLine.startsWith("https://"))) {
+                                        android.util.Log.d("PlayStationRepository", "Found stream URL in M3U: $trimmedLine")
+                                        return@withContext Result.success(trimmedLine)
+                                    }
                                 }
                             }
                         }
-                        
+
                         // Если не удалось распарсить M3U, используем оригинальный URL
                         android.util.Log.w("PlayStationRepository", "Could not parse M3U, using original URL")
                         return@withContext Result.success(station.StreamUrl)

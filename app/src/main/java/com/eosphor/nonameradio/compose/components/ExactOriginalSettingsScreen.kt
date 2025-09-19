@@ -1,276 +1,102 @@
 package com.eosphor.nonameradio.compose.components
 
+import android.content.Intent
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.NetworkCheck
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.QueueMusic
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SettingsInputComponent
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.eosphor.nonameradio.LegacySettingsActivity
+import com.eosphor.nonameradio.R
 
-data class ExactOriginalSettingsItem(
-    val title: String,
-    val subtitle: String,
-    val icon: ImageVector,
-    val onClick: () -> Unit
+private data class SettingsCategory(
+    @StringRes val titleRes: Int,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val preferenceRoot: String?
 )
-
-@Composable
-fun ExactOriginalSettingsSection(
-    title: String,
-    items: List<ExactOriginalSettingsItem>,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-        items.forEach { item ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = item.onClick)
-                    .padding(vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = item.icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(text = item.title, style = MaterialTheme.typography.bodyLarge)
-                    Text(text = item.subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowRight,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-            Divider()
-        }
-    }
-}
 
 @Composable
 fun ExactOriginalSettingsScreen(
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val categories = listOf(
+        SettingsCategory(R.string.settings_appearance, Icons.Filled.Palette, "pref_category_ui"),
+        SettingsCategory(R.string.settings_startup_behaviour, Icons.Filled.PlayArrow, "pref_category_startup"),
+        SettingsCategory(R.string.settings_interaction, Icons.Filled.List, "pref_category_interaction"),
+        SettingsCategory(R.string.settings_play, Icons.Filled.QueueMusic, "pref_category_player"),
+        SettingsCategory(R.string.settings_alarm, Icons.Filled.Alarm, "pref_category_alarm"),
+        SettingsCategory(R.string.settings_recordings, Icons.Filled.Settings, "pref_category_recordings"),
+        SettingsCategory(R.string.settings_connectivity, Icons.Filled.NetworkCheck, "pref_category_connectivity"),
+        SettingsCategory(R.string.settings_mpd, Icons.Filled.SettingsInputComponent, "pref_category_mpd"),
+        SettingsCategory(R.string.settings_other, Icons.Filled.Info, "pref_category_other")
+    )
+
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item {
             Text(
-                text = "Settings",
+                text = stringResource(R.string.nav_item_settings),
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
         }
 
-        // Appearance (как в оригинале)
-        item {
-            ExactOriginalSettingsSection(
-                title = "Appearance",
-                items = listOf(
-                    ExactOriginalSettingsItem(
-                        title = "Theme Selection",
-                        subtitle = "Light",
-                        icon = Icons.Default.Palette,
-                        onClick = { /* TODO: Open theme selection */ }
-                    ),
-                    ExactOriginalSettingsItem(
-                        title = "Circular Icons",
-                        subtitle = "Disabled",
-                        icon = Icons.Default.Circle,
-                        onClick = { /* TODO: Toggle circular icons */ }
-                    ),
-                    ExactOriginalSettingsItem(
-                        title = "Compact Style",
-                        subtitle = "Disabled",
-                        icon = Icons.Default.Compress,
-                        onClick = { /* TODO: Toggle compact style */ }
-                    ),
-                    ExactOriginalSettingsItem(
-                        title = "Bottom Navigation",
-                        subtitle = "Enabled",
-                        icon = Icons.Default.Navigation,
-                        onClick = { /* TODO: Toggle bottom navigation */ }
+        items(categories) { category ->
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        val intent = Intent(context, LegacySettingsActivity::class.java)
+                        if (!category.preferenceRoot.isNullOrEmpty()) {
+                            intent.putExtra(
+                                LegacySettingsActivity.EXTRA_PREFERENCE_ROOT,
+                                category.preferenceRoot
+                            )
+                        }
+                        context.startActivity(intent)
+                    }
+                    .padding(vertical = 12.dp),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = category.icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
                     )
-                )
-            )
-        }
-
-        // Startup Behavior (как в оригинале)
-        item {
-            ExactOriginalSettingsSection(
-                title = "Startup Behavior",
-                items = listOf(
-                    ExactOriginalSettingsItem(
-                        title = "Startup Action",
-                        subtitle = "Show History",
-                        icon = Icons.Default.PlayArrow,
-                        onClick = { /* TODO: Open startup action settings */ }
-                    ),
-                    ExactOriginalSettingsItem(
-                        title = "Auto-play",
-                        subtitle = "Disabled",
-                        icon = Icons.Default.PlayCircleOutline,
-                        onClick = { /* TODO: Toggle autoplay */ }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = stringResource(category.titleRes),
+                        style = MaterialTheme.typography.bodyLarge
                     )
-                )
-            )
-        }
-
-        // Playback (как в оригинале)
-        item {
-            ExactOriginalSettingsSection(
-                title = "Playback",
-                items = listOf(
-                    ExactOriginalSettingsItem(
-                        title = "Audio Quality",
-                        subtitle = "High (128 kbps)",
-                        icon = Icons.Default.VolumeUp,
-                        onClick = { /* TODO: Open quality settings */ }
-                    ),
-                    ExactOriginalSettingsItem(
-                        title = "Equalizer",
-                        subtitle = "Disabled",
-                        icon = Icons.Default.GraphicEq,
-                        onClick = { /* TODO: Open equalizer */ }
-                    ),
-                    ExactOriginalSettingsItem(
-                        title = "Sleep Timer",
-                        subtitle = "Disabled",
-                        icon = Icons.Default.HourglassEmpty,
-                        onClick = { /* TODO: Open sleep timer settings */ }
-                    )
-                )
-            )
-        }
-
-        // Network (как в оригинале)
-        item {
-            ExactOriginalSettingsSection(
-                title = "Network",
-                items = listOf(
-                    ExactOriginalSettingsItem(
-                        title = "Connection Timeout",
-                        subtitle = "30 seconds",
-                        icon = Icons.Default.Timer,
-                        onClick = { /* TODO: Open timeout settings */ }
-                    ),
-                    ExactOriginalSettingsItem(
-                        title = "Metered Connection Warning",
-                        subtitle = "Enabled",
-                        icon = Icons.Default.Warning,
-                        onClick = { /* TODO: Toggle metered connection warning */ }
-                    ),
-                    ExactOriginalSettingsItem(
-                        title = "Proxy Settings",
-                        subtitle = "Disabled",
-                        icon = Icons.Default.Settings,
-                        onClick = { /* TODO: Open proxy settings */ }
-                    )
-                )
-            )
-        }
-
-        // MPD (Music Player Daemon) (как в оригинале)
-        item {
-            ExactOriginalSettingsSection(
-                title = "MPD",
-                items = listOf(
-                    ExactOriginalSettingsItem(
-                        title = "MPD Server",
-                        subtitle = "Disabled",
-                        icon = Icons.Default.SettingsInputComponent,
-                        onClick = { /* TODO: Open MPD settings */ }
-                    ),
-                    ExactOriginalSettingsItem(
-                        title = "MPD Host",
-                        subtitle = "localhost",
-                        icon = Icons.Default.Computer,
-                        onClick = { /* TODO: Open MPD host settings */ }
-                    ),
-                    ExactOriginalSettingsItem(
-                        title = "MPD Port",
-                        subtitle = "6600",
-                        icon = Icons.Default.Numbers,
-                        onClick = { /* TODO: Open MPD port settings */ }
-                    )
-                )
-            )
-        }
-
-        // Data Management (как в оригинале)
-        item {
-            ExactOriginalSettingsSection(
-                title = "Data Management",
-                items = listOf(
-                    ExactOriginalSettingsItem(
-                        title = "Clear Cache",
-                        subtitle = "Removes temporary data",
-                        icon = Icons.Default.Delete,
-                        onClick = { /* TODO: Clear cache */ }
-                    ),
-                    ExactOriginalSettingsItem(
-                        title = "Export Favorites",
-                        subtitle = "Save your favorite stations",
-                        icon = Icons.Default.Upload,
-                        onClick = { /* TODO: Export favorites */ }
-                    ),
-                    ExactOriginalSettingsItem(
-                        title = "Import Favorites",
-                        subtitle = "Load favorite stations from file",
-                        icon = Icons.Default.Download,
-                        onClick = { /* TODO: Import favorites */ }
-                    ),
-                    ExactOriginalSettingsItem(
-                        title = "Clear History",
-                        subtitle = "Remove all listening history",
-                        icon = Icons.Default.History,
-                        onClick = { /* TODO: Clear history */ }
-                    )
-                )
-            )
-        }
-
-        // About (как в оригинале)
-        item {
-            ExactOriginalSettingsSection(
-                title = "About",
-                items = listOf(
-                    ExactOriginalSettingsItem(
-                        title = "Version",
-                        subtitle = "DEV-0.108",
-                        icon = Icons.Default.Info,
-                        onClick = { /* TODO: Show version info */ }
-                    ),
-                    ExactOriginalSettingsItem(
-                        title = "Open Source Licenses",
-                        subtitle = "View licenses",
-                        icon = Icons.Default.Description,
-                        onClick = { /* TODO: Show licenses */ }
-                    ),
-                    ExactOriginalSettingsItem(
-                        title = "Privacy Policy",
-                        subtitle = "View privacy policy",
-                        icon = Icons.Default.PrivacyTip,
-                        onClick = { /* TODO: Open privacy policy */ }
-                    )
-                )
-            )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Divider()
+            }
         }
     }
 }

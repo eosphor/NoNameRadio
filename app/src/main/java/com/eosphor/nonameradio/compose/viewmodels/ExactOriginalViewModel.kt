@@ -1,13 +1,33 @@
 package com.eosphor.nonameradio.compose.viewmodels
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import androidx.core.os.ConfigurationCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.preference.PreferenceManager
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.eosphor.nonameradio.RadioDroidApp
+import com.eosphor.nonameradio.Utils
+import com.eosphor.nonameradio.players.selector.PlayerType
+import com.eosphor.nonameradio.service.PauseReason
+import com.eosphor.nonameradio.service.PlayerServiceUtil
 import com.eosphor.nonameradio.station.DataRadioStation
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import org.json.JSONArray
+import java.net.URLEncoder
+import java.util.HashMap
+import java.util.Locale
 
 data class ExactOriginalUiState(
     val isLoading: Boolean = false,
@@ -21,6 +41,7 @@ data class ExactOriginalUiState(
     val changedLatelyStations: List<DataRadioStation> = emptyList(),
     val currentlyHeardStations: List<DataRadioStation> = emptyList(),
     val favoriteStations: List<DataRadioStation> = emptyList(),
+    val favoriteStationIds: Set<String> = emptySet(),
     val historyStations: List<DataRadioStation> = emptyList(),
     val searchResults: List<DataRadioStation> = emptyList(),
     val tagCategories: List<String> = emptyList(),
@@ -29,28 +50,50 @@ data class ExactOriginalUiState(
     val error: String? = null,
     // Новые функции
     val isSearchActive: Boolean = false,
+    val searchQuery: String = "",
     val isIconsView: Boolean = false,
-    val showDeleteButton: Boolean = false,
     val sleepTimerMinutes: Int = 0,
     val sleepTimerActive: Boolean = false,
     val mpdEnabled: Boolean = false,
-    val mediaRouteActive: Boolean = false
+    val mediaRouteActive: Boolean = false,
+    val currentSearchStyle: com.eosphor.nonameradio.station.StationsFilter.SearchStyle = com.eosphor.nonameradio.station.StationsFilter.SearchStyle.ByName
 )
 
 class ExactOriginalViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(ExactOriginalUiState())
+    private val _uiState = MutableStateFlow(ExactOriginalUiState(isLoading = true))
     val uiState: StateFlow<ExactOriginalUiState> = _uiState.asStateFlow()
 
     private var historyManager: com.eosphor.nonameradio.HistoryManager? = null
+    private var httpClient: OkHttpClient? = null
+    private var appContext: Context? = null
+    private var hasLoadedInitialData = false
+    private var favoritesReceiverRegistered = false
 
-    init {
-        loadInitialData()
+    private val SEARCH_TAB_INDEX = 8
+
+    private val favoritesReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            refreshFavoritesState()
+        }
     }
+
+    private val _pendingAlarmStation = MutableStateFlow<DataRadioStation?>(null)
+    val pendingAlarmStation: StateFlow<DataRadioStation?> = _pendingAlarmStation.asStateFlow()
 
     fun initializeHistoryManager(historyManager: com.eosphor.nonameradio.HistoryManager) {
         this.historyManager = historyManager
         android.util.Log.d("ExactOriginalViewModel", "HistoryManager initialized")
         loadHistoryFromManager()
+    }
+
+    fun initializeNetwork(client: OkHttpClient, context: Context) {
+        this.httpClient = client
+        this.appContext = context.applicationContext
+        this.appContext?.let { PlayerServiceUtil.startService(it) }
+        this.appContext?.let { registerFavoritesReceiver(it) }
+        android.util.Log.d("ExactOriginalViewModel", "Network initialized")
+        triggerInitialLoadIfNeeded()
+        refreshTimerState()
     }
 
     private fun loadHistoryFromManager() {
@@ -60,57 +103,135 @@ class ExactOriginalViewModel : ViewModel() {
         }
     }
 
+    private fun triggerInitialLoadIfNeeded() {
+        if (!hasLoadedInitialData) {
+            loadInitialData()
+        }
+    }
+
     private fun loadInitialData() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _uiState.update { it.copy(isLoading = true) }
 
             try {
-                delay(1000) // Симуляция загрузки
+                val client = httpClient
+                val ctx = appContext
+                val useNetwork = client != null && ctx != null
 
-                // Загружаем реальные станции через RadioBrowser API
-                val localStations = loadRealStations("local", 20)
-                val topClickStations = loadRealStations("topclick", 20)
-                val topVoteStations = loadRealStations("topvote", 20)
-                val changedLatelyStations = loadRealStations("changed", 20)
-                val currentlyHeardStations = loadRealStations("currently", 20)
-                val favoriteStations = loadRealStations("favorite", 15)
+                val resolvedClient = client
+                val resolvedContext = ctx
+                val canUseNetwork = useNetwork && resolvedClient != null && resolvedContext != null
 
-                // Загружаем реальные категории
-                val tagCategories = loadRealTags()
-                val countryCategories = loadRealCountries()
-                val languageCategories = loadRealLanguages()
+                val localStations = if (canUseNetwork) {
+                    fetchStationsRelative(resolvedClient!!, resolvedContext!!, getLocalStationsEndpoint(resolvedContext))
+                } else {
+                    createRealisticStations("local", 20)
+                }
+                val topClickStations = if (canUseNetwork) {
+                    fetchStationsRelative(resolvedClient!!, resolvedContext!!, "json/stations/topclick/100")
+                } else {
+                    createRealisticStations("topclick", 20)
+                }
+                val topVoteStations = if (canUseNetwork) {
+                    fetchStationsRelative(resolvedClient!!, resolvedContext!!, "json/stations/topvote/100")
+                } else {
+                    createRealisticStations("topvote", 20)
+                }
+                val changedLatelyStations = if (canUseNetwork) {
+                    fetchStationsRelative(resolvedClient!!, resolvedContext!!, "json/stations/lastchange/100")
+                } else {
+                    createRealisticStations("changed", 20)
+                }
+                val currentlyHeardStations = if (canUseNetwork) {
+                    fetchStationsRelative(resolvedClient!!, resolvedContext!!, "json/stations/lastclick/100")
+                } else {
+                    createRealisticStations("currently", 20)
+                }
+                val favoriteStations = loadFavoriteStations()
 
-                _uiState.value = _uiState.value.copy(
-                    localStations = localStations,
-                    topClickStations = topClickStations,
-                    topVoteStations = topVoteStations,
-                    changedLatelyStations = changedLatelyStations,
-                    currentlyHeardStations = currentlyHeardStations,
-                    favoriteStations = favoriteStations,
-                    tagCategories = tagCategories,
-                    countryCategories = countryCategories,
-                    languageCategories = languageCategories,
-                    isLoading = false
-                )
+                val tagCategories = if (canUseNetwork) {
+                    fetchSimpleList(resolvedClient!!, resolvedContext!!, "json/tags", "name")
+                } else {
+                    loadRealTags()
+                }
+                val countryCategories = if (canUseNetwork) {
+                    fetchSimpleList(resolvedClient!!, resolvedContext!!, "json/countrycodes", "name")
+                } else {
+                    loadRealCountries()
+                }
+                val languageCategories = if (canUseNetwork) {
+                    fetchSimpleList(resolvedClient!!, resolvedContext!!, "json/languages", "name")
+                } else {
+                    loadRealLanguages()
+                }
 
+                _uiState.update {
+                    it.copy(
+                        localStations = localStations,
+                        topClickStations = topClickStations,
+                        topVoteStations = topVoteStations,
+                        changedLatelyStations = changedLatelyStations,
+                        currentlyHeardStations = currentlyHeardStations,
+                        favoriteStations = favoriteStations,
+                        favoriteStationIds = favoriteStations.mapNotNull { it.StationUuid }.toSet(),
+                        tagCategories = tagCategories,
+                        countryCategories = countryCategories,
+                        languageCategories = languageCategories,
+                        isLoading = false,
+                        error = null
+                    )
+                }
+
+                hasLoadedInitialData = true
                 android.util.Log.d("ExactOriginalViewModel", "Loaded all real data successfully")
 
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = e.message
-                )
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
     }
 
-    private suspend fun loadRealStations(prefix: String, count: Int): List<DataRadioStation> {
-        return try {
-            // Здесь будет реальная загрузка через RadioBrowser API
-            // Пока используем моковые данные с реальными именами станций
-            createRealisticStations(prefix, count)
+    private fun getLocalStationsEndpoint(context: Context): String {
+        // В оригинале определяется страна; упростим до кода из конфигурации
+        val locales = ConfigurationCompat.getLocales(context.resources.configuration)
+        val country = when {
+            !locales.isEmpty -> locales[0]?.country
+            else -> Locale.getDefault().country
+        }
+        return if (!country.isNullOrEmpty()) {
+            "json/stations/bycountrycodeexact/" + country + "?order=clickcount&reverse=true"
+        } else {
+            "json/stations/topclick/100"
+        }
+    }
+
+    private suspend fun fetchStationsRelative(client: OkHttpClient, context: Context, relative: String): List<DataRadioStation> = withContext(kotlinx.coroutines.Dispatchers.IO) {
+        try {
+            val result = Utils.downloadFeedRelative(client, context, relative, false, null)
+            if (result != null) {
+                val list = com.eosphor.nonameradio.station.DataRadioStation.DecodeJson(result)
+                list ?: emptyList()
+            } else emptyList()
         } catch (e: Exception) {
-            android.util.Log.e("ExactOriginalViewModel", "Error loading stations: ${e.message}")
+            android.util.Log.e("ExactOriginalViewModel", "fetchStationsRelative error: ${e.message}")
+            emptyList()
+        }
+    }
+
+    private suspend fun fetchSimpleList(client: OkHttpClient, context: Context, relative: String, fieldName: String): List<String> = withContext(kotlinx.coroutines.Dispatchers.IO) {
+        try {
+            val result = Utils.downloadFeedRelative(client, context, relative, false, null)
+            if (result != null) {
+                val arr = JSONArray(result)
+                val out = ArrayList<String>(arr.length())
+                for (i in 0 until arr.length()) {
+                    val obj = arr.getJSONObject(i)
+                    if (obj.has(fieldName)) out.add(obj.getString(fieldName))
+                }
+                out
+            } else emptyList()
+        } catch (e: Exception) {
+            android.util.Log.e("ExactOriginalViewModel", "fetchSimpleList error: ${e.message}")
             emptyList()
         }
     }
@@ -174,7 +295,15 @@ class ExactOriginalViewModel : ViewModel() {
     }
 
     fun navigateToSection(section: String) {
-        _uiState.value = _uiState.value.copy(selectedDrawerItem = section)
+        _uiState.update { state ->
+            state.copy(
+                selectedDrawerItem = section,
+                isSearchActive = false,
+                searchQuery = "",
+                searchResults = if (section == "stations") state.searchResults else emptyList(),
+                currentSearchStyle = com.eosphor.nonameradio.station.StationsFilter.SearchStyle.ByName
+            )
+        }
     }
 
     fun selectTab(tabIndex: Int) {
@@ -199,132 +328,287 @@ class ExactOriginalViewModel : ViewModel() {
 
             // Обновляем локальный список истории
             loadHistoryFromManager()
+
+            val app = appContext as? RadioDroidApp
+            if (app != null) {
+                PlayerServiceUtil.startService(app)
+                Utils.playAndWarnIfMetered(app, station, PlayerType.RADIODROID) {
+                    Utils.play(app, station)
+                }
+            } else {
+                android.util.Log.w("ExactOriginalViewModel", "RadioDroidApp context is null, playing via PlayerServiceUtil directly")
+                PlayerServiceUtil.play(station)
+            }
         }
     }
 
     fun pauseStation() {
         _uiState.value = _uiState.value.copy(isPlaying = false)
+        PlayerServiceUtil.pause(PauseReason.USER)
     }
 
     fun toggleFavorite(station: DataRadioStation) {
-        // TODO: Implement favorite toggle logic
-        android.util.Log.d("ExactOriginalViewModel", "Toggle favorite for station: ${station.Name}")
+        viewModelScope.launch(Dispatchers.IO) {
+            val app = appContext as? RadioDroidApp ?: return@launch
+            val favouriteManager = app.favouriteManager
+            val currentFavorites = favouriteManager.getList()
+            val isFavorite = currentFavorites.any { it.StationUuid == station.StationUuid }
+
+            if (isFavorite) {
+                favouriteManager.remove(station.StationUuid)
+            } else {
+                favouriteManager.add(station)
+            }
+
+            val updatedFavorites = favouriteManager.getList()
+            withContext(Dispatchers.Main) {
+                _uiState.update {
+                    it.copy(
+                        favoriteStations = updatedFavorites,
+                        favoriteStationIds = updatedFavorites.mapNotNull { fav -> fav.StationUuid }.toSet()
+                    )
+                }
+            }
+        }
     }
 
-    fun searchStations(query: String) {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            
-            try {
-                delay(500) // Симуляция поиска
-                
-                val searchResults = createRealisticStations("search", 15).map { station ->
-                    station.apply {
-                        Name = "$query Radio ${station.Name}"
-                    }
-                }
-                
-                _uiState.value = _uiState.value.copy(
-                    searchResults = searchResults,
+    fun searchStations(query: String, style: com.eosphor.nonameradio.station.StationsFilter.SearchStyle = com.eosphor.nonameradio.station.StationsFilter.SearchStyle.ByName) {
+        val trimmed = query.trim()
+        _uiState.update { it.copy(currentSearchStyle = style) }
+
+        if (trimmed.isEmpty()) {
+            _uiState.update {
+                it.copy(
+                    searchQuery = "",
+                    searchResults = emptyList(),
                     isLoading = false
                 )
-                
-                android.util.Log.d("ExactOriginalViewModel", "Search completed for query: $query")
-                
+            }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, searchQuery = trimmed, selectedTabIndex = SEARCH_TAB_INDEX) }
+
+            try {
+                val results = fetchSearchResults(trimmed, style)
+                _uiState.update {
+                    it.copy(
+                        searchResults = results,
+                        isLoading = false,
+                        error = null
+                    )
+                }
+                android.util.Log.d("ExactOriginalViewModel", "Search completed for query: $trimmed style=$style size=${results.size}")
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = e.message
-                )
+                android.util.Log.e("ExactOriginalViewModel", "Search error", e)
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = e.message
+                    )
+                }
             }
         }
     }
 
     fun refreshLocalStations() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            delay(1000)
-            val newStations = createRealisticStations("local", 20)
-            _uiState.value = _uiState.value.copy(
-                localStations = newStations,
-                isLoading = false
-            )
+            _uiState.update { it.copy(isLoading = true) }
+            val client = httpClient
+            val context = appContext
+            val newStations = if (client != null && context != null) {
+                fetchStationsRelative(client, context, getLocalStationsEndpoint(context)).takeIf { it.isNotEmpty() }
+            } else null
+
+            _uiState.update {
+                it.copy(
+                    localStations = newStations ?: createRealisticStations("local", 20),
+                    isLoading = false
+                )
+            }
         }
     }
 
     fun refreshTopClickStations() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            delay(1000)
-            val newStations = createRealisticStations("topclick", 20)
-            _uiState.value = _uiState.value.copy(
-                topClickStations = newStations,
-                isLoading = false
-            )
+            _uiState.update { it.copy(isLoading = true) }
+            val client = httpClient
+            val context = appContext
+            val newStations = if (client != null && context != null) {
+                fetchStationsRelative(client, context, "json/stations/topclick/100").takeIf { it.isNotEmpty() }
+            } else null
+
+            _uiState.update {
+                it.copy(
+                    topClickStations = newStations ?: createRealisticStations("topclick", 20),
+                    isLoading = false
+                )
+            }
         }
     }
 
     fun refreshTopVoteStations() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            delay(1000)
-            val newStations = createRealisticStations("topvote", 20)
-            _uiState.value = _uiState.value.copy(
-                topVoteStations = newStations,
-                isLoading = false
-            )
+            _uiState.update { it.copy(isLoading = true) }
+            val client = httpClient
+            val context = appContext
+            val newStations = if (client != null && context != null) {
+                fetchStationsRelative(client, context, "json/stations/topvote/100").takeIf { it.isNotEmpty() }
+            } else null
+
+            _uiState.update {
+                it.copy(
+                    topVoteStations = newStations ?: createRealisticStations("topvote", 20),
+                    isLoading = false
+                )
+            }
         }
     }
 
     fun refreshChangedLatelyStations() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            delay(1000)
-            val newStations = createRealisticStations("changed", 20)
-            _uiState.value = _uiState.value.copy(
-                changedLatelyStations = newStations,
-                isLoading = false
-            )
+            _uiState.update { it.copy(isLoading = true) }
+            val client = httpClient
+            val context = appContext
+            val newStations = if (client != null && context != null) {
+                fetchStationsRelative(client, context, "json/stations/lastchange/100").takeIf { it.isNotEmpty() }
+            } else null
+
+            _uiState.update {
+                it.copy(
+                    changedLatelyStations = newStations ?: createRealisticStations("changed", 20),
+                    isLoading = false
+                )
+            }
         }
     }
 
     fun refreshCurrentlyHeardStations() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            delay(1000)
-            val newStations = createRealisticStations("currently", 20)
-            _uiState.value = _uiState.value.copy(
-                currentlyHeardStations = newStations,
-                isLoading = false
-            )
+            _uiState.update { it.copy(isLoading = true) }
+            val client = httpClient
+            val context = appContext
+            val newStations = if (client != null && context != null) {
+                fetchStationsRelative(client, context, "json/stations/lastclick/100").takeIf { it.isNotEmpty() }
+            } else null
+
+            _uiState.update {
+                it.copy(
+                    currentlyHeardStations = newStations ?: createRealisticStations("currently", 20),
+                    isLoading = false
+                )
+            }
         }
     }
 
     fun refreshFavorites() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            delay(1000)
-            val newStations = createRealisticStations("favorite", 15)
-            _uiState.value = _uiState.value.copy(
-                favoriteStations = newStations,
-                isLoading = false
-            )
+            _uiState.update { it.copy(isLoading = true) }
+            val favorites = loadFavoriteStations()
+            _uiState.update {
+                it.copy(
+                    favoriteStations = favorites,
+                    favoriteStationIds = favorites.mapNotNull { fav -> fav.StationUuid }.toSet(),
+                    isLoading = false
+                )
+            }
         }
     }
 
+    fun refreshFavoritesState() {
+        viewModelScope.launch {
+            val favorites = loadFavoriteStations()
+            _uiState.update {
+                it.copy(
+                    favoriteStations = favorites,
+                    favoriteStationIds = favorites.mapNotNull { fav -> fav.StationUuid }.toSet()
+                )
+            }
+        }
+    }
+
+    fun requestAddAlarm() {
+        viewModelScope.launch {
+            val station = historyManager?.getList()?.firstOrNull()
+            if (station != null) {
+                _pendingAlarmStation.value = station
+            } else {
+                android.util.Log.w("ExactOriginalViewModel", "Cannot create alarm: history is empty")
+            }
+        }
+    }
+
+    fun confirmAddAlarm(hour: Int, minute: Int) {
+        val station = _pendingAlarmStation.value ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            val app = appContext as? RadioDroidApp ?: return@launch
+            app.alarmManager.add(station, hour, minute)
+            _pendingAlarmStation.value = null
+        }
+    }
+
+    fun dismissAddAlarmDialog() {
+        _pendingAlarmStation.value = null
+    }
+
     // Новые функции для полного функционала
+    fun openSearch() {
+        if (!_uiState.value.isSearchActive) {
+            _uiState.update {
+                it.copy(
+                    isSearchActive = true,
+                    selectedTabIndex = SEARCH_TAB_INDEX,
+                    currentSearchStyle = com.eosphor.nonameradio.station.StationsFilter.SearchStyle.ByName
+                )
+            }
+            android.util.Log.d("ExactOriginalViewModel", "Search opened")
+        }
+    }
+
+    fun closeSearch() {
+        if (_uiState.value.isSearchActive) {
+            _uiState.update {
+                it.copy(
+                    isSearchActive = false,
+                    searchQuery = "",
+                    searchResults = emptyList(),
+                    isLoading = false
+                )
+            }
+            android.util.Log.d("ExactOriginalViewModel", "Search closed")
+        }
+    }
+
+    fun updateSearchQuery(query: String) {
+        _uiState.update { it.copy(searchQuery = query) }
+    }
+
+    fun submitSearch(query: String) {
+        val trimmed = query.trim()
+        updateSearchQuery(trimmed)
+        if (trimmed.isNotEmpty()) {
+            searchStations(trimmed, _uiState.value.currentSearchStyle)
+        } else {
+            _uiState.update { it.copy(searchResults = emptyList(), isLoading = false) }
+        }
+    }
+
     fun toggleSearch() {
-        _uiState.value = _uiState.value.copy(
-            isSearchActive = !_uiState.value.isSearchActive
-        )
-        android.util.Log.d("ExactOriginalViewModel", "Search toggled: ${_uiState.value.isSearchActive}")
+        if (_uiState.value.isSearchActive) {
+            closeSearch()
+        } else {
+            openSearch()
+        }
+    }
+
+    fun setIconsView(useIcons: Boolean) {
+        _uiState.update { it.copy(isIconsView = useIcons) }
+        android.util.Log.d("ExactOriginalViewModel", "View mode set: ${if (useIcons) "Icons" else "List"}")
     }
 
     fun toggleViewMode() {
-        _uiState.value = _uiState.value.copy(
-            isIconsView = !_uiState.value.isIconsView
-        )
-        android.util.Log.d("ExactOriginalViewModel", "View mode toggled: ${if (_uiState.value.isIconsView) "Icons" else "List"}")
+        setIconsView(!_uiState.value.isIconsView)
     }
 
     fun showMpdSettings() {
@@ -332,9 +616,43 @@ class ExactOriginalViewModel : ViewModel() {
         // TODO: Navigate to MPD settings screen
     }
 
-    fun showSleepTimer() {
-        android.util.Log.d("ExactOriginalViewModel", "Show sleep timer dialog")
-        // TODO: Show sleep timer dialog
+    fun getCurrentSleepTimerMinutes(): Int {
+        val context = appContext ?: return 0
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
+        val currentSeconds = PlayerServiceUtil.getTimerSeconds()
+        return when {
+            currentSeconds <= 0 -> sharedPref.getInt("sleep_timer_default_minutes", 10)
+            currentSeconds < 60 -> 1
+            else -> (currentSeconds / 60).toInt()
+        }
+    }
+
+    fun setSleepTimer(minutes: Int) {
+        val context = appContext ?: return
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
+        PlayerServiceUtil.clearTimer()
+        if (minutes > 0) {
+            PlayerServiceUtil.addTimer(minutes * 60)
+            sharedPref.edit().putInt("sleep_timer_default_minutes", minutes).apply()
+        }
+        refreshTimerState()
+        android.util.Log.d("ExactOriginalViewModel", "Sleep timer set to $minutes minutes")
+    }
+
+    fun clearSleepTimer() {
+        PlayerServiceUtil.clearTimer()
+        refreshTimerState()
+        android.util.Log.d("ExactOriginalViewModel", "Sleep timer cleared")
+    }
+
+    private fun refreshTimerState() {
+        val seconds = PlayerServiceUtil.getTimerSeconds()
+        _uiState.update {
+            it.copy(
+                sleepTimerMinutes = if (seconds > 0) (seconds / 60).toInt() else 0,
+                sleepTimerActive = seconds > 0
+            )
+        }
     }
 
     fun showMediaRoute() {
@@ -366,22 +684,6 @@ class ExactOriginalViewModel : ViewModel() {
         // TODO: Implement delete functionality based on current context
     }
 
-    fun setSleepTimer(minutes: Int) {
-        _uiState.value = _uiState.value.copy(
-            sleepTimerMinutes = minutes,
-            sleepTimerActive = minutes > 0
-        )
-        android.util.Log.d("ExactOriginalViewModel", "Sleep timer set to $minutes minutes")
-    }
-
-    fun cancelSleepTimer() {
-        _uiState.value = _uiState.value.copy(
-            sleepTimerMinutes = 0,
-            sleepTimerActive = false
-        )
-        android.util.Log.d("ExactOriginalViewModel", "Sleep timer cancelled")
-    }
-
     fun toggleMpd() {
         _uiState.value = _uiState.value.copy(
             mpdEnabled = !_uiState.value.mpdEnabled
@@ -394,5 +696,86 @@ class ExactOriginalViewModel : ViewModel() {
             mediaRouteActive = !_uiState.value.mediaRouteActive
         )
         android.util.Log.d("ExactOriginalViewModel", "Media route toggled: ${_uiState.value.mediaRouteActive}")
+    }
+
+    fun applyCategoryFilter(style: com.eosphor.nonameradio.station.StationsFilter.SearchStyle, value: String) {
+        _uiState.update {
+            it.copy(
+                selectedTabIndex = SEARCH_TAB_INDEX,
+                isSearchActive = false,
+                searchQuery = value,
+                currentSearchStyle = style
+            )
+        }
+        searchStations(value, style)
+    }
+
+    private suspend fun fetchSearchResults(query: String, style: com.eosphor.nonameradio.station.StationsFilter.SearchStyle): List<DataRadioStation> = withContext(Dispatchers.IO) {
+        val client = httpClient
+        val context = appContext
+        if (client == null || context == null) return@withContext emptyList()
+
+        val radioApp = context as? RadioDroidApp ?: return@withContext emptyList()
+
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
+        val showBroken = sharedPref.getBoolean("show_broken", false)
+
+        val params = HashMap<String, String>().apply {
+            put("order", "clickcount")
+            put("reverse", "true")
+            put("hidebroken", (!showBroken).toString())
+        }
+
+        val encoded = try {
+            URLEncoder.encode(query, "utf-8").replace("+", "%20")
+        } catch (e: Exception) {
+            android.util.Log.e("ExactOriginalViewModel", "Encoding error", e)
+            query
+        }
+
+        val relative = when (style) {
+            com.eosphor.nonameradio.station.StationsFilter.SearchStyle.ByName -> "json/stations/byname/$encoded"
+            com.eosphor.nonameradio.station.StationsFilter.SearchStyle.ByLanguageExact -> "json/stations/bylanguageexact/$encoded"
+            com.eosphor.nonameradio.station.StationsFilter.SearchStyle.ByCountryCodeExact -> "json/stations/bycountrycodeexact/$encoded"
+            com.eosphor.nonameradio.station.StationsFilter.SearchStyle.ByTagExact -> "json/stations/bytagexact/$encoded"
+        }
+
+        try {
+            val result = Utils.downloadFeedRelative(client, radioApp, relative, false, params)
+            if (result != null) {
+                com.eosphor.nonameradio.station.DataRadioStation.DecodeJson(result).orEmpty()
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("ExactOriginalViewModel", "fetchSearchResults error", e)
+            emptyList()
+        }
+    }
+
+    private suspend fun loadFavoriteStations(): List<DataRadioStation> = withContext(Dispatchers.IO) {
+        val app = appContext as? RadioDroidApp ?: return@withContext emptyList()
+        val favouriteManager = app.favouriteManager
+        favouriteManager.getList()
+    }
+
+    private fun registerFavoritesReceiver(context: Context) {
+        if (!favoritesReceiverRegistered) {
+            LocalBroadcastManager.getInstance(context).registerReceiver(
+                favoritesReceiver,
+                IntentFilter(com.eosphor.nonameradio.station.DataRadioStation.RADIO_STATION_LOCAL_INFO_CHAGED)
+            )
+            favoritesReceiverRegistered = true
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        appContext?.let {
+            if (favoritesReceiverRegistered) {
+                LocalBroadcastManager.getInstance(it).unregisterReceiver(favoritesReceiver)
+                favoritesReceiverRegistered = false
+            }
+        }
     }
 }

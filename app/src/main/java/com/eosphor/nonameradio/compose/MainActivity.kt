@@ -66,9 +66,6 @@ fun RadioDroidApp() {
                         },
                         onNavigateToRecordings = {
                             navController.navigate("recordings")
-                        },
-                        onNavigateToCategories = { categoryRoute ->
-                            navController.navigate(categoryRoute)
                         }
                     )
                 }

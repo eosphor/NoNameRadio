@@ -15,6 +15,7 @@ fun ExactOriginalHistoryScreen(
     stations: List<DataRadioStation>,
     onStationClick: (DataRadioStation) -> Unit = {},
     onStationFavoriteClick: (DataRadioStation) -> Unit = {},
+    favoriteStationIds: Set<String> = emptySet(),
     modifier: Modifier = Modifier
 ) {
     if (stations.isEmpty()) {
@@ -49,7 +50,8 @@ fun ExactOriginalHistoryScreen(
         ExactOriginalStationsScreen(
             stations = stations,
             onStationClick = onStationClick,
-            onStationFavoriteClick = onStationFavoriteClick
+            onStationFavoriteClick = onStationFavoriteClick,
+            favoriteStationIds = favoriteStationIds
         )
     }
 }

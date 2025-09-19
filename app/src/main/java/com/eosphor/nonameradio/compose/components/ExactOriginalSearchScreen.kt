@@ -2,42 +2,53 @@ package com.eosphor.nonameradio.compose.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.eosphor.nonameradio.R
 import com.eosphor.nonameradio.station.DataRadioStation
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 
 @Composable
 fun ExactOriginalSearchScreen(
+    query: String,
+    onQueryChange: (String) -> Unit = {},
     onSearch: (String) -> Unit = {},
     searchResults: List<DataRadioStation> = emptyList(),
     onStationClick: (DataRadioStation) -> Unit = {},
     onStationFavoriteClick: (DataRadioStation) -> Unit = {},
+    favoriteStationIds: Set<String> = emptySet(),
+    onFavoritesChanged: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    var searchQuery by remember { mutableStateOf("") }
-    var isSearchActive by remember { mutableStateOf(false) }
-
     Column(
         modifier = modifier.fillMaxSize()
     ) {
         // Search Bar (точно как в оригинале)
         OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
+            value = query,
+            onValueChange = onQueryChange,
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Search stations...") },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
+            placeholder = { Text(stringResource(R.string.action_search)) },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             trailingIcon = {
-                if (searchQuery.isNotEmpty()) {
-                    IconButton(onClick = { searchQuery = "" }) {
-                        Icon(Icons.Default.Clear, contentDescription = "Clear")
+                if (query.isNotEmpty()) {
+                    IconButton(onClick = { onQueryChange("") }) {
+                        Icon(Icons.Default.Clear, contentDescription = null)
                     }
                 }
             },
-            singleLine = true
+            singleLine = true,
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+            keyboardActions = androidx.compose.foundation.text.KeyboardActions(
+                onSearch = { onSearch(query) }
+            )
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -47,9 +58,11 @@ fun ExactOriginalSearchScreen(
             ExactOriginalStationsScreen(
                 stations = searchResults,
                 onStationClick = onStationClick,
-                onStationFavoriteClick = onStationFavoriteClick
+                onStationFavoriteClick = onStationFavoriteClick,
+                favoriteStationIds = favoriteStationIds,
+                onFavoritesChanged = onFavoritesChanged
             )
-        } else if (searchQuery.isNotBlank()) {
+        } else if (query.isNotBlank()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = androidx.compose.ui.Alignment.Center
@@ -65,7 +78,7 @@ fun ExactOriginalSearchScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "No results found for \"$searchQuery\"",
+                        text = stringResource(R.string.error_list_update),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
@@ -87,13 +100,13 @@ fun ExactOriginalSearchScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Search for radio stations",
+                        text = stringResource(R.string.action_search),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Enter station name, genre, or country",
+                        text = stringResource(R.string.nav_item_stations),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )

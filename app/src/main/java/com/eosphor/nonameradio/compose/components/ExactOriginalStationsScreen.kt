@@ -1,5 +1,8 @@
 package com.eosphor.nonameradio.compose.components
 
+import android.content.pm.ShortcutInfo
+import android.content.pm.ShortcutManager
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,12 +19,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.preference.PreferenceManager
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.eosphor.nonameradio.R
+import com.eosphor.nonameradio.RadioDroidApp
+import com.eosphor.nonameradio.Utils
+import com.eosphor.nonameradio.compose.util.findFragmentActivity
+import com.eosphor.nonameradio.players.PlayStationTask
+import com.eosphor.nonameradio.players.selector.PlayerType
 import com.eosphor.nonameradio.station.DataRadioStation
+import com.eosphor.nonameradio.station.StationActions
 
 @Composable
 fun ExactOriginalStationsScreen(
@@ -29,6 +42,8 @@ fun ExactOriginalStationsScreen(
     onStationClick: (DataRadioStation) -> Unit = {},
     onStationFavoriteClick: (DataRadioStation) -> Unit = {},
     onRefresh: () -> Unit = {},
+    favoriteStationIds: Set<String> = emptySet(),
+    onFavoritesChanged: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -72,8 +87,9 @@ fun ExactOriginalStationsScreen(
                         onClick = { onStationClick(station) },
                         onFavoriteClick = { onStationFavoriteClick(station) },
                         onPlayClick = { onStationClick(station) },
-                        isFavorite = false, // TODO: Get from favorite manager
-                        isPlaying = false // TODO: Get from player state
+                        isFavorite = favoriteStationIds.contains(station.StationUuid),
+                        isPlaying = false, // TODO: Get from player state
+                        onFavoritesChanged = onFavoritesChanged
                     )
                 }
             }
@@ -89,8 +105,15 @@ fun ExactOriginalStationItem(
     onPlayClick: () -> Unit = {},
     isFavorite: Boolean = false,
     isPlaying: Boolean = false,
+    onFavoritesChanged: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val anchorView = LocalView.current
+    val activity = context.findFragmentActivity()
+    var menuExpanded by remember { mutableStateOf(false) }
+    val sharedPrefs = remember { PreferenceManager.getDefaultSharedPreferences(context.applicationContext) }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -186,9 +209,20 @@ fun ExactOriginalStationItem(
                 }
             }
 
+            IconButton(
+                onClick = onFavoriteClick,
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Default.Star else Icons.Outlined.StarBorder,
+                    contentDescription = "Favorite",
+                    tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
             // More button (точно как в оригинале)
             IconButton(
-                onClick = { /* TODO: Show more options */ },
+                onClick = { menuExpanded = true },
                 modifier = Modifier.size(48.dp)
             ) {
                 Icon(
@@ -196,6 +230,99 @@ fun ExactOriginalStationItem(
                     contentDescription = "More options",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+
+            DropdownMenu(
+                expanded = menuExpanded,
+                onDismissRequest = { menuExpanded = false }
+            ) {
+                if (sharedPrefs.getBoolean("play_external", false)) {
+                    DropdownMenuItem(
+                        text = { Text(text = context.getString(R.string.context_menu_play_in_radiodroid)) },
+                        onClick = {
+                            StationActions.playInRadioDroid(context, station)
+                            menuExpanded = false
+                        }
+                    )
+                } else {
+                    DropdownMenuItem(
+                        text = { Text(text = context.getString(R.string.context_menu_play_in_external_player)) },
+                        onClick = {
+                            val app = context.applicationContext as RadioDroidApp
+                            Utils.playAndWarnIfMetered(app, station, PlayerType.EXTERNAL) {
+                                PlayStationTask.playExternal(station, context).execute()
+                            }
+                            menuExpanded = false
+                        }
+                    )
+                }
+
+                if (activity != null) {
+                    DropdownMenuItem(
+                        text = { Text(text = context.getString(R.string.context_menu_visit_homepage)) },
+                        onClick = {
+                            StationActions.openStationHomeUrl(activity, station)
+                            menuExpanded = false
+                        }
+                    )
+                }
+
+                DropdownMenuItem(
+                    text = { Text(text = context.getString(R.string.context_menu_share)) },
+                    onClick = {
+                        if (activity != null) {
+                            StationActions.share(activity, station)
+                        }
+                        menuExpanded = false
+                    }
+                )
+
+                if (activity != null) {
+                    DropdownMenuItem(
+                        text = { Text(text = context.getString(R.string.context_menu_add_alarm)) },
+                        onClick = {
+                            StationActions.setAsAlarm(activity, station)
+                            menuExpanded = false
+                        }
+                    )
+                }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                    val shortcutManager: ShortcutManager? = context.getSystemService(ShortcutManager::class.java)
+                    if (shortcutManager?.isRequestPinShortcutSupported == true) {
+                        DropdownMenuItem(
+                            text = { Text(text = context.getString(R.string.context_menu_create_shortcut)) },
+                            onClick = {
+                                station.prepareShortcut(context, object : DataRadioStation.ShortcutReadyListener {
+                                    override fun onShortcutReadyListener(shortcut: ShortcutInfo) {
+                                        shortcutManager.requestPinShortcut(shortcut, null)
+                                    }
+                                })
+                                menuExpanded = false
+                            }
+                        )
+                    }
+                }
+
+                if (isFavorite) {
+                    DropdownMenuItem(
+                        text = { Text(text = context.getString(R.string.context_menu_delete)) },
+                        onClick = {
+                            StationActions.removeFromFavourites(context, anchorView, station)
+                            onFavoritesChanged()
+                            menuExpanded = false
+                        }
+                    )
+                } else {
+                    DropdownMenuItem(
+                        text = { Text(text = context.getString(R.string.action_favorite)) },
+                        onClick = {
+                            StationActions.markAsFavourite(context, station)
+                            onFavoritesChanged()
+                            menuExpanded = false
+                        }
+                    )
+                }
             }
         }
     }

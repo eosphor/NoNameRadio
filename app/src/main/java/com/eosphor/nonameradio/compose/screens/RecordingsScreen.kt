@@ -49,8 +49,7 @@ fun RecordingsScreen(
     LaunchedEffect(uiState.selectedRecording) {
         uiState.selectedRecording?.let { recording ->
             onRecordingClick(recording)
-            // Reset selection
-            viewModel.clearError()
+            viewModel.clearSelectedRecording()
         }
     }
 

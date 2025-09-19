@@ -66,7 +66,7 @@ public class StationActions {
         }).show();
     }
 
-    static void openStationHomeUrl(final @NonNull FragmentActivity activity, final @NonNull DataRadioStation station) {
+    public static void openStationHomeUrl(final @NonNull FragmentActivity activity, final @NonNull DataRadioStation station) {
         if (!TextUtils.isEmpty(station.HomePageUrl)) {
             Uri stationUrl = Uri.parse(station.HomePageUrl);
             if (stationUrl != null) {
