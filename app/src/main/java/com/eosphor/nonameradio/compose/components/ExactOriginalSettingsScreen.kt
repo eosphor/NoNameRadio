@@ -1,33 +1,26 @@
 package com.eosphor.nonameradio.compose.components
 
 import android.content.Intent
+import android.media.audiofx.AudioEffect
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Alarm
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.NetworkCheck
-import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.QueueMusic
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SettingsInputComponent
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.eosphor.nonameradio.LegacySettingsActivity
 import com.eosphor.nonameradio.R
+import com.eosphor.nonameradio.RadioDroidApp
+import com.eosphor.nonameradio.compose.viewmodels.SettingsViewModel
 
 private data class SettingsCategory(
     @StringRes val titleRes: Int,
@@ -37,9 +30,41 @@ private data class SettingsCategory(
 
 @Composable
 fun ExactOriginalSettingsScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: SettingsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
+
+    // Инициализация ViewModel
+    LaunchedEffect(Unit) {
+        viewModel.initializeSettings(context)
+    }
+
+    if (selectedCategory == null) {
+        // Главный экран настроек
+        SettingsMainScreen(
+            modifier = modifier,
+            onCategorySelected = { category -> selectedCategory = category }
+        )
+    } else {
+        // Экран конкретной категории настроек
+        SettingsCategoryScreen(
+            modifier = modifier,
+            category = selectedCategory!!,
+            uiState = uiState,
+            viewModel = viewModel,
+            onBack = { selectedCategory = null }
+        )
+    }
+}
+
+@Composable
+private fun SettingsMainScreen(
+    modifier: Modifier = Modifier,
+    onCategorySelected: (String) -> Unit
+) {
     val categories = listOf(
         SettingsCategory(R.string.settings_appearance, Icons.Filled.Palette, "pref_category_ui"),
         SettingsCategory(R.string.settings_startup_behaviour, Icons.Filled.PlayArrow, "pref_category_startup"),
@@ -70,14 +95,7 @@ fun ExactOriginalSettingsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        val intent = Intent(context, LegacySettingsActivity::class.java)
-                        if (!category.preferenceRoot.isNullOrEmpty()) {
-                            intent.putExtra(
-                                LegacySettingsActivity.EXTRA_PREFERENCE_ROOT,
-                                category.preferenceRoot
-                            )
-                        }
-                        context.startActivity(intent)
+                        onCategorySelected(category.preferenceRoot ?: "")
                     }
                     .padding(vertical = 12.dp),
                 horizontalAlignment = Alignment.Start
@@ -93,10 +111,96 @@ fun ExactOriginalSettingsScreen(
                         text = stringResource(category.titleRes),
                         style = MaterialTheme.typography.bodyLarge
                     )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Icon(
+                        imageVector = Icons.Filled.ArrowForward,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                Divider()
+                HorizontalDivider()
             }
         }
+    }
+}
+
+@Composable
+private fun SettingsCategoryScreen(
+    modifier: Modifier = Modifier,
+    category: String,
+    uiState: com.eosphor.nonameradio.compose.viewmodels.SettingsUiState,
+    viewModel: SettingsViewModel,
+    onBack: () -> Unit
+) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = "Back"
+                    )
+                }
+                Text(
+                    text = getCategoryTitle(category),
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
+        }
+
+        when (category) {
+            "pref_category_ui" -> {
+                appearanceSettings(uiState, viewModel)
+            }
+            "pref_category_startup" -> {
+                startupSettings(uiState, viewModel)
+            }
+            "pref_category_interaction" -> {
+                interactionSettings(uiState, viewModel)
+            }
+            "pref_category_player" -> {
+                playerSettings(uiState, viewModel)
+            }
+            "pref_category_alarm" -> {
+                alarmSettings(uiState, viewModel)
+            }
+            "pref_category_recordings" -> {
+                recordingsSettings(uiState, viewModel)
+            }
+            "pref_category_connectivity" -> {
+                connectivitySettings(uiState, viewModel)
+            }
+            "pref_category_mpd" -> {
+                mpdSettings(uiState, viewModel)
+            }
+            "pref_category_other" -> {
+                otherSettings(uiState, viewModel)
+            }
+        }
+    }
+}
+
+@Composable
+private fun getCategoryTitle(category: String): String {
+    return when (category) {
+        "pref_category_ui" -> "Appearance"
+        "pref_category_startup" -> "Startup Behavior"
+        "pref_category_interaction" -> "Interaction"
+        "pref_category_player" -> "Playback"
+        "pref_category_alarm" -> "Alarm"
+        "pref_category_recordings" -> "Recordings"
+        "pref_category_connectivity" -> "Connectivity"
+        "pref_category_mpd" -> "MPD"
+        "pref_category_other" -> "Other"
+        else -> "Settings"
     }
 }
