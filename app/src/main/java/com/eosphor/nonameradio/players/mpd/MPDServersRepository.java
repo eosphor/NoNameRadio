@@ -86,6 +86,23 @@ public class MPDServersRepository {
         serversLiveData.postValue(serversLiveData.getValue());
     }
 
+    public void updateServer(@NonNull MPDServerData mpdServerData) {
+        boolean changed = false;
+        for (int i = 0; i < servers.size(); i++) {
+            MPDServerData data = servers.get(i);
+            if (data.id == mpdServerData.id) {
+                servers.set(i, mpdServerData);
+                changed = true;
+                break;
+            }
+        }
+
+        if (changed) {
+            saveMPDServers(servers, context);
+            serversLiveData.postValue(serversLiveData.getValue());
+        }
+    }
+
     public void updatePersistentData(@NonNull MPDServerData mpdServerData) {
         boolean changed = false;
         for (int i = 0; i < servers.size(); i++) {

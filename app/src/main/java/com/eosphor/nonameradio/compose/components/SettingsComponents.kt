@@ -338,6 +338,7 @@ fun LazyListScope.mpdSettings(
             subtitle = "Manage MPD server connections",
             onClick = {
                 // TODO: Navigate to MPD servers screen
+                // This will be handled by the main navigation
             }
         )
     }
