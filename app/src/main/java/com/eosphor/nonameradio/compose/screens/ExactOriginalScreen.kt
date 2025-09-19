@@ -252,7 +252,10 @@ fun ExactOriginalScreen(
                             favoriteStationIds = uiState.favoriteStationIds
                         )
                     }
-                    "alarm" -> ExactOriginalAlarmScreen()
+                    "alarm" -> {
+                        val app = context.applicationContext as com.eosphor.nonameradio.RadioDroidApp
+                        ExactOriginalAlarmScreen()
+                    }
                     "settings" -> ExactOriginalSettingsScreen()
                 }
             }

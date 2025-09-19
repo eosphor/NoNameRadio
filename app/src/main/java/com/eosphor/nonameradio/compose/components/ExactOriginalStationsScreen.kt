@@ -304,6 +304,22 @@ fun ExactOriginalStationItem(
                     }
                 }
 
+                DropdownMenuItem(
+                    text = { Text(text = context.getString(R.string.context_menu_copy_stream_url)) },
+                    onClick = {
+                        StationActions.copyStreamUrlToClipboard(context, station)
+                        menuExpanded = false
+                    }
+                )
+
+                DropdownMenuItem(
+                    text = { Text(text = context.getString(R.string.context_menu_vote)) },
+                    onClick = {
+                        StationActions.vote(context, station)
+                        menuExpanded = false
+                    }
+                )
+
                 if (isFavorite) {
                     DropdownMenuItem(
                         text = { Text(text = context.getString(R.string.context_menu_delete)) },

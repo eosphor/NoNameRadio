@@ -76,6 +76,10 @@ public class StationActions {
         }
     }
 
+    public static void copyStreamUrlToClipboard(final @NonNull Context context, final @NonNull DataRadioStation station) {
+        retrieveAndCopyStreamUrlToClipboard(context, station);
+    }
+
     private static void retrieveAndCopyStreamUrlToClipboard(final @NonNull Context context, final @NonNull DataRadioStation station) {
         LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ActivityMain.ACTION_SHOW_LOADING));
 
@@ -205,7 +209,7 @@ public class StationActions {
                 PlayerType.RADIODROID, () -> Utils.play(radioDroidApp, station));
     }
 
-    private static void vote(final @NonNull Context context, final @NonNull DataRadioStation station) {
+    public static void vote(final @NonNull Context context, final @NonNull DataRadioStation station) {
         final WeakReference<Context> contextRef = new WeakReference<>(context);
 
         new AsyncTask<Void, Void, String>() {

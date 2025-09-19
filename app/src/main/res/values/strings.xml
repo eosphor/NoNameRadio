@@ -351,5 +351,7 @@
     <string name="context_menu_play_in_external_player">@string/action_play_in_external</string>
     <string name="context_menu_add_alarm">@string/action_alarm</string>
     <string name="context_menu_create_shortcut">@string/detail_create_shortcut</string>
+    <string name="context_menu_copy_stream_url">@string/action_station_copy_stream_url</string>
+    <string name="context_menu_vote">Vote</string>
     <string name="context_menu_delete">@string/action_delete</string>
 </resources>
