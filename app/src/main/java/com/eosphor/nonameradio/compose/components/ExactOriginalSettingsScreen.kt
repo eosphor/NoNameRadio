@@ -78,6 +78,61 @@ fun ExactOriginalSettingsScreen(
             )
         }
 
+        // Appearance (как в оригинале)
+        item {
+            ExactOriginalSettingsSection(
+                title = "Appearance",
+                items = listOf(
+                    ExactOriginalSettingsItem(
+                        title = "Theme Selection",
+                        subtitle = "Light",
+                        icon = Icons.Default.Palette,
+                        onClick = { /* TODO: Open theme selection */ }
+                    ),
+                    ExactOriginalSettingsItem(
+                        title = "Circular Icons",
+                        subtitle = "Disabled",
+                        icon = Icons.Default.Circle,
+                        onClick = { /* TODO: Toggle circular icons */ }
+                    ),
+                    ExactOriginalSettingsItem(
+                        title = "Compact Style",
+                        subtitle = "Disabled",
+                        icon = Icons.Default.Compress,
+                        onClick = { /* TODO: Toggle compact style */ }
+                    ),
+                    ExactOriginalSettingsItem(
+                        title = "Bottom Navigation",
+                        subtitle = "Enabled",
+                        icon = Icons.Default.Navigation,
+                        onClick = { /* TODO: Toggle bottom navigation */ }
+                    )
+                )
+            )
+        }
+
+        // Startup Behavior (как в оригинале)
+        item {
+            ExactOriginalSettingsSection(
+                title = "Startup Behavior",
+                items = listOf(
+                    ExactOriginalSettingsItem(
+                        title = "Startup Action",
+                        subtitle = "Show History",
+                        icon = Icons.Default.PlayArrow,
+                        onClick = { /* TODO: Open startup action settings */ }
+                    ),
+                    ExactOriginalSettingsItem(
+                        title = "Auto-play",
+                        subtitle = "Disabled",
+                        icon = Icons.Default.PlayCircleOutline,
+                        onClick = { /* TODO: Toggle autoplay */ }
+                    )
+                )
+            )
+        }
+
+        // Playback (как в оригинале)
         item {
             ExactOriginalSettingsSection(
                 title = "Playback",
@@ -89,50 +144,79 @@ fun ExactOriginalSettingsScreen(
                         onClick = { /* TODO: Open quality settings */ }
                     ),
                     ExactOriginalSettingsItem(
-                        title = "Auto-play",
-                        subtitle = "Enabled",
-                        icon = Icons.Default.PlayArrow,
-                        onClick = { /* TODO: Toggle autoplay */ }
-                    ),
-                    ExactOriginalSettingsItem(
                         title = "Equalizer",
                         subtitle = "Disabled",
                         icon = Icons.Default.GraphicEq,
                         onClick = { /* TODO: Open equalizer */ }
+                    ),
+                    ExactOriginalSettingsItem(
+                        title = "Sleep Timer",
+                        subtitle = "Disabled",
+                        icon = Icons.Default.HourglassEmpty,
+                        onClick = { /* TODO: Open sleep timer settings */ }
                     )
                 )
             )
         }
 
+        // Network (как в оригинале)
         item {
             ExactOriginalSettingsSection(
-                title = "Interface",
+                title = "Network",
                 items = listOf(
                     ExactOriginalSettingsItem(
-                        title = "Theme",
-                        subtitle = "System default",
-                        icon = Icons.Default.Palette,
-                        onClick = { /* TODO: Open theme settings */ }
+                        title = "Connection Timeout",
+                        subtitle = "30 seconds",
+                        icon = Icons.Default.Timer,
+                        onClick = { /* TODO: Open timeout settings */ }
                     ),
                     ExactOriginalSettingsItem(
-                        title = "Language",
-                        subtitle = "English",
-                        icon = Icons.Default.Language,
-                        onClick = { /* TODO: Open language settings */ }
-                    ),
-                    ExactOriginalSettingsItem(
-                        title = "Show Icons in List",
+                        title = "Metered Connection Warning",
                         subtitle = "Enabled",
-                        icon = Icons.Default.Image,
-                        onClick = { /* TODO: Toggle show icons */ }
+                        icon = Icons.Default.Warning,
+                        onClick = { /* TODO: Toggle metered connection warning */ }
+                    ),
+                    ExactOriginalSettingsItem(
+                        title = "Proxy Settings",
+                        subtitle = "Disabled",
+                        icon = Icons.Default.Settings,
+                        onClick = { /* TODO: Open proxy settings */ }
                     )
                 )
             )
         }
 
+        // MPD (Music Player Daemon) (как в оригинале)
         item {
             ExactOriginalSettingsSection(
-                title = "Data",
+                title = "MPD",
+                items = listOf(
+                    ExactOriginalSettingsItem(
+                        title = "MPD Server",
+                        subtitle = "Disabled",
+                        icon = Icons.Default.SettingsInputComponent,
+                        onClick = { /* TODO: Open MPD settings */ }
+                    ),
+                    ExactOriginalSettingsItem(
+                        title = "MPD Host",
+                        subtitle = "localhost",
+                        icon = Icons.Default.Computer,
+                        onClick = { /* TODO: Open MPD host settings */ }
+                    ),
+                    ExactOriginalSettingsItem(
+                        title = "MPD Port",
+                        subtitle = "6600",
+                        icon = Icons.Default.Numbers,
+                        onClick = { /* TODO: Open MPD port settings */ }
+                    )
+                )
+            )
+        }
+
+        // Data Management (как в оригинале)
+        item {
+            ExactOriginalSettingsSection(
+                title = "Data Management",
                 items = listOf(
                     ExactOriginalSettingsItem(
                         title = "Clear Cache",
@@ -151,6 +235,39 @@ fun ExactOriginalSettingsScreen(
                         subtitle = "Load favorite stations from file",
                         icon = Icons.Default.Download,
                         onClick = { /* TODO: Import favorites */ }
+                    ),
+                    ExactOriginalSettingsItem(
+                        title = "Clear History",
+                        subtitle = "Remove all listening history",
+                        icon = Icons.Default.History,
+                        onClick = { /* TODO: Clear history */ }
+                    )
+                )
+            )
+        }
+
+        // About (как в оригинале)
+        item {
+            ExactOriginalSettingsSection(
+                title = "About",
+                items = listOf(
+                    ExactOriginalSettingsItem(
+                        title = "Version",
+                        subtitle = "DEV-0.108",
+                        icon = Icons.Default.Info,
+                        onClick = { /* TODO: Show version info */ }
+                    ),
+                    ExactOriginalSettingsItem(
+                        title = "Open Source Licenses",
+                        subtitle = "View licenses",
+                        icon = Icons.Default.Description,
+                        onClick = { /* TODO: Show licenses */ }
+                    ),
+                    ExactOriginalSettingsItem(
+                        title = "Privacy Policy",
+                        subtitle = "View privacy policy",
+                        icon = Icons.Default.PrivacyTip,
+                        onClick = { /* TODO: Open privacy policy */ }
                     )
                 )
             )

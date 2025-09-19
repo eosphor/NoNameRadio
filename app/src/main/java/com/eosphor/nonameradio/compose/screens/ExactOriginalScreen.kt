@@ -74,7 +74,7 @@ fun ExactOriginalScreen(
                         Column(
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            // Toolbar (точно как в оригинале)
+                            // Toolbar (точно как в оригинале с полным меню)
                             TopAppBar(
                                 title = { 
                                     Text(
@@ -98,16 +98,61 @@ fun ExactOriginalScreen(
                                     }
                                 },
                                 actions = {
+                                    // Progress indicator (как в оригинале)
                                     if (uiState.isLoading) {
                                         CircularProgressIndicator(
                                             modifier = Modifier.size(24.dp)
                                         )
                                     }
-                                    IconButton(onClick = { /* TODO: Search */ }) {
+                                    
+                                    // Search (как в оригинале)
+                                    IconButton(onClick = { viewModel.toggleSearch() }) {
                                         Icon(Icons.Default.Search, contentDescription = "Search")
                                     }
-                                    IconButton(onClick = { /* TODO: More options */ }) {
-                                        Icon(Icons.Default.MoreVert, contentDescription = "More")
+                                    
+                                    // View toggle (Icons/List view)
+                                    IconButton(onClick = { viewModel.toggleViewMode() }) {
+                                        Icon(
+                                            if (uiState.isIconsView) Icons.Default.ViewList else Icons.Default.ViewModule,
+                                            contentDescription = "Toggle View"
+                                        )
+                                    }
+                                    
+                                    // MPD support
+                                    IconButton(onClick = { viewModel.showMpdSettings() }) {
+                                        Icon(Icons.Default.SettingsInputComponent, contentDescription = "MPD")
+                                    }
+                                    
+                                    // Sleep Timer
+                                    IconButton(onClick = { viewModel.showSleepTimer() }) {
+                                        Icon(Icons.Default.HourglassEmpty, contentDescription = "Sleep Timer")
+                                    }
+                                    
+                                    // Media Route (Chromecast)
+                                    IconButton(onClick = { viewModel.showMediaRoute() }) {
+                                        Icon(Icons.Default.Cast, contentDescription = "Cast")
+                                    }
+                                    
+                                    // Save favorites
+                                    IconButton(onClick = { viewModel.saveFavorites() }) {
+                                        Icon(Icons.Default.Save, contentDescription = "Save")
+                                    }
+                                    
+                                    // Load favorites
+                                    IconButton(onClick = { viewModel.loadFavorites() }) {
+                                        Icon(Icons.Default.Upload, contentDescription = "Load")
+                                    }
+                                    
+                                    // Add Alarm
+                                    IconButton(onClick = { viewModel.addAlarm() }) {
+                                        Icon(Icons.Default.AlarmAdd, contentDescription = "Add Alarm")
+                                    }
+                                    
+                                    // Delete (context dependent)
+                                    if (uiState.showDeleteButton) {
+                                        IconButton(onClick = { viewModel.deleteSelected() }) {
+                                            Icon(Icons.Default.Delete, contentDescription = "Delete")
+                                        }
                                     }
                                 }
                             )

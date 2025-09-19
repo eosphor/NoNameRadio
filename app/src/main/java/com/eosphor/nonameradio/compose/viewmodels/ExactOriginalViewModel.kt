@@ -26,7 +26,15 @@ data class ExactOriginalUiState(
     val tagCategories: List<String> = emptyList(),
     val countryCategories: List<String> = emptyList(),
     val languageCategories: List<String> = emptyList(),
-    val error: String? = null
+    val error: String? = null,
+    // Новые функции
+    val isSearchActive: Boolean = false,
+    val isIconsView: Boolean = false,
+    val showDeleteButton: Boolean = false,
+    val sleepTimerMinutes: Int = 0,
+    val sleepTimerActive: Boolean = false,
+    val mpdEnabled: Boolean = false,
+    val mediaRouteActive: Boolean = false
 )
 
 class ExactOriginalViewModel : ViewModel() {
@@ -302,5 +310,89 @@ class ExactOriginalViewModel : ViewModel() {
                 isLoading = false
             )
         }
+    }
+
+    // Новые функции для полного функционала
+    fun toggleSearch() {
+        _uiState.value = _uiState.value.copy(
+            isSearchActive = !_uiState.value.isSearchActive
+        )
+        android.util.Log.d("ExactOriginalViewModel", "Search toggled: ${_uiState.value.isSearchActive}")
+    }
+
+    fun toggleViewMode() {
+        _uiState.value = _uiState.value.copy(
+            isIconsView = !_uiState.value.isIconsView
+        )
+        android.util.Log.d("ExactOriginalViewModel", "View mode toggled: ${if (_uiState.value.isIconsView) "Icons" else "List"}")
+    }
+
+    fun showMpdSettings() {
+        android.util.Log.d("ExactOriginalViewModel", "Show MPD settings")
+        // TODO: Navigate to MPD settings screen
+    }
+
+    fun showSleepTimer() {
+        android.util.Log.d("ExactOriginalViewModel", "Show sleep timer dialog")
+        // TODO: Show sleep timer dialog
+    }
+
+    fun showMediaRoute() {
+        android.util.Log.d("ExactOriginalViewModel", "Show media route (Chromecast)")
+        // TODO: Show media route dialog
+    }
+
+    fun saveFavorites() {
+        viewModelScope.launch {
+            android.util.Log.d("ExactOriginalViewModel", "Save favorites to file")
+            // TODO: Implement save favorites functionality
+        }
+    }
+
+    fun loadFavorites() {
+        viewModelScope.launch {
+            android.util.Log.d("ExactOriginalViewModel", "Load favorites from file")
+            // TODO: Implement load favorites functionality
+        }
+    }
+
+    fun addAlarm() {
+        android.util.Log.d("ExactOriginalViewModel", "Add new alarm")
+        // TODO: Navigate to add alarm screen
+    }
+
+    fun deleteSelected() {
+        android.util.Log.d("ExactOriginalViewModel", "Delete selected items")
+        // TODO: Implement delete functionality based on current context
+    }
+
+    fun setSleepTimer(minutes: Int) {
+        _uiState.value = _uiState.value.copy(
+            sleepTimerMinutes = minutes,
+            sleepTimerActive = minutes > 0
+        )
+        android.util.Log.d("ExactOriginalViewModel", "Sleep timer set to $minutes minutes")
+    }
+
+    fun cancelSleepTimer() {
+        _uiState.value = _uiState.value.copy(
+            sleepTimerMinutes = 0,
+            sleepTimerActive = false
+        )
+        android.util.Log.d("ExactOriginalViewModel", "Sleep timer cancelled")
+    }
+
+    fun toggleMpd() {
+        _uiState.value = _uiState.value.copy(
+            mpdEnabled = !_uiState.value.mpdEnabled
+        )
+        android.util.Log.d("ExactOriginalViewModel", "MPD toggled: ${_uiState.value.mpdEnabled}")
+    }
+
+    fun toggleMediaRoute() {
+        _uiState.value = _uiState.value.copy(
+            mediaRouteActive = !_uiState.value.mediaRouteActive
+        )
+        android.util.Log.d("ExactOriginalViewModel", "Media route toggled: ${_uiState.value.mediaRouteActive}")
     }
 }
