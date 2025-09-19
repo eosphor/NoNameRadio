@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.eosphor.nonameradio.R
@@ -806,12 +807,113 @@ private fun EqualizerSettings() {
 
 @Composable
 private fun ProxySettings() {
+    var showProxyDialog by remember { mutableStateOf(false) }
+    
     SettingsButton(
         title = "Proxy Settings",
         subtitle = "Configure proxy connection",
         onClick = {
-            // TODO: Open proxy settings dialog
+            showProxyDialog = true
         }
+    )
+    
+    if (showProxyDialog) {
+        ProxySettingsDialog(
+            onDismiss = { showProxyDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun ProxySettingsDialog(
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    var proxyHost by remember { mutableStateOf("") }
+    var proxyPort by remember { mutableStateOf("") }
+    var proxyUsername by remember { mutableStateOf("") }
+    var proxyPassword by remember { mutableStateOf("") }
+    var isTesting by remember { mutableStateOf(false) }
+    var testResult by remember { mutableStateOf<String?>(null) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Proxy Settings") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = proxyHost,
+                    onValueChange = { proxyHost = it },
+                    label = { Text("Proxy Host") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                OutlinedTextField(
+                    value = proxyPort,
+                    onValueChange = { proxyPort = it },
+                    label = { Text("Proxy Port") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                OutlinedTextField(
+                    value = proxyUsername,
+                    onValueChange = { proxyUsername = it },
+                    label = { Text("Username (optional)") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                OutlinedTextField(
+                    value = proxyPassword,
+                    onValueChange = { proxyPassword = it },
+                    label = { Text("Password (optional)") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                if (testResult != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = testResult!!,
+                        color = if (testResult!!.startsWith("Success")) 
+                            MaterialTheme.colorScheme.primary 
+                        else 
+                            MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Row {
+                Button(
+                    onClick = {
+                        isTesting = true
+                        testResult = null
+                        // TODO: Implement proxy test
+                        testResult = "Proxy test not implemented yet"
+                        isTesting = false
+                    },
+                    enabled = !isTesting && proxyHost.isNotBlank() && proxyPort.isNotBlank()
+                ) {
+                    if (isTesting) {
+                        CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                    } else {
+                        Text("Test")
+                    }
+                }
+                
+                Spacer(modifier = Modifier.width(8.dp))
+                
+                TextButton(onClick = onDismiss) {
+                    Text("Close")
+                }
+            }
+        },
+        dismissButton = null
     )
 }
 
@@ -840,22 +942,178 @@ private fun BatteryOptimizationSettings(
 
 @Composable
 private fun StatisticsSettings() {
+    var showStatisticsDialog by remember { mutableStateOf(false) }
+    
     SettingsButton(
         title = "Statistics",
         subtitle = "View app statistics",
         onClick = {
-            // TODO: Open statistics dialog
+            showStatisticsDialog = true
         }
+    )
+    
+    if (showStatisticsDialog) {
+        StatisticsDialog(
+            onDismiss = { showStatisticsDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun StatisticsDialog(
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    val app = context.applicationContext as com.eosphor.nonameradio.RadioDroidApp
+    val favouriteManager = app.getFavouriteManager()
+    val historyManager = app.getHistoryManager()
+    
+    val favoritesCount = favouriteManager.getList().size
+    val historyCount = historyManager.getList().size
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("App Statistics") },
+        text = {
+            Column {
+                StatisticItem(
+                    title = "Favorites",
+                    value = favoritesCount.toString(),
+                    subtitle = "Saved stations"
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                StatisticItem(
+                    title = "History",
+                    value = historyCount.toString(),
+                    subtitle = "Played stations"
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                StatisticItem(
+                    title = "Total Stations",
+                    value = (favoritesCount + historyCount).toString(),
+                    subtitle = "All stations"
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        },
+        dismissButton = null
     )
 }
 
 @Composable
+private fun StatisticItem(
+    title: String,
+    value: String,
+    subtitle: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+        }
+        
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
+@Composable
 private fun AboutSettings() {
+    var showAboutDialog by remember { mutableStateOf(false) }
+    
     SettingsButton(
         title = "About",
         subtitle = "App information and version",
         onClick = {
-            // TODO: Open about dialog
+            showAboutDialog = true
         }
+    )
+    
+    if (showAboutDialog) {
+        AboutDialog(
+            onDismiss = { showAboutDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun AboutDialog(
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("About NoNameRadio") },
+        text = {
+            Column {
+                Text(
+                    text = "NoNameRadio - Internet Radio Player",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Text(
+                    text = "Version: 1.0.0",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Text(
+                    text = "A modern internet radio player built with Jetpack Compose. Listen to thousands of radio stations from around the world.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Text(
+                    text = "Features:",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Medium
+                )
+                
+                Text("• Browse radio stations by country, language, and tags")
+                Text("• Save favorite stations")
+                Text("• Play history tracking")
+                Text("• Sleep timer")
+                Text("• Alarm functionality")
+                Text("• External player support")
+                Text("• MPD server integration")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        },
+        dismissButton = null
     )
 }

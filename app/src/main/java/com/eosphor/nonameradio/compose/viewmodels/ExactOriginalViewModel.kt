@@ -663,14 +663,27 @@ class ExactOriginalViewModel : ViewModel() {
     fun saveFavorites() {
         viewModelScope.launch {
             android.util.Log.d("ExactOriginalViewModel", "Save favorites to file")
-            // TODO: Implement save favorites functionality
+            val context = appContext ?: return@launch
+            val app = context.applicationContext as com.eosphor.nonameradio.RadioDroidApp
+            val favouriteManager = app.getFavouriteManager()
+            
+            try {
+                // Используем стандартную директорию для сохранения
+                val saveDir = com.eosphor.nonameradio.StationSaveManager.getSaveDir()
+                val fileName = "favorites_${System.currentTimeMillis()}.m3u"
+                favouriteManager.SaveM3U(saveDir, fileName)
+                android.util.Log.d("ExactOriginalViewModel", "Favorites saved to: $saveDir/$fileName")
+            } catch (e: Exception) {
+                android.util.Log.e("ExactOriginalViewModel", "Error saving favorites", e)
+            }
         }
     }
 
     fun loadFavorites() {
         viewModelScope.launch {
             android.util.Log.d("ExactOriginalViewModel", "Load favorites from file")
-            // TODO: Implement load favorites functionality
+            // TODO: Implement load favorites functionality with file picker
+            // This should trigger a file picker dialog
         }
     }
 
@@ -681,7 +694,26 @@ class ExactOriginalViewModel : ViewModel() {
 
     fun deleteSelected() {
         android.util.Log.d("ExactOriginalViewModel", "Delete selected items")
-        // TODO: Implement delete functionality based on current context
+        val context = appContext ?: return
+        val app = context.applicationContext as com.eosphor.nonameradio.RadioDroidApp
+        
+        when (_uiState.value.selectedDrawerItem) {
+            "history" -> {
+                // Очистить историю
+                val historyManager = app.getHistoryManager()
+                historyManager.clear()
+                android.util.Log.d("ExactOriginalViewModel", "History cleared")
+            }
+            "starred" -> {
+                // Очистить избранное
+                val favouriteManager = app.getFavouriteManager()
+                favouriteManager.clear()
+                android.util.Log.d("ExactOriginalViewModel", "Favorites cleared")
+            }
+            else -> {
+                android.util.Log.d("ExactOriginalViewModel", "Delete not applicable for current context")
+            }
+        }
     }
 
     fun toggleMpd() {
