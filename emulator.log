@@ -165,3 +165,6 @@ INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=484.229,767.4
 INFO         | Created VkInstance:0xb121d9000 for application:'' engine:''.
 INFO         | Destroyed VkInstance:0xb121d9000 for application:'' engine:''.
 INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=467.357,237.088 gbl=467.357,237.088 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-467.357,-237.088 last=-467.357,-237.088 Δ 467.357,237.088) : no target window (:0, )
+ERROR        | adb protocol fault (couldn't read status length)
+ERROR        | adb protocol fault (couldn't read status length)
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=525.167,813.9 gbl=525.167,813.9 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-525.167,-813.9 last=-525.167,-813.9 Δ 525.167,813.9) : no target window (:0, )

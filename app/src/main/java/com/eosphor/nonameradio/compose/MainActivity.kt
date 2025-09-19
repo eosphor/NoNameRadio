@@ -15,7 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.eosphor.nonameradio.compose.screens.CategoriesScreen
 import com.eosphor.nonameradio.compose.screens.HistoryScreen
-import com.eosphor.nonameradio.compose.screens.LegacyMainScreen
+import com.eosphor.nonameradio.compose.screens.OriginalRadioDroidScreen
 import com.eosphor.nonameradio.compose.screens.PlayerFullScreen
 import com.eosphor.nonameradio.compose.screens.RecordingsScreen
 import com.eosphor.nonameradio.compose.screens.StationListScreen
@@ -50,8 +50,8 @@ fun RadioDroidApp() {
         startDestination = "main"
     ) {
         composable("main") {
-            val viewModel: com.eosphor.nonameradio.compose.viewmodels.LegacyMainScreenViewModel = viewModel()
-            LegacyMainScreen(
+            val viewModel: com.eosphor.nonameradio.compose.viewmodels.OriginalRadioDroidViewModel = viewModel()
+            OriginalRadioDroidScreen(
                 viewModel = viewModel,
                 onNavigateToStationList = {
                     navController.navigate("station_list")
