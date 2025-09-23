@@ -10,6 +10,9 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.multidex.MultiDexApplication;
 import androidx.preference.PreferenceManager;
 
+import com.yandex.metrica.YandexMetrica;
+import com.yandex.metrica.YandexMetricaConfig;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.integration.okhttp3.OkHttpUrlLoader;
 import com.bumptech.glide.load.model.GlideUrl;
@@ -80,6 +83,20 @@ public class RadioDroidApp extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // Initialize AppMetrica
+        YandexMetricaConfig config = YandexMetricaConfig.newConfigBuilder("620825a5-2d14-47ce-af59-acb3618c547e")
+                .withLogs()
+                .withCrashReporting(true)
+                .withNativeCrashReporting(true)
+                .withLocationTracking(false)
+                .withStatisticsSending(true)
+                .build();
+        YandexMetrica.activate(this, config);
+        YandexMetrica.enableActivityAutoTracking(this);
+        
+        // Report app start event
+        YandexMetrica.reportEvent("app_started");
 
         GoogleProviderHelper.use(getBaseContext());
 

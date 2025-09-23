@@ -26,6 +26,10 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="com.android.providers.tv.permission.WRITE_EPG_DATA" />
+    
+    <!-- AppMetrica permissions -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <uses-sdk tools:overrideLibrary="androidx.tvprovider"/>
 
@@ -125,6 +129,10 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
+        <meta-data
+            android:name="com.yandex.metrica.API_KEY"
+            android:value="620825a5-2d14-47ce-af59-acb3618c547e" />
 
         <meta-data
             android:name="com.google.android.gms.car.application"

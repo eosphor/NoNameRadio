@@ -33,7 +33,8 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 import androidx.media3.datasource.DataSource;
 import androidx.media3.datasource.okhttp.OkHttpDataSource;
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy;
-import androidx.media3.datasource.HttpDataSource;
+import com.yandex.metrica.YandexMetrica;
+import com.yandex.metrica.YandexMetricaConfig;
 
 import net.programmierecke.radiodroid2.BuildConfig;
 import net.programmierecke.radiodroid2.R;
@@ -129,6 +130,9 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
         player.setMediaItem(mediaItem);
         player.prepare();
         player.setPlayWhenReady(true);
+        
+        // Report playback start event
+        YandexMetrica.reportEvent("radio_playback_started", "{\"url\":\"" + streamUrl + "\",\"is_hls\":" + isHls + "}");
 
         if (connectivityManager == null) {
             connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -183,6 +187,9 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
     @Override
     public void stop() {
         Log.i(TAG, "Stopping exoplayer.");
+        
+        // Report playback stop event
+        YandexMetrica.reportEvent("radio_playback_stopped");
 
         cancelStopTask();
 
@@ -390,7 +397,7 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
             int retryDelay = getSanitizedRetryDelaySettingsMs();
             IOException exception = loadErrorInfo.exception;
 
-            if (exception instanceof HttpDataSource.InvalidContentTypeException) {
+            if (exception instanceof androidx.media3.datasource.HttpDataSource.InvalidContentTypeException) {
                 stateListener.onPlayerError(R.string.error_play_stream);
                 return C.TIME_UNSET; // Immediately surface error if we cannot play content type
             }
