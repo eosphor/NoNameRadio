@@ -24,6 +24,7 @@ public class RadioMediaSessionService extends MediaBrowserServiceCompat {
     
     private MediaSessionCompat mediaSession;
     private RadioSessionCallback sessionCallback;
+    private MediaSessionManager sessionManager;
     
     @Override
     public void onCreate() {
@@ -43,6 +44,11 @@ public class RadioMediaSessionService extends MediaBrowserServiceCompat {
             MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
         );
         
+        // Initialize MediaSessionManager
+        RadioDroidApp app = (RadioDroidApp) getApplication();
+        sessionManager = new MediaSessionManager(this, app.getRadioPlayer());
+        sessionManager.setMediaSessionService(this);
+        
         // Set session active
         mediaSession.setActive(true);
     }
@@ -50,6 +56,11 @@ public class RadioMediaSessionService extends MediaBrowserServiceCompat {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        
+        if (sessionManager != null) {
+            sessionManager.destroy();
+        }
+        
         if (mediaSession != null) {
             mediaSession.setActive(false);
             mediaSession.release();
@@ -67,6 +78,13 @@ public class RadioMediaSessionService extends MediaBrowserServiceCompat {
     public void onLoadChildren(@NonNull String parentId, @NonNull Result<List<MediaBrowserCompat.MediaItem>> result) {
         // For now, return empty list - can be extended for media library browsing
         result.sendResult(null);
+    }
+    
+    /**
+     * Get the MediaSessionManager
+     */
+    public MediaSessionManager getSessionManager() {
+        return sessionManager;
     }
     
     /**

@@ -49,6 +49,7 @@ public class RadioPlayer implements PlayerWrapper.PlayListener, Recordable {
     private final Context mainContext;
 
     private String streamName;
+    private DataRadioStation currentStation;
 
     private final Handler playerThreadHandler;
 
@@ -105,6 +106,8 @@ public class RadioPlayer implements PlayerWrapper.PlayListener, Recordable {
 
     public final void play(final DataRadioStation station, final boolean isAlarm) {
         setState(PlayState.PrePlaying, -1);
+        
+        this.currentStation = station;
 
         playStationTask = new PlayStationTask(station, mainContext,
                 (url) -> RadioPlayer.this.play(station.playableUrl, station.Name, isAlarm),
@@ -151,6 +154,9 @@ public class RadioPlayer implements PlayerWrapper.PlayListener, Recordable {
         }
 
         cancelStationLinkRetrieval();
+        
+        // Clear current station
+        this.currentStation = null;
 
         playerThreadHandler.post(() -> {
             final int audioSessionId = getAudioSessionId();
@@ -234,6 +240,10 @@ public class RadioPlayer implements PlayerWrapper.PlayListener, Recordable {
 
     public PlayState getPlayState() {
         return playState;
+    }
+
+    public DataRadioStation getCurrentStation() {
+        return currentStation;
     }
 
     private void setState(PlayState state, int audioSessionId) {

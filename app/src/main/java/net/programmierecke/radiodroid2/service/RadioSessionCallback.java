@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 
 import net.programmierecke.radiodroid2.RadioDroidApp;
 import net.programmierecke.radiodroid2.players.RadioPlayer;
+import net.programmierecke.radiodroid2.players.PlayState;
 import net.programmierecke.radiodroid2.station.DataRadioStation;
 
 /**
@@ -34,8 +35,18 @@ public class RadioSessionCallback extends MediaSessionCompat.Callback {
     public void onPlay() {
         Log.d(TAG, "onPlay called");
         if (radioPlayer != null) {
-            // For now, just log - in real implementation, we'd need to track current station
-            Log.d(TAG, "Play command received - need to implement station tracking");
+            // Resume playback if paused, or play current station if stopped
+            if (radioPlayer.getPlayState() == PlayState.Paused) {
+                radioPlayer.pause(); // This will resume if paused
+            } else {
+                // Try to play current station if available
+                DataRadioStation currentStation = radioPlayer.getCurrentStation();
+                if (currentStation != null) {
+                    radioPlayer.play(currentStation, false);
+                } else {
+                    Log.w(TAG, "No current station to play");
+                }
+            }
         }
     }
     
