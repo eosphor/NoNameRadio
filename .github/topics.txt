@@ -13,3 +13,13 @@ open-source
 gpl3
 material-design
 mobile-app
+audio-streaming
+hls-support
+media-session
+network-resilience
+radio-browser
+android-development
+kotlin
+java
+gradle
+android-studio
