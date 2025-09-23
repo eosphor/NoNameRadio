@@ -20,6 +20,7 @@ import com.bumptech.glide.load.model.GlideUrl;
 import net.programmierecke.radiodroid2.alarm.RadioAlarmManager;
 import net.programmierecke.radiodroid2.history.TrackHistoryRepository;
 import net.programmierecke.radiodroid2.players.RadioPlayer;
+import net.programmierecke.radiodroid2.service.MediaSessionUtil;
 import net.programmierecke.radiodroid2.players.mpd.MPDClient;
 import net.programmierecke.radiodroid2.station.live.metadata.TrackMetadataSearcher;
 import net.programmierecke.radiodroid2.proxy.ProxySettings;
@@ -128,6 +129,9 @@ public class RadioDroidApp extends MultiDexApplication {
 
         mpdClient = new MPDClient(this);
         radioPlayer = new RadioPlayer(this);
+
+        // Initialize MediaSessionUtil
+        MediaSessionUtil.initialize(this);
 
         castHandler = new CastHandler();
 

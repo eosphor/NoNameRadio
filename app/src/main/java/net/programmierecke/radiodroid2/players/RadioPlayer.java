@@ -246,6 +246,15 @@ public class RadioPlayer implements PlayerWrapper.PlayListener, Recordable {
         return currentStation;
     }
 
+    public net.programmierecke.radiodroid2.station.live.ShoutcastInfo getShoutcastInfo() {
+        // For now, return null - this can be implemented later if needed
+        return null;
+    }
+
+    public net.programmierecke.radiodroid2.station.live.StreamLiveInfo getStreamLiveInfo() {
+        return lastLiveInfo;
+    }
+
     private void setState(PlayState state, int audioSessionId) {
         if (BuildConfig.DEBUG) Log.d(TAG, String.format("set state '%s'", state.name()));
 

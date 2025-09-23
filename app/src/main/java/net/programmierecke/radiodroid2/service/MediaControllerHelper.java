@@ -126,6 +126,13 @@ public class MediaControllerHelper {
     }
     
     /**
+     * Get context
+     */
+    public Context getContext() {
+        return context;
+    }
+    
+    /**
      * Check if MediaController is connected
      */
     public boolean isConnected() {
