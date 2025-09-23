@@ -12,11 +12,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Modern NetworkCallback for connectivity monitoring
 - Enhanced ExoPlayer retry logic with exponential backoff
 - BroadcastReceiver for real-time UI state synchronization
+- Gradle version catalogs with libs.versions.toml configuration
+- Centralized dependency management through version catalogs
+- Common lint configurations for consistent code quality
 
 ### Changed
 - Updated Media3 to version 1.8.0
 - Replaced custom DataSource with DefaultMediaSourceFactory
 - Modernized connectivity handling (removed CONNECTIVITY_ACTION)
+- Updated AndroidX dependencies to latest compatible minor versions
+- Updated Material Design components to latest stable releases
+- Updated Glide image loading library to latest minor version
+- Updated OkHttp networking library to latest compatible version
+- Updated Room database library to latest minor release
+- Migrated dependency versions to centralized libs.versions.toml
 
 ### Removed
 - MediaPlayer fallback (obsolete with minSdk 21)
