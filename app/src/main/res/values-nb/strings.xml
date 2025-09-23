@@ -12,7 +12,7 @@
   <string name="detail_pause">Pause</string>
   <string name="detail_stop">Stopp</string>
   <string name="detail_share">Del</string>
-  <string name="detail_play_in_radiodroid">Spill i RadioDroid</string>
+  <string name="detail_play_in_radiodroid">Spill i NoNameRadio</string>
 
   <string name="action_links">Lenker</string>
   <string name="action_homepage">Hjemmeside</string>
@@ -58,7 +58,7 @@
   <string name="nav_item_settings">Innstillinger</string>
   <string name="nav_item_alarm">Alarm</string>
 
-  <string name="about_text">Denne appen bruker radiokanaloversikten til\nhttps://www.radio-browser.info/\nAlle kan legge til nye radiokanaler eller oppdatere informasjonen om kanaler som finnes fra før. Nettsiden fungerer som en wiki om nettbaserte radiokanaler.\n\nKontakt:\nsegler_alex\@web.de\n\nMeld om feil:\nhttps://github.com/segler-alex/RadioDroid/issues\n\nHvis du liker appen og ønsker å hjelpe til, ta gjerne kontakt med meg på e-post. Jeg trenger virkelig noen med designkompetanse for å gjøre appen finere. :) Kanskje noen som kan tegne ikoner, bilder osv. Men og utviklere som kan rette feil eller legge til ny funksjonalitet.\nForslag til nye funksjoner blir også satt pris på!\n\nDenne appen er fri programvare tilgjengelig under GPLv3-lisensen:\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
+  <string name="about_text">Denne appen bruker radiokanaloversikten til\nhttps://www.radio-browser.info/\nAlle kan legge til nye radiokanaler eller oppdatere informasjonen om kanaler som finnes fra før. Nettsiden fungerer som en wiki om nettbaserte radiokanaler.\n\nKontakt:\nsegler_alex\@web.de\n\nMeld om feil:\nhttps://github.com/segler-alex/NoNameRadio/issues\n\nHvis du liker appen og ønsker å hjelpe til, ta gjerne kontakt med meg på e-post. Jeg trenger virkelig noen med designkompetanse for å gjøre appen finere. :) Kanskje noen som kan tegne ikoner, bilder osv. Men og utviklere som kan rette feil eller legge til ny funksjonalitet.\nForslag til nye funksjoner blir også satt pris på!\n\nDenne appen er fri programvare tilgjengelig under GPLv3-lisensen:\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
   <string name="about_version">Versjon: %1$s</string>
   <string name="detail_star">Legg til som favoritt</string>
   <string name="detail_unstar">Fjern fra favoritter</string>
@@ -137,7 +137,7 @@
   <string name="settings_alarm">Alarm</string>
   <string name="settings_alarm_external">Åpne i ekstern app</string>
   <string name="settings_alarm_external_desc_on">Åpne alarmen i standard ekstern app</string>
-  <string name="settings_alarm_external_desc_off">Åpne alarmen med RadioDroid</string>
+  <string name="settings_alarm_external_desc_off">Åpne alarmen med NoNameRadio</string>
   <string name="settings_alarm_audio_player">Musikkspiller</string>
   <string name="settings_alarm_sleep_timer">Søvnnedtelling</string>
   <string name="settings_alarm_sleep_timer_desc">Stopp avspilling etter %1$s minutter</string>
@@ -147,7 +147,7 @@
   <string name="settings_auto_play_on_startup_off">Spill ikke av siste kanal ved oppstart</string>
   <string name="settings_play_external">Åpne i ekstern app</string>
   <string name="settings_play_external_desc_on">Spill kanaler i ekstern avspiller</string>
-  <string name="settings_play_external_desc_off">Spill kanaler i RadioDroid</string>
+  <string name="settings_play_external_desc_off">Spill kanaler i NoNameRadio</string>
   <string name="settings_equalizer">Equalizer</string>
   
   <string name="settings_connectivity">Tilkobling</string>
@@ -278,7 +278,7 @@
   
   <string name="media_route_menu_title">GoogleCast</string>
   <string name="app_id">5A97BAE4</string>
-  <string name="app_name">RadioDroid</string>
+  <string name="app_name">NoNameRadio</string>
 	  
   <string name="settings_mpd">Musikkavspillingstjeneste</string>
   <string name="settings_mpd_port">MPD port</string>
@@ -299,7 +299,7 @@
   <string name="settings_lastfm_api_key_desc">Angi API nøkkel for å spå på albumgrafikk i fullskjermspiller</string>
   <string name="settings_other">Annet</string>
   <string name="settings_statistics">Statistikk</string>
-  <string name="settings_about">Om RadioDroid</string>
+  <string name="settings_about">Om NoNameRadio</string>
   
   <string name="description_btn_skip_to_next">Hopp til neste</string>
   <string name="description_btn_skip_to_previous">Hopp til forrige</string>

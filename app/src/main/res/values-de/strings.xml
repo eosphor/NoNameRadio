@@ -35,7 +35,7 @@
     <string name="nav_item_alarm">Wecker</string>
     <string name="tab_player_recordings">Aufnahmen</string>
 
-    <string name="about_text">Diese App nutzt das kostenlose Radiostation-Verzeichnis von\nhttps://www.radio-browser.info\nJeder kann Stationen hinzufügen. Es funktioniert wie ein Wiki für Online-(Streaming-)Radiostationen.\n\nBugtracker:\nhttps://github.com/morckx/RadioDroid/issues\n(ursprünglich: https://github.com/segler-alex/RadioDroid/issues)\n\nDiese App ist freie Software, lizenziert unter der GPLv3.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
+    <string name="about_text">Diese App nutzt das kostenlose Radiostation-Verzeichnis von\nhttps://www.radio-browser.info\nJeder kann Stationen hinzufügen. Es funktioniert wie ein Wiki für Online-(Streaming-)Radiostationen.\n\nBugtracker:\nhttps://github.com/morckx/NoNameRadio/issues\n(ursprünglich: https://github.com/segler-alex/NoNameRadio/issues)\n\nDiese App ist freie Software, lizenziert unter der GPLv3.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
     <string name="detail_star">Als Favorit setzen</string>
     <string name="detail_unstar">Als Favorit löschen</string>
     <string name="progress_loading">Lade...</string>
@@ -102,7 +102,7 @@
     <string name="settings_lastfm_api_key">Last.fm API Schlüssel</string>
     <string name="settings_lastfm_api_key_desc">Mit Last.fm werden Album Bilder im Player angezeigt</string>
     <string name="settings_statistics">Statistik</string>
-    <string name="settings_about">Über RadioDroid</string>
+    <string name="settings_about">Über NoNameRadio</string>
 
     <string name="settings_connectivity">Konnektivität</string>
     <string name="settings_warn_no_wifi">WLAN-Verbindung</string>
@@ -209,7 +209,7 @@
     <string name="notify_paused">Angehalten</string>
     <string name="notify_pre_play">Verbinde</string>
     <string name="refresh">Aktualisierung</string>
-    <string name="settings_alarm_external_desc_off">Den Alarm mit RadioDroid abspielen.</string>
+    <string name="settings_alarm_external_desc_off">Den Alarm mit NoNameRadio abspielen.</string>
     <string name="settings_alarm_external_desc_on">Den Alarm mit einer externen Standard-App abspielen.</string>
     <string name="settings_bottom_navigation">Navigation unten</string>
     <string name="settings_click_trend_icon_visible">Trendsymbolanzeige</string>
@@ -229,7 +229,7 @@
     <string name="settings_auto_resume_on_bluetooth_a2dp_connected">Bluetoothverbindung</string>
     <string name="settings_auto_resume_on_bluetooth_a2dp_connected_on">Die Wiedergabe wird bei Bluetoothwiederverbindung fortgesetzt.</string>
 
-    <string name="settings_play_external_desc_off">Stationen werden mit RadioDroid abgespielt.</string>
+    <string name="settings_play_external_desc_off">Stationen werden mit NoNameRadio abgespielt.</string>
     <string name="settings_play_external_desc_on">Stationen werden mit einem externem Player abspielt.</string>
     <string name="settings_proxy_action_test">Prüfung</string>
     <string name="settings_proxy_login">Nutzername</string>

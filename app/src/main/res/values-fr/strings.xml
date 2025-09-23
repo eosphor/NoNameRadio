@@ -12,7 +12,7 @@
     <string name="detail_pause">Pause</string>
     <string name="detail_stop">Arrêter</string>
     <string name="detail_share">Partager</string>
-    <string name="detail_play_in_radiodroid">Lire avec RadioDroid</string>
+    <string name="detail_play_in_radiodroid">Lire avec NoNameRadio</string>
 
     <string name="action_links">Liens</string>
     <string name="action_homepage">Page d\'accueil</string>
@@ -58,7 +58,7 @@
     <string name="nav_item_settings">Réglages</string>
     <string name="nav_item_alarm">Alarme</string>
 
-    <string name="about_text">Cette application utilise le répertoire libre de stations radios à l\'adresse\nhttps://www.radio-browser.info\nChacun peut y ajouter des stations. Ce répertoire fonctionne comme un wiki pour les stations de radio en ligne (streaming).\n\nSuivi de bogues :\nhttps://github.com/morckx/RadioDroid/issues\n(initialement: https://github.com/segler-alex/RadioDroid/issues)\n\nCette application est un logiciel libre sous licence GPLv3.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
+    <string name="about_text">Cette application utilise le répertoire libre de stations radios à l\'adresse\nhttps://www.radio-browser.info\nChacun peut y ajouter des stations. Ce répertoire fonctionne comme un wiki pour les stations de radio en ligne (streaming).\n\nSuivi de bogues :\nhttps://github.com/morckx/NoNameRadio/issues\n(initialement: https://github.com/segler-alex/NoNameRadio/issues)\n\nCette application est un logiciel libre sous licence GPLv3.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
     <string name="about_version">Version : %1$s</string>
     <string name="detail_star">Ajouter aux favoris</string>
     <string name="detail_unstar">Supprimer des favoris</string>
@@ -137,7 +137,7 @@
     <string name="settings_alarm">Alarme</string>
     <string name="settings_alarm_external">Ouverture avec une application externe</string>
     <string name="settings_alarm_external_desc_on">Ouvrir l\'alarme avec l\'application externe par défaut</string>
-    <string name="settings_alarm_external_desc_off">Ouvrir l\'alarme avec RadioDroid</string>
+    <string name="settings_alarm_external_desc_off">Ouvrir l\'alarme avec NoNameRadio</string>
     <string name="settings_alarm_audio_player">Lecteur audio</string>
     <string name="settings_alarm_sleep_timer">Minuterie pour le sommeil</string>
     <string name="settings_alarm_sleep_timer_desc">Stopper la lecture après %1$s minutes</string>
@@ -147,7 +147,7 @@
     <string name="settings_auto_play_on_startup_off">Ne pas lire la dernière station au démarrage</string>
     <string name="settings_play_external">Ouverture avec une application externe</string>
     <string name="settings_play_external_desc_on">Lire les stations avec un lecteur externe</string>
-    <string name="settings_play_external_desc_off">Lire les stations avec RadioDroid</string>
+    <string name="settings_play_external_desc_off">Lire les stations avec NoNameRadio</string>
     <string name="settings_equalizer">Égaliseur</string>
 
     <string name="settings_connectivity">Connectivité</string>
@@ -273,7 +273,7 @@
 
     <string name="media_route_menu_title">GoogleCast</string>
     <string name="app_id">5A97BAE4</string>
-    <string name="app_name">RadioDroid</string>
+    <string name="app_name">NoNameRadio</string>
 
     <string name="settings_mpd">Music Player Daemon</string>
     <string name="settings_mpd_port">Port MPD</string>
@@ -294,7 +294,7 @@
     <string name="settings_lastfm_api_key_desc">Entrez une clé API pour activer la pochette d\'album dans le lecteur plein écran</string>
     <string name="settings_other">Autre</string>
     <string name="settings_statistics">Statistiques</string>
-    <string name="settings_about">À propos RadioDroid</string>
+    <string name="settings_about">À propos NoNameRadio</string>
 
     <string name="description_btn_skip_to_next">Passer au suivant</string>
     <string name="description_btn_skip_to_previous">Passer au précédent</string>

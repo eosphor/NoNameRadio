@@ -44,7 +44,7 @@
     <string name="nav_item_alarm">Alarma</string>
     <string name="tab_player_recordings">Enregistraments</string>
 
-    <string name="about_text">Aquesta aplicació utilitza el directori d\'emissores de ràdio gratuïtes a\nhttps://www.radio-browser.info\nTothom pot afegir emissores. Funciona com un wiki per a emissores de ràdio en línia. \n\nContacte:\nsegler_alex@web.de\n\nBugtracker: \nhttps://github.com/segler-alex/RadioDroid/issues\n\nSi us agrada aquest programari i voleu ajudar-nos, no dubteu a enviar-nos un correu electrònic. Necessitem algú amb experiència en disseny gràfic per fer que l\'aplicació sigui més agradable a la vista :) Potser algú que pugui dibuixar icones, imatges... però també programadors que arreglin errors, o desenvolupin (noves funcionalitats, no  errors ;)\nLes idees per a noves funcionalitats també són benvingudes!\n\nAquesta aplicació és un programari lliure llicenciat sota la llicència GPLv3. \nhttp://www.gnu.org/licenses/gpl-3.0.html</string>
+    <string name="about_text">Aquesta aplicació utilitza el directori d\'emissores de ràdio gratuïtes a\nhttps://www.radio-browser.info\nTothom pot afegir emissores. Funciona com un wiki per a emissores de ràdio en línia. \n\nContacte:\nsegler_alex@web.de\n\nBugtracker: \nhttps://github.com/segler-alex/NoNameRadio/issues\n\nSi us agrada aquest programari i voleu ajudar-nos, no dubteu a enviar-nos un correu electrònic. Necessitem algú amb experiència en disseny gràfic per fer que l\'aplicació sigui més agradable a la vista :) Potser algú que pugui dibuixar icones, imatges... però també programadors que arreglin errors, o desenvolupin (noves funcionalitats, no  errors ;)\nLes idees per a noves funcionalitats també són benvingudes!\n\nAquesta aplicació és un programari lliure llicenciat sota la llicència GPLv3. \nhttp://www.gnu.org/licenses/gpl-3.0.html</string>
     <string name="about_version">Versió: %1$s</string>
     <string name="detail_star">Afegir a preferides</string>
     <string name="detail_unstar">Suprimeix de preferides</string>
@@ -113,7 +113,7 @@
     <string name="settings_alarm">Alarma</string>
     <string name="settings_alarm_external">Habiliteu l\'aplicació externa</string>
     <string name="settings_alarm_external_desc_on">Obriu l\'alarma amb una aplicació externa predeterminada</string>
-    <string name="settings_alarm_external_desc_off">Obriu l\'alarma amb RadioDroid</string>
+    <string name="settings_alarm_external_desc_off">Obriu l\'alarma amb NoNameRadio</string>
     <string name="settings_alarm_audio_player">Reproductor d\'àudio</string>
     <string name="settings_alarm_sleep_timer">Temporitzador</string>
     <string name="settings_alarm_sleep_timer_desc">Deixa de reproduir després de %1$s minuts</string>
@@ -123,7 +123,7 @@
     <string name="settings_auto_play_on_startup_off">No reproduir la darrera emissora a l\'inici</string>
     <string name="settings_play_external">Activa el reproductor extern</string>
     <string name="settings_play_external_desc_on">Reprodueix emissores amb reproductor extern</string>
-    <string name="settings_play_external_desc_off">Reprodueix les emissores amb RadioDroid</string>
+    <string name="settings_play_external_desc_off">Reprodueix les emissores amb NoNameRadio</string>
     <string name="settings_equalizer">Equalitzador</string>
 
     <string name="settings_warn_no_wifi">Avís sense connexió sense fils</string>
@@ -208,7 +208,7 @@
 
     <string name="media_route_menu_title">GoogleCast</string>
     <string name="app_id">5A97BAE4</string>
-    <string name="app_name">RadioDroid</string>
+    <string name="app_name">NoNameRadio</string>
 
     <string name="settings_mpd">Music Player Daemon</string>
     <string name="settings_mpd_port">Port MPD</string>
@@ -219,7 +219,7 @@
 
     <string name="settings_other">Altres</string>
     <string name="settings_statistics">Estadístiques</string>
-    <string name="settings_about">Quant a RadioDroid</string>
+    <string name="settings_about">Quant a NoNameRadio</string>
 
     <string-array name="weekdays">
         <item>dg</item>

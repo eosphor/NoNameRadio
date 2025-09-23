@@ -36,7 +36,7 @@
     <string name="nav_item_statistics">Статистика</string>
     <string name="nav_item_about">О приложении</string>>
 
-    <string name="about_text">Приложение использует свободную базу станций \nhttps://www.radio-browser.info\nБаза станций работает как вики для онлайн радио, где каждый может добавить или отредактировать информацию о станциях. \n\nКонтакты:\nsegler_alex@web.de\n\nБаг-трекер:\nhttps://github.com/segler-alex/RadioDroid/issues\n\nЕсли вам понравилось приложение и вы хотите помочь - можете написать на мой имейл. Мне очень нужен кто-то с навыками создания графических интерфейсов, чтобы сделать приложение приятным глазу ;) Также приветствуются все идеи по улучшению приложения. Данное приложение является свободным программным обеспечением с лицензией GPLv3. https://www.gnu.org/licenses/gpl-3.0.html</string>
+    <string name="about_text">NoNameRadio — это открытый форк RadioDroid.\n\nДом проекта:\nhttps://github.com/eosphor/NoNameRadio\n\nПриложение использует свободный каталог радиостанций:\nhttps://www.radio-browser.info\nЛюбой может добавлять станции — каталог работает как вики для онлайн‑радио.\n\nОригинальный проект:\nhttps://github.com/morckx/RadioDroid\n(изначально: https://github.com/segler-alex/RadioDroid)\n\nПриложение распространяется по лицензии GPLv3:\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
     <string name="about_version">Версия: %1$s</string>
     <string name="detail_star">Добавить в избранное</string>
     <string name="detail_unstar">Удалить из избранного</string>
@@ -172,7 +172,7 @@
 
     <string name="settings_other">Другое</string>
     <string name="settings_statistics">Статистика</string>
-    <string name="settings_about">Про RadioDroid</string>
+    <string name="settings_about">Про NoNameRadio</string>
 
     <string-array name="weekdays">
         <item>В</item>

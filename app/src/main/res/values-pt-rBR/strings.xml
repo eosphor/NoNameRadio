@@ -12,7 +12,7 @@
     <string name="detail_pause">Pausar</string>
     <string name="detail_stop">Parar</string>
     <string name="detail_share">Compartilhar</string>
-    <string name="detail_play_in_radiodroid">Reproduzir via RadioDroid</string>
+    <string name="detail_play_in_radiodroid">Reproduzir via NoNameRadio</string>
 
     <string name="action_links">Links</string>
     <string name="action_homepage">Tela inicial</string>
@@ -58,7 +58,7 @@
     <string name="nav_item_settings">Configurações</string>
     <string name="nav_item_alarm">Alarme</string>
 
-    <string name="about_text">Este App usa o catálogo gratuito de rádios do site\nhttps://www.radio-browser.info\nTodos podem adicionar ou editar às rádios aí. Funciona como wiki das rádios na rede.\n\nContato:\nsegler_alex@web.de\n\nRelatar problemas:\nhttps://github.com/segler-alex/RadioDroid/issues\n\nSe você gosta da idea e quer ajudar, fique a vontade para enviar um e-mail. Além disso preciso de alguém com experiência gráfica para tornar o App mais agradável aos olhos :) alguém que possa desenhar ícones, imagens... Assim como desenvolvedores que corrijam bugs ou implementem novas funcionalidades não falhas ;)\nNovas idéias e melhorias são sempre bem-vindos!\n\nEste App é de software livre, licenciado sob a GPLv3.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
+    <string name="about_text">Este App usa o catálogo gratuito de rádios do site\nhttps://www.radio-browser.info\nTodos podem adicionar ou editar às rádios aí. Funciona como wiki das rádios na rede.\n\nContato:\nsegler_alex@web.de\n\nRelatar problemas:\nhttps://github.com/segler-alex/NoNameRadio/issues\n\nSe você gosta da idea e quer ajudar, fique a vontade para enviar um e-mail. Além disso preciso de alguém com experiência gráfica para tornar o App mais agradável aos olhos :) alguém que possa desenhar ícones, imagens... Assim como desenvolvedores que corrijam bugs ou implementem novas funcionalidades não falhas ;)\nNovas idéias e melhorias são sempre bem-vindos!\n\nEste App é de software livre, licenciado sob a GPLv3.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
     <string name="about_version">Versão: %1$s</string>
     <string name="detail_star">Adicionar aos favoritos</string>
     <string name="detail_unstar">Excluir dos favoritos</string>
@@ -137,7 +137,7 @@
     <string name="settings_alarm">Alarme</string>
     <string name="settings_alarm_external">Via o App externo</string>
     <string name="settings_alarm_external_desc_on">Abrir o alarme via App externo padrão</string>
-    <string name="settings_alarm_external_desc_off">Abrir o alarme via RadioDroid</string>
+    <string name="settings_alarm_external_desc_off">Abrir o alarme via NoNameRadio</string>
     <string name="settings_alarm_audio_player">Player de áudio</string>
     <string name="settings_alarm_sleep_timer">Despertador</string>
     <string name="settings_alarm_sleep_timer_desc">Parar de reproduzir após %1$s minutos</string>
@@ -147,7 +147,7 @@
     <string name="settings_auto_play_on_startup_off">Não reproduzir a última rádio ao abrir</string>
     <string name="settings_play_external">Habilitar player externo</string>
     <string name="settings_play_external_desc_on">Reproduzir as rádios com o App externo</string>
-    <string name="settings_play_external_desc_off">Reproduzir as rádios via RadioDroid</string>
+    <string name="settings_play_external_desc_off">Reproduzir as rádios via NoNameRadio</string>
     <string name="settings_equalizer">Equalizador</string>
 
     <string name="settings_connectivity">Conectividade</string>
@@ -268,7 +268,7 @@
 
     <string name="media_route_menu_title">GoogleCast</string>
     <string name="app_id">5A97BAE</string>
-    <string name="app_name">RadioDroid</string>
+    <string name="app_name">NoNameRadio</string>
 
     <string name="settings_mpd">Daemon de reprodutor da música</string>
     <string name="settings_mpd_port">Porta MPD</string>
@@ -289,7 +289,7 @@
     <string name="settings_lastfm_api_key_desc">Digite uma chave API para habilitar a arte de álbum em tela completa</string>
     <string name="settings_other">Outros</string>
     <string name="settings_statistics">Estatísticas</string>
-    <string name="settings_about">Sobre RadioDroid</string>
+    <string name="settings_about">Sobre NoNameRadio</string>
 
     <string name="description_btn_skip_to_next">Pular para a próxima</string>
     <string name="description_btn_skip_to_previous">Voltar para a anterior</string>

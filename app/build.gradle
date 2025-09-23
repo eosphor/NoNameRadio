@@ -57,7 +57,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "net.programmierecke.radiodroid2"
+        applicationId "com.nonameradio.app"
         minSdkVersion 21
         targetSdkVersion 36
 
@@ -76,7 +76,7 @@ android {
         // Define your application name here.
         // It must neither be present in /res/values/strings.xml
         // nor in /res/values/string_no_translate.xml
-        resValue 'string', 'app_name_untranslated', 'RadioDroid'
+        resValue 'string', 'app_name_untranslated', 'NoNameRadio'
 
         // There is no easy way to get available locales during runtime, and especially before
         // tests setup.
@@ -109,15 +109,27 @@ android {
     }
 
     buildTypes {
-        release {
+        debug {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-
+            debuggable true
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+        }
+        
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            
+            // Optimize APK
+            zipAlignEnabled true
+            
             lintOptions {
                 disable 'MissingTranslation'
             }
         }
     }
+    
     productFlavors {
         play {
             dimension "one"
@@ -126,10 +138,12 @@ android {
             dimension "one"
         }
     }
+    
     lint {
         abortOnError true
         disable 'UnsafeOptInUsageError'
     }
+    
     namespace 'net.programmierecke.radiodroid2'
 
     testOptions {
@@ -138,6 +152,18 @@ android {
         }
         animationsDisabled = true
         unitTests.returnDefaultValues = true
+    }
+
+    // Build optimizations
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE', 'META-INF/LICENSE.txt', 'META-INF/NOTICE', 'META-INF/NOTICE.txt']
+        }
+    }
+    
+    // Enable parallel compilation
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
     }
 
     task renewFallbackStations(type: Download) {
@@ -151,72 +177,96 @@ android {
 }
 
 ext {
-    media3Version = '1.7.1'
+    media3Version = '1.8.0'
     iconicsVersion = '5.4.0'
+    androidxVersion = '1.7.1'
+    materialVersion = '1.12.0'
+    constraintVersion = '2.2.1'
+    roomVersion = '2.7.2'
+    lifecycleVersion = '2.9.1'
+    pagingVersion = '3.3.6'
+    okhttpVersion = '5.0.0'
+    gsonVersion = '2.13.1'
+    glideVersion = '4.16.0'
+    testVersion = '1.6.1'
+    espressoVersion = '3.6.1'
 }
 
 dependencies {
+    // Core AndroidX
     implementation 'androidx.multidex:multidex:2.0.1'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation "androidx.appcompat:appcompat:$androidxVersion"
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
-    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation "com.google.android.material:material:$materialVersion"
     implementation 'androidx.preference:preference-ktx:1.2.1'
     implementation 'androidx.mediarouter:mediarouter:1.8.1'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.recyclerview:recyclerview:1.4.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+    implementation "androidx.constraintlayout:constraintlayout:$constraintVersion"
     implementation 'androidx.tvprovider:tvprovider:1.1.0'
     implementation 'androidx.tracing:tracing:1.3.0'
 
-    implementation 'com.squareup.okhttp3:okhttp:5.0.0'
-
-    implementation 'com.google.code.gson:gson:2.13.1'
-    implementation 'com.github.bumptech.glide:glide:4.16.0'
-    implementation 'com.github.bumptech.glide:okhttp3-integration:4.16.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
+    // Networking
+    implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
+    implementation "com.google.code.gson:gson:$gsonVersion"
+    
+    // Media
     implementation "androidx.media3:media3-exoplayer:$media3Version"
     implementation "androidx.media3:media3-exoplayer-hls:$media3Version"
+    implementation "androidx.media3:media3-session:$media3Version"
+    implementation "androidx.media3:media3-ui:$media3Version"
+    implementation "androidx.media3:media3-datasource-okhttp:$media3Version"
+    
+    // Image loading
+    implementation "com.github.bumptech.glide:glide:$glideVersion"
+    implementation "com.github.bumptech.glide:okhttp3-integration:$glideVersion"
+    annotationProcessor "com.github.bumptech.glide:compiler:$glideVersion"
+    
+    // UI Components
     implementation "com.mikepenz:iconics-core:$iconicsVersion"
     implementation "com.mikepenz:iconics-views:$iconicsVersion"
     implementation 'com.mikepenz:google-material-typeface:3.0.1.4.original-kotlin@aar'
-    //noinspection NewerVersionAvailable - this is the last version that contains some icons we use
     implementation 'com.mikepenz:community-material-typeface:5.0.45.1-kotlin@aar'
+    
+    // Utilities
     implementation 'com.github.rustamg:file-dialogs:1.0'
     implementation 'info.debatty:java-string-similarity:2.0.0'
     implementation 'me.xdrop:fuzzywuzzy:1.4.0'
     implementation 'com.github.zawadz88:MaterialPopupMenu:3.4.0'
     implementation 'com.github.ByteHamster:SearchPreference:v2.3.0'
 
-    implementation 'androidx.room:room-runtime:2.7.2'
-    androidTestImplementation("androidx.test.espresso:espresso-contrib:3.6.1") {
-        exclude group: 'org.checkerframework', module: 'checker'
-    }
-    annotationProcessor 'androidx.room:room-compiler:2.7.2'
+    // Database
+    implementation "androidx.room:room-runtime:$roomVersion"
+    annotationProcessor "androidx.room:room-compiler:$roomVersion"
 
+    // Lifecycle
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
-    implementation "androidx.lifecycle:lifecycle-common-java8:2.9.1"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.1"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
 
-    implementation 'androidx.paging:paging-runtime-ktx:3.3.6'
+    // Paging
+    implementation "androidx.paging:paging-runtime-ktx:$pagingVersion"
 
+    // Play Services (Play flavor only)
     playImplementation 'com.google.android.gms:play-services-cast:22.1.0'
     playImplementation 'com.google.android.gms:play-services-cast-framework:22.1.0'
     playImplementation 'com.google.android.gms:play-services-safetynet:18.1.0'
 
+    // Testing
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.13.3'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.13.3'
     testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.13.3'
 
-    androidTestImplementation 'androidx.test:core:1.6.1'
+    androidTestImplementation "androidx.test:core:$testVersion"
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
-    androidTestImplementation 'androidx.test:runner:1.6.2'
-    androidTestImplementation 'androidx.test:rules:1.6.1'
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+    androidTestImplementation "androidx.test:runner:1.6.2"
+    androidTestImplementation "androidx.test:rules:$testVersion"
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.3.0'
-
-    androidTestImplementation("com.squareup.okhttp3:mockwebserver:5.0.0")
+    androidTestImplementation("androidx.test.espresso:espresso-contrib:$espressoVersion") {
+        exclude group: 'org.checkerframework', module: 'checker'
+    }
+    androidTestImplementation("com.squareup.okhttp3:mockwebserver:$okhttpVersion")
     androidTestImplementation("com.github.YarikSOffice:lingver:1.3.0")
     androidTestUtil 'androidx.test:orchestrator:1.5.1'
 }

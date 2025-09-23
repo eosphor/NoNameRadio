@@ -16,6 +16,8 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.media3.common.MediaMetadata;
+
 import net.programmierecke.radiodroid2.utils.ImageLoader;
 
 import net.programmierecke.radiodroid2.ActivityMain;
@@ -454,5 +456,32 @@ public class DataRadioStation implements Parcelable {
         public void onPrepareLoad(Drawable placeHolderDrawable) {
             // No action needed
         }
+    }
+    
+    /**
+     * Convert this radio station to Media3 MediaMetadata.
+     * Used for MediaSession integration.
+     */
+    public MediaMetadata toMediaMetadata() {
+        MediaMetadata.Builder builder = new MediaMetadata.Builder()
+                .setTitle(Name)
+                .setArtist(Country != null ? Country : "")
+                .setAlbumTitle(State != null ? State : "")
+                .setGenre(TagsAll != null ? TagsAll : "")
+                .setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC);
+        
+        // Add custom extras for bitrate and codec
+        android.os.Bundle extras = new android.os.Bundle();
+        if (Bitrate > 0) {
+            extras.putInt("bitrate", Bitrate);
+        }
+        if (Codec != null && !Codec.isEmpty()) {
+            extras.putString("codec", Codec);
+        }
+        if (!extras.isEmpty()) {
+            builder.setExtras(extras);
+        }
+        
+        return builder.build();
     }
 }

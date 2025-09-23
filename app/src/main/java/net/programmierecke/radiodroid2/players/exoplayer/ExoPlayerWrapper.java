@@ -1,12 +1,12 @@
 package net.programmierecke.radiodroid2.players.exoplayer;
 
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -29,13 +29,11 @@ import androidx.media3.extractor.metadata.icy.IcyHeaders;
 import androidx.media3.extractor.metadata.icy.IcyInfo;
 import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.exoplayer.source.MediaSource;
-import androidx.media3.exoplayer.source.ProgressiveMediaSource;
-import androidx.media3.exoplayer.hls.HlsMediaSource;
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 import androidx.media3.datasource.DataSource;
-import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter;
+import androidx.media3.datasource.okhttp.OkHttpDataSource;
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy;
 import androidx.media3.datasource.HttpDataSource;
-import androidx.media3.common.util.UnstableApi;
 
 import net.programmierecke.radiodroid2.BuildConfig;
 import net.programmierecke.radiodroid2.R;
@@ -52,8 +50,7 @@ import java.util.Map;
 
 import okhttp3.OkHttpClient;
 
-@UnstableApi
-public class ExoPlayerWrapper implements PlayerWrapper, IcyDataSource.IcyDataSourceListener, Player.Listener {
+public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
 
     final private String TAG = "ExoPlayerWrapper";
 
@@ -78,21 +75,8 @@ public class ExoPlayerWrapper implements PlayerWrapper, IcyDataSource.IcyDataSou
     private MediaSource audioSource;
 
     private Runnable fullStopTask;
-
-    private final BroadcastReceiver networkChangedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (fullStopTask != null && player != null && audioSource != null && Utils.hasAnyConnection(context)) {
-                Log.i(TAG, "Regained connection. Resuming playback.");
-
-                cancelStopTask();
-
-                player.setMediaSource(audioSource);
-                player.prepare();
-                player.setPlayWhenReady(true);
-            }
-        }
-    };
+    private ConnectivityManager connectivityManager;
+    private ConnectivityManager.NetworkCallback networkCallback;
 
     @Override
     public void playRemote(@NonNull OkHttpClient httpClient, @NonNull String streamUrl, @NonNull Context context, boolean isAlarm) {
@@ -132,25 +116,57 @@ public class ExoPlayerWrapper implements PlayerWrapper, IcyDataSource.IcyDataSou
         final int retryTimeout = prefs.getInt("settings_retry_timeout", 10);
         final int retryDelay = prefs.getInt("settings_retry_delay", 100);
 
-        DataSource.Factory dataSourceFactory = new RadioDataSourceFactory(httpClient, new DefaultBandwidthMeter.Builder(context).build(), this, retryTimeout, retryDelay);
-        // Produces Extractor instances for parsing the media data.
-        if (!isHls) {
-            audioSource = new ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .setLoadErrorHandlingPolicy(new CustomLoadErrorHandlingPolicy())
-                    .createMediaSource(MediaItem.fromUri(Uri.parse(streamUrl)));
-            player.setMediaSource(audioSource);
-            player.prepare();
-        } else {
-            audioSource = new HlsMediaSource.Factory(dataSourceFactory)
-                    .setLoadErrorHandlingPolicy(new CustomLoadErrorHandlingPolicy())
-                    .createMediaSource(MediaItem.fromUri(Uri.parse(streamUrl)));
-            player.setMediaSource(audioSource);
-            player.prepare();
-        }
+        // Create OkHttpDataSource.Factory with custom OkHttpClient
+        OkHttpDataSource.Factory httpDataSourceFactory = new OkHttpDataSource.Factory(httpClient)
+                .setUserAgent("NoNameRadio");
 
+        // Create DataSource.Factory with bandwidth meter
+        DataSource.Factory dataSourceFactory = new DataSource.Factory() {
+            @Override
+            public DataSource createDataSource() {
+                return httpDataSourceFactory.createDataSource();
+            }
+        };
+
+        // Create DefaultMediaSourceFactory - it automatically handles HLS/Progressive
+        DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(dataSourceFactory)
+                .setLoadErrorHandlingPolicy(new CustomLoadErrorHandlingPolicy());
+
+        // Create MediaItem and MediaSource
+        MediaItem mediaItem = MediaItem.fromUri(Uri.parse(streamUrl));
+        audioSource = mediaSourceFactory.createMediaSource(mediaItem);
+        
+        player.setMediaSource(audioSource);
+        player.prepare();
         player.setPlayWhenReady(true);
 
-        context.registerReceiver(networkChangedReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        if (connectivityManager == null) {
+            connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        }
+
+        if (networkCallback == null && connectivityManager != null) {
+            NetworkRequest request = new NetworkRequest.Builder()
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                    .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                    .addTransportType(NetworkCapabilities.TRANSPORT_ETHERNET)
+                    .build();
+
+            networkCallback = new ConnectivityManager.NetworkCallback() {
+                @Override
+                public void onAvailable(@NonNull Network network) {
+                    if (fullStopTask != null && player != null && audioSource != null && Utils.hasAnyConnection(context)) {
+                        Log.i(TAG, "Regained connection. Resuming playback.");
+                        cancelStopTask();
+                        player.setMediaSource(audioSource);
+                        player.prepare();
+                        player.setPlayWhenReady(true);
+                    }
+                }
+            };
+
+            connectivityManager.registerNetworkCallback(request, networkCallback);
+        }
 
         // State changed will be called when audio session id is available.
     }
@@ -162,7 +178,10 @@ public class ExoPlayerWrapper implements PlayerWrapper, IcyDataSource.IcyDataSou
         cancelStopTask();
 
         if (player != null) {
-            context.unregisterReceiver(networkChangedReceiver);
+            if (connectivityManager != null && networkCallback != null) {
+                try { connectivityManager.unregisterNetworkCallback(networkCallback); } catch (Exception ignored) {}
+                networkCallback = null;
+            }
             player.stop();
             player.release();
             player = null;
@@ -176,7 +195,10 @@ public class ExoPlayerWrapper implements PlayerWrapper, IcyDataSource.IcyDataSou
         cancelStopTask();
 
         if (player != null) {
-            context.unregisterReceiver(networkChangedReceiver);
+            if (connectivityManager != null && networkCallback != null) {
+                try { connectivityManager.unregisterNetworkCallback(networkCallback); } catch (Exception ignored) {}
+                networkCallback = null;
+            }
             player.stop();
             player.release();
             player = null;
@@ -235,16 +257,6 @@ public class ExoPlayerWrapper implements PlayerWrapper, IcyDataSource.IcyDataSou
     }
 
     @Override
-    public void onDataSourceConnected() {
-
-    }
-
-    @Override
-    public void onDataSourceConnectionLost() {
-
-    }
-
-    @Override
     public void onMetadata(@NonNull Metadata metadata) {
         if (BuildConfig.DEBUG) Log.d(TAG, "META: " + metadata);
         final int length = metadata.length();
@@ -261,21 +273,21 @@ public class ExoPlayerWrapper implements PlayerWrapper, IcyDataSource.IcyDataSou
                             put("StreamTitle", icyInfo.title);
                         }};
                         StreamLiveInfo streamLiveInfo = new StreamLiveInfo(rawMetadata);
-                        onDataSourceStreamLiveInfo(streamLiveInfo);
+                        if (stateListener != null) {
+                            stateListener.onDataSourceStreamLiveInfo(streamLiveInfo);
+                        }
                     }
                 } else if (entry instanceof IcyHeaders icyHeaders) {
                     Log.d(TAG, "IcyHeaders: " + icyHeaders);
-                    onDataSourceShoutcastInfo(new ShoutcastInfo(icyHeaders));
+                    ShoutcastInfo shoutcastInfo = new ShoutcastInfo(icyHeaders);
+                    if (stateListener != null) {
+                        stateListener.onDataSourceShoutcastInfo(shoutcastInfo, isHls);
+                    }
                 } else if (entry instanceof Id3Frame id3Frame) {
                     Log.d(TAG, "id3 metadata: " + id3Frame);
                 }
             }
         }
-    }
-
-    @Override
-    public void onDataSourceConnectionLostIrrecoverably() {
-        Log.i(TAG, "Connection lost irrecoverably.");
     }
 
     void resumeWhenNetworkConnected() {
@@ -307,29 +319,6 @@ public class ExoPlayerWrapper implements PlayerWrapper, IcyDataSource.IcyDataSou
                 stateListener.onPlayerError(R.string.error_stream_reconnect_timeout);
             }
         });
-    }
-
-    @Override
-    public void onDataSourceShoutcastInfo(@Nullable ShoutcastInfo shoutcastInfo) {
-        stateListener.onDataSourceShoutcastInfo(shoutcastInfo, false);
-    }
-
-    @Override
-    public void onDataSourceStreamLiveInfo(StreamLiveInfo streamLiveInfo) {
-        stateListener.onDataSourceStreamLiveInfo(streamLiveInfo);
-    }
-
-    @Override
-    public void onDataSourceBytesRead(byte[] buffer, int offset, int length) {
-        totalTransferredBytes += length;
-        currentPlaybackTransferredBytes += length;
-
-        if (recordableListener != null) {
-            // Create a copy of the buffer to avoid race conditions with buffer reuse
-            byte[] recordingBuffer = new byte[length];
-            System.arraycopy(buffer, offset, recordingBuffer, 0, length);
-            recordableListener.onBytesAvailable(recordingBuffer, 0, length);
-        }
     }
 
     @Override

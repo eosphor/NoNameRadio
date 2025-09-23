@@ -2,15 +2,12 @@ package net.programmierecke.radiodroid2.players;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
-import androidx.media3.common.util.UnstableApi;
 
 import net.programmierecke.radiodroid2.BuildConfig;
 import net.programmierecke.radiodroid2.R;
@@ -20,7 +17,6 @@ import net.programmierecke.radiodroid2.station.DataRadioStation;
 import net.programmierecke.radiodroid2.station.live.ShoutcastInfo;
 import net.programmierecke.radiodroid2.station.live.StreamLiveInfo;
 import net.programmierecke.radiodroid2.players.exoplayer.ExoPlayerWrapper;
-import net.programmierecke.radiodroid2.players.mediaplayer.MediaPlayerWrapper;
 import net.programmierecke.radiodroid2.recording.Recordable;
 import net.programmierecke.radiodroid2.recording.RecordableListener;
 
@@ -30,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 
-@UnstableApi
 public class RadioPlayer implements PlayerWrapper.PlayListener, Recordable {
 
     final private String TAG = "RadioPlayer";
@@ -55,7 +50,6 @@ public class RadioPlayer implements PlayerWrapper.PlayListener, Recordable {
 
     private String streamName;
 
-    private HandlerThread playerThread;
     private final Handler playerThreadHandler;
 
     private PlayerListener playerListener;
@@ -81,20 +75,9 @@ public class RadioPlayer implements PlayerWrapper.PlayListener, Recordable {
     public RadioPlayer(Context mainContext) {
         this.mainContext = mainContext;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            // ExoPlayer has its own thread for cpu intensive tasks
-            playerThreadHandler = new Handler(Looper.getMainLooper());
-            currentPlayer = new ExoPlayerWrapper();
-        } else {
-            playerThread = new HandlerThread("MediaPlayerThread");
-            playerThread.start();
-
-            // MediaPlayer requires to be run in non-ui thread.
-            playerThreadHandler = new Handler(playerThread.getLooper());
-            // use old MediaPlayer on API levels < 16
-            // https://github.com/google/ExoPlayer/issues/711
-            currentPlayer = new MediaPlayerWrapper(playerThreadHandler);
-        }
+        // ExoPlayer runs heavy tasks on its own threads; we post control ops to main looper
+        playerThreadHandler = new Handler(Looper.getMainLooper());
+        currentPlayer = new ExoPlayerWrapper();
 
         currentPlayer.setStateListener(this);
     }
@@ -184,13 +167,6 @@ public class RadioPlayer implements PlayerWrapper.PlayListener, Recordable {
 
     public final void destroy() {
         stop();
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-            Looper looper = playerThread.getLooper();
-            if (looper != null) {
-                playerThreadHandler.post(() -> playerThread.quit());
-            }
-        }
     }
 
     public final boolean isPlaying() {

@@ -1,16 +1,78 @@
-<div align=center><img src="https://user-images.githubusercontent.com/38007519/39290477-e1bac174-4959-11e8-9229-836355a74a7c.png"/></div>
+# NoNameRadio
 
-# <div align=center>Android radio streaming app based on <a href="http://www.radio-browser.info" target="_blank">Radio Browser</a> (morckx version)</div>
+A modern Android radio streaming application based on the [Radio Browser](http://www.radio-browser.info) API. This is a fork of RadioDroid with enhanced features and a modernized architecture.
 
-<div align=center><a href="https://f-droid.org/repository/browse/?fdid=net.programmierecke.radiodroid2" target="_blank">
-<img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80"/></a>
-<a href="https://play.google.com/store/apps/details?id=net.programmierecke.radiodroid2" target="_blank">
-<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Get it on Google Play" height="80"/></a></div>
+Project home: `https://github.com/eosphor/NoNameRadio`
 
+Original project: `https://github.com/morckx/RadioDroid` (initially: `https://github.com/segler-alex/RadioDroid`)
 
+## Features
 
-### <div align=center>Please add issues or feature requests on github under issues.</div>
-### <div align=center>Download releases here https://github.com/morckx/RadioDroid/releases</div>
+- **Stream thousands of radio stations** from around the world
+- **Modern Media3 architecture** with ExoPlayer integration
+- **Media Session support** for system integration (lock screen controls, Android Auto, etc.)
+- **Favorites and History** management
+- **Recording capabilities** for offline listening
+- **Sleep timer** functionality
+- **Alarm clock** with radio station wake-up
+- **Material Design** interface
+- **Dark/Light themes** support
+- **Multiple languages** support
 
-<div align=center><a href="http://www.gnu.org/licenses/gpl-3.0.html" target="_blank">
-<img src="http://www.gnu.org/graphics/gplv3-with-text-84x42.png" alt="GPLv3 Logo"/></a></div>
+## Technical Improvements
+
+This fork includes several modernizations over the original RadioDroid:
+
+- **Media3 ExoPlayer** integration with HLS support
+- **MediaSessionService** for proper media controls
+- **OkHttp** data source for better network handling
+- **Modern Android architecture** components
+- **Updated dependencies** to latest stable versions
+- **Removed deprecated APIs** and legacy code
+
+## Installation
+
+### From Source
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/eosphor/NoNameRadio.git
+   cd NoNameRadio
+   ```
+
+2. Open in Android Studio and build the project
+
+3. Install the APK on your device
+
+### Build Requirements
+
+- Android Studio Arctic Fox or later
+- Android SDK API 21+ (Android 5.0+)
+- Gradle 8.10+
+- Kotlin 1.9.24+
+
+## Usage
+
+1. **Browse Stations**: Use the search functionality to find radio stations by name, country, or genre
+2. **Play Music**: Tap on any station to start streaming
+3. **Add to Favorites**: Star stations you like for quick access
+4. **Record**: Use the record button to save streams for offline listening
+5. **Set Alarms**: Configure radio alarms to wake up to your favorite station
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
+
+## License
+
+This project is licensed under the GPLv3 License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- **Original RadioDroid**: [morckx/RadioDroid](https://github.com/morckx/RadioDroid)
+- **Radio Browser API**: [radio-browser.info](http://www.radio-browser.info)
+- **Android Media3**: Google's modern media playback framework
+
+## Author
+
+Created by [@monviso](https://www.linkedin.com/in/monviso/)

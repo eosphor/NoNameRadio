@@ -44,7 +44,7 @@
     <string name="nav_item_alarm">Alarm</string>
     <string name="tab_player_recordings">Nagrania</string>
 
-    <string name="about_text">Ta aplikacja korzysta z bezpłatnego katalogu stacji radiowych umieszczonych pod adresem \nhttps://www.radio-browser.info\nKażdy może dodawać do niego stacje lub edytować istniejące stacje. Działa jak wiki dla internetowych (streaming) stacji radiowych.\n\nKontakt:\nsegler_alex@web.de\n\nBugtracker - Zgłoś błąd:\nhttps://github.com/segler-alex/RadioDroid/issues\n\nJeśli podoba Ci się oprogramowanie i chcesz pomóc, wyślij mi e-mail. Potrzebuję kogoś z doświadczeniem graficznym, aby uczynić aplikację przyjemniejszą dla oka :) Może ktoś, kto potrafi rysować ikony, obrazy... ale także programistów, którzy naprawiają błędy lub wdrażają nowe (funkcje nie zawierające błędów;)\nRównież pomysły na nowe funkcje są zawsze mile widziane!\n\nTa aplikacja jest wolnym oprogramowaniem na licencji GPLv3.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
+    <string name="about_text">NoNameRadio - to fork RadioDroid.\n\nTa aplikacja korzysta z bezpłatnego katalogu stacji radiowych umieszczonych pod adresem \nhttps://www.radio-browser.info\nKażdy może dodawać do niego stacje lub edytować istniejące stacje. Działa jak wiki dla internetowych (streaming) stacji radiowych.\n\nOryginalny projekt:\nhttps://github.com/segler-alex/RadioDroid\n\nJeśli podoba Ci się oprogramowanie i chcesz pomóc, wyślij mi e-mail. Potrzebuję kogoś z doświadczeniem graficznym, aby uczynić aplikację przyjemniejszą dla oka :) Może ktoś, kto potrafi rysować ikony, obrazy... ale także programistów, którzy naprawiają błędy lub wdrażają nowe (funkcje nie zawierające błędów;)\nRównież pomysły na nowe funkcje są zawsze mile widziane!\n\nTa aplikacja jest wolnym oprogramowaniem na licencji GPLv3.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
     <string name="about_version">Wersja: %1$s</string>
     <string name="detail_star">Dodaj do ulubionych</string>
     <string name="detail_unstar">Usuń z ulubionych</string>
@@ -113,7 +113,7 @@
     <string name="settings_alarm">Alarm</string>
     <string name="settings_alarm_external">Włącz zewnętrzną aplikację</string>
     <string name="settings_alarm_external_desc_on">Otwórz alarm z domyślną aplikacją zewnętrzną</string>
-    <string name="settings_alarm_external_desc_off">Otwórz alarm z RadioDroid</string> 
+    <string name="settings_alarm_external_desc_off">Otwórz alarm z NoNameRadio</string> 
     <string name="settings_alarm_audio_player">Odtwarzacz muzyki</string>
     <string name="settings_alarm_sleep_timer">Wyłącznik czasowy</string>
     <string name="settings_alarm_sleep_timer_desc">Przestań odtwarzać po %1$s minutach</string>
@@ -123,7 +123,7 @@
     <string name="settings_auto_play_on_startup_off">Nie odtwarzaj ostatniej stacji podczas uruchamiania</string>
     <string name="settings_play_external">Włącz zewnętrzny odtwarzacz</string>
     <string name="settings_play_external_desc_on">Odtwarzaj stacje za pomocą zewnętrznego odtwarzacza</string>
-    <string name="settings_play_external_desc_off">Odtwarzaj stacje z RadioDroid</string> 
+    <string name="settings_play_external_desc_off">Odtwarzaj stacje z NoNameRadio</string> 
     <string name="settings_equalizer">Korektor graficzny</string>
 
     <string name="settings_connectivity">Połączenie</string>
@@ -223,7 +223,7 @@
 
     <string name="media_route_menu_title">GoogleCast</string>
     <string name="app_id">5A97BAE4</string>
-    <string name="app_name">RadioDroid</string>
+    <string name="app_name">NoNameRadio</string>
 
     <string name="settings_mpd">Music Player Daemon</string>
     <string name="settings_mpd_port">Port MPD</string>
@@ -234,7 +234,7 @@
 
     <string name="settings_other">Inne</string>
     <string name="settings_statistics">Statystyki</string>
-    <string name="settings_about">O RadioDroid</string>
+    <string name="settings_about">O NoNameRadio</string>
 
     <string-array name="weekdays">
         <item>N</item>

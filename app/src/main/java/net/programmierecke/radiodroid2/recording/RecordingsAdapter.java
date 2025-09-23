@@ -106,7 +106,7 @@ public class RecordingsAdapter extends RecyclerView.Adapter<RecordingsAdapter.Re
         i.setAction(android.content.Intent.ACTION_VIEW);
 
         File file = new File(path);
-        Uri fileUri = FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", file);
+        Uri fileUri = FileProvider.getUriForFile(context, "com.nonameradio.app.fileprovider", file);
         i.setDataAndType(fileUri, "audio/*");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

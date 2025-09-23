@@ -12,7 +12,7 @@
     <string name="detail_pause">Jeda</string>
     <string name="detail_stop">Setop</string>
     <string name="detail_share">Bagikan</string>
-    <string name="detail_play_in_radiodroid">Putar di RadioDroid</string>
+    <string name="detail_play_in_radiodroid">Putar di NoNameRadio</string>
 
     <string name="action_links">Tautan</string>
     <string name="action_homepage">Situs resmi</string>
@@ -58,7 +58,7 @@
     <string name="nav_item_settings">Pengaturan</string>
     <string name="nav_item_alarm">Alarm</string>
 
-    <string name="about_text">Aplikasi ini menggunakan direktori radio gratis di \nhttps://www.radio-browser.info\nSemua orang bisa menambahkan stasiun radio atau menyunting stasiun yang sudah ada. Bekerja seperti wiki untuk stasiun radio daring (streaming).\n\nKontak:\nsegler_alex@web.de\n\nPelacak bug:\nhttps://github.com/segler-alex/RadioDroid/issues\n\nJuka anda menyukai aplikasi ini dan ingin membantu, jangan sungkan untuk mengirim surel. Saya sangat membutuhkan seseorang dengan keahlian grafis untuk membuat desain aplikasi ini menjadi lebih baik :) Mungkin seseorang yang bisa menggambar ikon, aset gambar...tetapi juga programer yang bisa memperbaiki bug, atau mengimplementasikan fitur baru.\nSaran ide-ide baru juga selalu kami hargai!\n\nAplikasi ini adalah perangkat lunak bebas dibawah naungan lisensi GPLv3.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
+    <string name="about_text">Aplikasi ini menggunakan direktori radio gratis di \nhttps://www.radio-browser.info\nSemua orang bisa menambahkan stasiun radio atau menyunting stasiun yang sudah ada. Bekerja seperti wiki untuk stasiun radio daring (streaming).\n\nKontak:\nsegler_alex@web.de\n\nPelacak bug:\nhttps://github.com/segler-alex/NoNameRadio/issues\n\nJuka anda menyukai aplikasi ini dan ingin membantu, jangan sungkan untuk mengirim surel. Saya sangat membutuhkan seseorang dengan keahlian grafis untuk membuat desain aplikasi ini menjadi lebih baik :) Mungkin seseorang yang bisa menggambar ikon, aset gambar...tetapi juga programer yang bisa memperbaiki bug, atau mengimplementasikan fitur baru.\nSaran ide-ide baru juga selalu kami hargai!\n\nAplikasi ini adalah perangkat lunak bebas dibawah naungan lisensi GPLv3.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
     <string name="about_version">Versi: %1$s</string>
     <string name="detail_star">Tambahkan ke favorit</string>
     <string name="detail_unstar">Hapus dari favorit</string>
@@ -136,7 +136,7 @@
     <string name="settings_alarm">Alarm</string>
     <string name="settings_alarm_external">Aktifkan aplikasi eksternal</string>
     <string name="settings_alarm_external_desc_on">Buka alarm dengan aplikasi eksternal bawaan</string>
-    <string name="settings_alarm_external_desc_off">Buka alarm dengan RadioDroid</string>
+    <string name="settings_alarm_external_desc_off">Buka alarm dengan NoNameRadio</string>
     <string name="settings_alarm_audio_player">Pemutar audio</string>
     <string name="settings_alarm_sleep_timer">Waktu tidur</string>
     <string name="settings_alarm_sleep_timer_desc">Setop pemutaran setelah %1$s menit</string>
@@ -146,7 +146,7 @@
     <string name="settings_auto_play_on_startup_off">Jangan putar stasiun terakhir saat memulai</string>
     <string name="settings_play_external">Aktifkan pemutar eksternal</string>
     <string name="settings_play_external_desc_on">Putar stasiun dengan pemutar eksternal</string>
-    <string name="settings_play_external_desc_off">Putar stasiun dengan RadioDroid</string>
+    <string name="settings_play_external_desc_off">Putar stasiun dengan NoNameRadio</string>
     <string name="settings_equalizer">Equalizer</string>
 
     <string name="settings_connectivity">Konektivitas</string>
@@ -271,7 +271,7 @@
 
     <string name="media_route_menu_title">GoogleCast</string>
     <string name="app_id">5A97BAE4</string>
-    <string name="app_name">RadioDroid</string>
+    <string name="app_name">NoNameRadio</string>
 
     <string name="settings_mpd">Daemon Pemutar Musik</string>
     <string name="settings_mpd_port">Porta MPD</string>
@@ -290,7 +290,7 @@
 
     <string name="settings_other">Lainnya</string>
     <string name="settings_statistics">Statistik</string>
-    <string name="settings_about">Tentang RadioDroid</string>
+    <string name="settings_about">Tentang NoNameRadio</string>
 
     <string name="description_btn_skip_to_next">Lewati ke berikutnya</string>
     <string name="description_btn_skip_to_previous">Lewati ke sebelumnya</string>

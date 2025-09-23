@@ -11,7 +11,7 @@
     <string name="detail_pause">Pause</string>
     <string name="detail_stop">Stop</string>
     <string name="detail_share">Share</string>
-    <string name="detail_play_in_radiodroid">Play in RadioDroid</string>
+    <string name="detail_play_in_radiodroid">Play in NoNameRadio</string>
 
     <string name="action_links">Links</string>
     <string name="action_homepage">Homepage</string>
@@ -57,12 +57,7 @@
     <string name="nav_item_settings">Settings</string>
     <string name="nav_item_alarm">Alarm</string>
 
-    <string name="about_text">This app uses the free radio station directory
-        at\nhttps://www.radio-browser.info\nEveryone can add stations to it. It works like a wiki
-        for online (streaming) radio
-        stations.\n\nBugtracker:\nhttps://github.com/morckx/RadioDroid/issues\n(originally:
-        https://github.com/segler-alex/RadioDroid/issues)\n\nThis app is free software licensed under the
-        GPLv3.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
+    <string name="about_text">NoNameRadio is an open-source fork of RadioDroid.\n\nProject home:\nhttps://github.com/eosphor/NoNameRadio\n\nThis app uses the free radio station directory at\nhttps://www.radio-browser.info\nAnyone can contribute stations; it works like a wiki for online (streaming) radio.\n\nOriginal project:\nhttps://github.com/morckx/RadioDroid\n(initially: https://github.com/segler-alex/RadioDroid)\n\nThis app is free software licensed under the GPLv3.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
     <string name="about_version">Version: %1$s</string>
     <string name="detail_star">Add to favorites</string>
     <string name="detail_unstar">Delete from favorites</string>
@@ -147,7 +142,7 @@
     <string name="settings_alarm">Alarm</string>
     <string name="settings_alarm_external">Enable external app</string>
     <string name="settings_alarm_external_desc_on">Open the alarm with default external app</string>
-    <string name="settings_alarm_external_desc_off">Open the alarm with RadioDroid</string>
+    <string name="settings_alarm_external_desc_off">Open the alarm with NoNameRadio</string>
     <string name="settings_alarm_audio_player">Audio player</string>
     <string name="settings_alarm_sleep_timer">Sleep timer</string>
     <string name="settings_alarm_sleep_timer_desc">Stop playing after %1$s minutes</string>
@@ -162,7 +157,7 @@
     <string name="settings_auto_off_sleep_timer_desc">Stop playing after %1$s minutes</string>
     <string name="settings_play_external">Enable external player</string>
     <string name="settings_play_external_desc_on">Play stations with external player</string>
-    <string name="settings_play_external_desc_off">Play stations with RadioDroid</string>
+    <string name="settings_play_external_desc_off">Play stations with NoNameRadio</string>
     <string name="settings_equalizer">Equalizer</string>
 
     <string name="settings_connectivity">Connectivity</string>
@@ -296,7 +291,7 @@
 
     <string name="media_route_menu_title">GoogleCast</string>
     <string name="app_id">5A97BAE4</string>
-    <string name="app_name">RadioDroid</string>
+    <string name="app_name">NoNameRadio</string>
 
     <string name="settings_mpd">Music Player Daemon</string>
     <string name="settings_mpd_port">MPD port</string>
@@ -316,12 +311,12 @@
     <string name="settings_lastfm_api_key">Last.fm API key</string>
     <string name="settings_lastfm_api_key_desc">Input an API key to enable album art in full screen player</string>
     <string name="settings_disable_battery_optimization">Battery optimization</string>
-    <string name="settings_ignore_battery_optimization_summary_on">Battery optimization is ignored, RadioDroid should always be able to re-gain focus after focus loss.</string>
-    <string name="settings_ignore_battery_optimization_summary_off">Battery optimization is activated, RadioDroid will not be able to re-gain focus after focus loss if in background.</string>
+    <string name="settings_ignore_battery_optimization_summary_on">Battery optimization is ignored, NoNameRadio should always be able to re-gain focus after focus loss.</string>
+    <string name="settings_ignore_battery_optimization_summary_off">Battery optimization is activated, NoNameRadio will not be able to re-gain focus after focus loss if in background.</string>
     <string name="key_ignore_battery_optimization">ignore_battery_optimization</string>
     <string name="settings_other">Other</string>
     <string name="settings_statistics">Statistics</string>
-    <string name="settings_about">About RadioDroid</string>
+    <string name="settings_about">About NoNameRadio</string>
 
     <string name="description_btn_skip_to_next">Skip to next</string>
     <string name="description_btn_skip_to_previous">Skip to previous</string>

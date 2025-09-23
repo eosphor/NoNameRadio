@@ -11,7 +11,7 @@
     <string name="detail_pause">Paŭzigi</string>
     <string name="detail_stop">Halti</string>
     <string name="detail_share">Konigi</string>
-    <string name="detail_play_in_radiodroid">Ludi per RadioDroid</string>
+    <string name="detail_play_in_radiodroid">Ludi per NoNameRadio</string>
 
     <string name="action_links">Ligiloj</string>
     <string name="action_homepage">Hejmpaĝo</string>
@@ -91,7 +91,7 @@
     <string name="settings_alarm">Vekhorloĝo</string>
     <string name="settings_alarm_audio_player">Sonludilo</string>
     <string name="settings_play">Ludilo</string>
-    <string name="settings_play_external_desc_off">Ludi radiajn staciojn per RadioDroid</string>
+    <string name="settings_play_external_desc_off">Ludi radiajn staciojn per NoNameRadio</string>
 
     <string name="settings_seconds_format">%d sekundoj</string>
 
@@ -141,7 +141,7 @@
 
     <string name="media_route_menu_title">GoogleCast</string>
     <string name="app_id">5A97BAE4</string>
-    <string name="app_name">RadioDroid</string>
+    <string name="app_name">NoNameRadio</string>
 
     <string name="action_mpd_nok">MPD ne konektita</string>
     <string name="action_mpd_ok">MPD konektita</string>
@@ -154,7 +154,7 @@
 
     <string name="settings_other">Aliaj</string>
     <string name="settings_statistics">Statistikoj</string>
-    <string name="settings_about">Pri RadioDroid</string>
+    <string name="settings_about">Pri NoNameRadio</string>
 
     <string name="description_btn_setup_alarm">Agordi vekhorloĝon</string>
 

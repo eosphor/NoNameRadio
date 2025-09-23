@@ -44,7 +44,7 @@
         android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="s">
         <provider
-            android:authorities="net.programmierecke.radiodroid2.fileprovider"
+            android:authorities="com.nonameradio.app.fileprovider"
             android:name="androidx.core.content.FileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
@@ -78,6 +78,15 @@
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
                 <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name="net.programmierecke.radiodroid2.service.RadioMediaSessionService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
             </intent-filter>
         </service>
 
