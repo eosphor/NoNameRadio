@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Gradle version catalogs with libs.versions.toml configuration
 - Centralized dependency management through version catalogs
 - Common lint configurations for consistent code quality
+- Kotlin DSL migration for all build scripts
+- Plugin management through version catalogs
 
 ### Changed
 - Updated Media3 to version 1.8.0
@@ -26,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated OkHttp networking library to latest compatible version
 - Updated Room database library to latest minor release
 - Migrated dependency versions to centralized libs.versions.toml
+- Migrated all build scripts from Groovy to Kotlin DSL
+- Centralized plugin management through version catalogs
 
 ### Removed
 - MediaPlayer fallback (obsolete with minSdk 21)
