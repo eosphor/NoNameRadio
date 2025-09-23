@@ -72,7 +72,6 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
     private Handler playerThreadHandler;
 
     private Context context;
-    private MediaSource audioSource;
 
     private Runnable fullStopTask;
     private ConnectivityManager connectivityManager;
@@ -120,23 +119,14 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
         OkHttpDataSource.Factory httpDataSourceFactory = new OkHttpDataSource.Factory(httpClient)
                 .setUserAgent("NoNameRadio");
 
-        // Create DataSource.Factory with bandwidth meter
-        DataSource.Factory dataSourceFactory = new DataSource.Factory() {
-            @Override
-            public DataSource createDataSource() {
-                return httpDataSourceFactory.createDataSource();
-            }
-        };
-
-        // Create DefaultMediaSourceFactory - it automatically handles HLS/Progressive
-        DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(dataSourceFactory)
+        // Create DefaultMediaSourceFactory with OkHttp data source - automatically handles HLS/Progressive
+        DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(httpDataSourceFactory)
                 .setLoadErrorHandlingPolicy(new CustomLoadErrorHandlingPolicy());
 
-        // Create MediaItem and MediaSource
+        // Create MediaItem and set it directly to player
         MediaItem mediaItem = MediaItem.fromUri(Uri.parse(streamUrl));
-        audioSource = mediaSourceFactory.createMediaSource(mediaItem);
         
-        player.setMediaSource(audioSource);
+        player.setMediaItem(mediaItem);
         player.prepare();
         player.setPlayWhenReady(true);
 
@@ -155,10 +145,12 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
             networkCallback = new ConnectivityManager.NetworkCallback() {
                 @Override
                 public void onAvailable(@NonNull Network network) {
-                    if (fullStopTask != null && player != null && audioSource != null && Utils.hasAnyConnection(context)) {
+                    if (fullStopTask != null && player != null && Utils.hasAnyConnection(context)) {
                         Log.i(TAG, "Regained connection. Resuming playback.");
                         cancelStopTask();
-                        player.setMediaSource(audioSource);
+                        // Recreate MediaItem and resume playback
+                        MediaItem mediaItem = MediaItem.fromUri(Uri.parse(streamUrl));
+                        player.setMediaItem(mediaItem);
                         player.prepare();
                         player.setPlayWhenReady(true);
                     }
