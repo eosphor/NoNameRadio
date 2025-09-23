@@ -149,3 +149,4 @@ INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=273.075,313.1
 INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=403.974,571.628 gbl=403.974,571.628 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-403.974,-571.628 last=-403.974,-571.628 Δ 403.974,571.628) : no target window (:0, )
 INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=355.846,776.995 gbl=355.846,776.995 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-355.846,-776.995 last=-355.846,-776.995 Δ 355.846,776.995) : no target window (:0, )
 INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=317.277,593.042 gbl=317.277,593.042 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-317.277,-593.042 last=-317.277,-593.042 Δ 317.277,593.042) : no target window (:0, )
+ERROR        | adb protocol fault (couldn't read status length)
