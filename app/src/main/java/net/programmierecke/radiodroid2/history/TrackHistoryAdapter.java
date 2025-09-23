@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import net.programmierecke.radiodroid2.R;
 import net.programmierecke.radiodroid2.Utils;
 import net.programmierecke.radiodroid2.service.MediaSessionUtil;
+import net.programmierecke.radiodroid2.utils.ImageLoader;
 
 public class TrackHistoryAdapter extends PagedListAdapter<TrackHistoryEntry, TrackHistoryAdapter.TrackHistoryItemViewHolder> {
     class TrackHistoryItemViewHolder extends RecyclerView.ViewHolder {
@@ -75,7 +76,7 @@ public class TrackHistoryAdapter extends PagedListAdapter<TrackHistoryEntry, Tra
         if (shouldLoadIcons) {
             if (!TextUtils.isEmpty(historyEntry.stationIconUrl)) {
                 //setupIcon(useCircularIcons, holder.imageViewIcon, holder.transparentImageView);
-                MediaSessionUtil.getStationIcon(holder.imageViewStationIcon, historyEntry.stationIconUrl);
+                MediaSessionUtil.getStationIcon(holder.imageViewStationIcon, historyEntry.stationIconUrl, stationImagePlaceholder);
             } else {
                 holder.imageViewStationIcon.setImageDrawable(stationImagePlaceholder);
             }
@@ -90,6 +91,14 @@ public class TrackHistoryAdapter extends PagedListAdapter<TrackHistoryEntry, Tra
         holder.textViewTrackArtist.setSelected(true);
 
         holder.rootview.setOnClickListener(view -> showTrackInfoDialog(historyEntry));
+    }
+
+    @Override
+    public void onViewRecycled(@NonNull TrackHistoryItemViewHolder holder) {
+        super.onViewRecycled(holder);
+
+        ImageLoader.cancelRequest(holder.imageViewStationIcon.getContext(), holder.imageViewStationIcon);
+        holder.imageViewStationIcon.setImageDrawable(stationImagePlaceholder);
     }
 
     @Override

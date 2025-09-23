@@ -6,6 +6,8 @@ import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.MultiTransformation;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
@@ -16,6 +18,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.content.ContextCompat;
 
 import net.programmierecke.radiodroid2.R;
 import net.programmierecke.radiodroid2.Utils;
@@ -39,11 +43,12 @@ public class ImageLoader {
      * Load image into ImageView with standard options
      */
     public static void loadImage(Context context, String url, ImageView imageView) {
+        Drawable placeholder = AppCompatResources.getDrawable(context, R.drawable.ic_launcher);
+        RequestOptions options = createRequestOptions(context, placeholder, new CenterCrop());
+
         Glide.with(context)
                 .load(url)
-                .apply(new RequestOptions()
-                        .error(R.drawable.ic_launcher)
-                        .transform(new CenterCrop()))
+                .apply(options)
                 .into(imageView);
     }
 
@@ -51,13 +56,14 @@ public class ImageLoader {
      * Load image into ImageView bypassing cache (for forced refresh)
      */
     public static void loadImageFresh(Context context, String url, ImageView imageView) {
+        Drawable placeholder = AppCompatResources.getDrawable(context, R.drawable.ic_launcher);
+        RequestOptions options = createRequestOptions(context, placeholder, new CenterCrop())
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true);
+
         Glide.with(context)
                 .load(url)
-                .apply(new RequestOptions()
-                        .error(R.drawable.ic_launcher)
-                        .transform(new CenterCrop())
-                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                        .skipMemoryCache(true))
+                .apply(options)
                 .into(imageView);
     }
 
@@ -65,15 +71,13 @@ public class ImageLoader {
      * Load image into ImageView with transformations for radio station icons
      */
     public static void loadStationIcon(Context context, String url, ImageView imageView) {
-        RequestOptions options = new RequestOptions()
-                .error(R.drawable.ic_launcher)
-                .transform(new CenterCrop());
+        Drawable placeholder = AppCompatResources.getDrawable(context, R.drawable.ic_photo_24dp);
+        loadStationIcon(context, url, imageView, placeholder);
+    }
 
-        if (Utils.useCircularIcons(context)) {
-            options = options.transform(new CircleCrop());
-        } else {
-            options = options.transform(new RoundedCorners(12));
-        }
+    public static void loadStationIcon(Context context, String url, ImageView imageView, @Nullable Drawable placeholder) {
+        Drawable safePlaceholder = placeholder != null ? placeholder : AppCompatResources.getDrawable(context, R.drawable.ic_photo_24dp);
+        RequestOptions options = createStationIconOptions(context, safePlaceholder);
 
         Glide.with(context)
                 .load(url)
@@ -85,15 +89,13 @@ public class ImageLoader {
      * Load image with specific size and transformations for media browser
      */
     public static void loadStationIconForBrowser(Context context, String url, int size, boolean useCircular, BitmapTarget target) {
-        RequestOptions options = new RequestOptions()
-                .error(R.drawable.ic_launcher)
-                .override(size, size);
+        Drawable placeholder = AppCompatResources.getDrawable(context, R.drawable.ic_photo_24dp);
+        Transformation<Bitmap> transformation = useCircular
+                ? new MultiTransformation<>(new CenterCrop(), new CircleCrop())
+                : new MultiTransformation<>(new CenterCrop(), new RoundedCorners(dpToPx(context, 12)));
 
-        if (useCircular) {
-            options = options.transform(new CenterCrop(), new CircleCrop());
-        } else {
-            options = options.transform(new CenterCrop(), new RoundedCorners(12));
-        }
+        RequestOptions options = createRequestOptions(context, placeholder, transformation)
+                .override(size, size);
 
         Glide.with(context)
                 .asBitmap()
@@ -140,18 +142,16 @@ public class ImageLoader {
                 android.util.TypedValue.COMPLEX_UNIT_DIP, 70, 
                 context.getResources().getDisplayMetrics());
 
-        RequestOptions offlineOptions = new RequestOptions()
-                .placeholder(placeholder)
+        RequestOptions baseOptions = createStationIconOptions(context, placeholder);
+
+        RequestOptions offlineOptions = baseOptions.clone()
                 .override((int) px, (int) px)  // Force square aspect ratio
-                .transform(new CenterCrop())
                 .diskCacheStrategy(DiskCacheStrategy.DATA)
                 .onlyRetrieveFromCache(true);
 
-        RequestOptions fallbackOptions = new RequestOptions()
-                .placeholder(placeholder)
+        RequestOptions fallbackOptions = baseOptions.clone()
                 .override((int) px, (int) px)  // Force square aspect ratio
-                .transform(new CenterCrop())
-                .diskCacheStrategy(DiskCacheStrategy.ALL);
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC);
 
         // Create a fallback request using Glide's error() method
         com.bumptech.glide.RequestBuilder<Drawable> fallbackRequest = Glide.with(context)
@@ -164,5 +164,35 @@ public class ImageLoader {
                 .apply(offlineOptions)
                 .error(fallbackRequest)
                 .into(imageView);
+}
+
+    private static RequestOptions createStationIconOptions(Context context, Drawable placeholder) {
+        if (Utils.useCircularIcons(context)) {
+            return createRequestOptions(context, placeholder, new MultiTransformation<>(new CenterCrop(), new CircleCrop()));
+        }
+
+        return createRequestOptions(context, placeholder, new MultiTransformation<>(new CenterCrop(), new RoundedCorners(dpToPx(context, 12))));
+    }
+
+    private static RequestOptions createRequestOptions(Context context, Drawable placeholder, Transformation<Bitmap> transformation) {
+        Drawable safePlaceholder = placeholder != null ? placeholder : AppCompatResources.getDrawable(context, R.drawable.ic_launcher);
+        if (safePlaceholder == null) {
+            safePlaceholder = ContextCompat.getDrawable(context, R.drawable.ic_launcher);
+        }
+
+        RequestOptions options = new RequestOptions()
+                .placeholder(safePlaceholder)
+                .error(safePlaceholder)
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC);
+
+        if (transformation != null) {
+            options = options.transform(transformation);
+        }
+
+        return options;
+    }
+
+    private static int dpToPx(Context context, int dp) {
+        return Math.round(dp * context.getResources().getDisplayMetrics().density);
     }
 }

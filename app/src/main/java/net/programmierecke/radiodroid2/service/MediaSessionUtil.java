@@ -6,6 +6,7 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import net.programmierecke.radiodroid2.RadioDroidApp;
 import net.programmierecke.radiodroid2.players.PlayState;
@@ -152,8 +153,14 @@ public class MediaSessionUtil {
      * Get station icon using ImageLoader
      */
     public static void getStationIcon(ImageView imageView, String iconUrl) {
+        getStationIcon(imageView, iconUrl, null);
+    }
+
+    public static void getStationIcon(ImageView imageView, String iconUrl, @Nullable Drawable placeholder) {
         if (mediaControllerHelper != null) {
-            ImageLoader.loadStationIcon(mediaControllerHelper.getContext(), iconUrl, imageView);
+            ImageLoader.loadStationIcon(mediaControllerHelper.getContext(), iconUrl, imageView, placeholder);
+        } else if (placeholder != null) {
+            imageView.setImageDrawable(placeholder);
         }
     }
     

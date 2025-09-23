@@ -81,7 +81,7 @@ public class ItemAdapterIconOnlyStation extends ItemAdapaterContextMenuStation i
 
         if (station.hasIcon()) {
             setupIcon(useCircularIcons, holder.imageViewIcon, holder.transparentImageView);
-            MediaSessionUtil.getStationIcon(holder.imageViewIcon, station.IconUrl);
+            MediaSessionUtil.getStationIcon(holder.imageViewIcon, station.IconUrl, stationImagePlaceholder);
         } else {
             holder.imageViewIcon.setImageDrawable(stationImagePlaceholder);
         }
@@ -102,4 +102,3 @@ public class ItemAdapterIconOnlyStation extends ItemAdapaterContextMenuStation i
         new ItemTouchHelper(swipeAndMoveHelper).attachToRecyclerView(recyclerView);
     }
 }
-

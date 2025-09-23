@@ -10,7 +10,7 @@ buildscript {
         maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath "de.undercouch:gradle-download-task:5.6.0"
+        classpath libs.download.task
     }
 }
 
@@ -120,13 +120,9 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            
+
             // Optimize APK
             zipAlignEnabled true
-            
-            lintOptions {
-                disable 'MissingTranslation'
-            }
         }
     }
     
@@ -141,7 +137,9 @@ android {
     
     lint {
         abortOnError true
-        disable 'UnsafeOptInUsageError'
+        disable 'UnsafeOptInUsageError', 'MissingTranslation'
+        checkReleaseBuilds true
+        warningsAsErrors false
     }
     
     namespace 'net.programmierecke.radiodroid2'
@@ -176,97 +174,77 @@ android {
     }
 }
 
-ext {
-    media3Version = '1.8.0'
-    iconicsVersion = '5.4.0'
-    androidxVersion = '1.7.1'
-    materialVersion = '1.12.0'
-    constraintVersion = '2.2.1'
-    roomVersion = '2.7.2'
-    lifecycleVersion = '2.9.1'
-    pagingVersion = '3.3.6'
-    okhttpVersion = '5.0.0'
-    gsonVersion = '2.13.1'
-    glideVersion = '4.16.0'
-    testVersion = '1.6.1'
-    espressoVersion = '3.6.1'
-}
-
 dependencies {
     // Core AndroidX
-    implementation 'androidx.multidex:multidex:2.0.1'
-    implementation "androidx.appcompat:appcompat:$androidxVersion"
-    implementation 'androidx.recyclerview:recyclerview:1.4.0'
-    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-    implementation "com.google.android.material:material:$materialVersion"
-    implementation 'androidx.preference:preference-ktx:1.2.1'
-    implementation 'androidx.mediarouter:mediarouter:1.8.1'
-    implementation "androidx.constraintlayout:constraintlayout:$constraintVersion"
-    implementation 'androidx.tvprovider:tvprovider:1.1.0'
-    implementation 'androidx.tracing:tracing:1.3.0'
+    implementation libs.androidx.multidex
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.recyclerview
+    implementation libs.androidx.swiperefreshlayout
+    implementation libs.material
+    implementation libs.androidx.preference.ktx
+    implementation libs.androidx.mediarouter
+    implementation libs.androidx.constraintlayout
+    implementation libs.androidx.tvprovider
+    implementation libs.androidx.tracing
+    implementation libs.androidx.localbroadcast
 
     // Networking
-    implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
-    implementation "com.google.code.gson:gson:$gsonVersion"
+    implementation libs.okhttp
+    implementation libs.gson
     
     // Media
-    implementation "androidx.media3:media3-exoplayer:$media3Version"
-    implementation "androidx.media3:media3-exoplayer-hls:$media3Version"
-    implementation "androidx.media3:media3-session:$media3Version"
-    implementation "androidx.media3:media3-ui:$media3Version"
-    implementation "androidx.media3:media3-datasource-okhttp:$media3Version"
+    implementation libs.bundles.media3
     
     // Image loading
-    implementation "com.github.bumptech.glide:glide:$glideVersion"
-    implementation "com.github.bumptech.glide:okhttp3-integration:$glideVersion"
-    annotationProcessor "com.github.bumptech.glide:compiler:$glideVersion"
+    implementation libs.bundles.glide
+    annotationProcessor libs.glide.compiler
     
     // UI Components
-    implementation "com.mikepenz:iconics-core:$iconicsVersion"
-    implementation "com.mikepenz:iconics-views:$iconicsVersion"
-    implementation 'com.mikepenz:google-material-typeface:3.0.1.4.original-kotlin@aar'
-    implementation 'com.mikepenz:community-material-typeface:5.0.45.1-kotlin@aar'
+    implementation libs.iconics.core
+    implementation libs.iconics.views
+    implementation libs.google.material.typeface
+    implementation libs.community.material.typeface
     
     // Utilities
-    implementation 'com.github.rustamg:file-dialogs:1.0'
-    implementation 'info.debatty:java-string-similarity:2.0.0'
-    implementation 'me.xdrop:fuzzywuzzy:1.4.0'
-    implementation 'com.github.zawadz88:MaterialPopupMenu:3.4.0'
-    implementation 'com.github.ByteHamster:SearchPreference:v2.3.0'
+    implementation libs.file.dialogs
+    implementation libs.java.string.similarity
+    implementation libs.fuzzywuzzy
+    implementation libs.material.popup.menu
+    implementation libs.search.preference
 
     // Database
-    implementation "androidx.room:room-runtime:$roomVersion"
-    annotationProcessor "androidx.room:room-compiler:$roomVersion"
+    implementation libs.room.runtime
+    annotationProcessor libs.room.compiler
 
     // Lifecycle
-    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
-    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
+    implementation libs.lifecycle.extensions
+    implementation libs.lifecycle.common.java8
+    implementation libs.lifecycle.viewmodel.ktx
 
     // Paging
-    implementation "androidx.paging:paging-runtime-ktx:$pagingVersion"
+    implementation libs.paging.runtime.ktx
 
     // Analytics
-    implementation 'com.yandex.android:mobmetricalib:5.3.0'
+    implementation libs.yandex.metrica
 
     // Testing
-    testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.13.3'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.13.3'
-    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.13.3'
+    testImplementation libs.junit4
+    testImplementation libs.junit.jupiter.api
+    testRuntimeOnly libs.junit.jupiter.engine
+    testRuntimeOnly libs.junit.vintage.engine
 
-    androidTestImplementation "androidx.test:core:$testVersion"
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-    androidTestImplementation "androidx.test:runner:1.6.2"
-    androidTestImplementation "androidx.test:rules:$testVersion"
-    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.3.0'
-    androidTestImplementation("androidx.test.espresso:espresso-contrib:$espressoVersion") {
+    androidTestImplementation libs.androidx.test.core
+    androidTestImplementation libs.androidx.test.ext.junit
+    androidTestImplementation libs.espresso.core
+    androidTestImplementation libs.androidx.test.runner
+    androidTestImplementation libs.androidx.test.rules
+    androidTestImplementation libs.uiautomator
+    androidTestImplementation(libs.espresso.contrib) {
         exclude group: 'org.checkerframework', module: 'checker'
     }
-    androidTestImplementation("com.squareup.okhttp3:mockwebserver:$okhttpVersion")
-    androidTestImplementation("com.github.YarikSOffice:lingver:1.3.0")
-    androidTestUtil 'androidx.test:orchestrator:1.5.1'
+    androidTestImplementation libs.mockwebserver
+    androidTestImplementation libs.lingver
+    androidTestUtil libs.androidx.test.orchestrator
 }
 
 
@@ -338,4 +316,3 @@ android.applicationVariants.configureEach { variant ->
         outputFileName = finalName
     }
 }
-

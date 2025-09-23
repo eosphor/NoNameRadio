@@ -42,6 +42,7 @@ import net.programmierecke.radiodroid2.players.selector.PlayerType;
 import net.programmierecke.radiodroid2.utils.RecyclerItemMoveAndSwipeHelper;
 import net.programmierecke.radiodroid2.service.PlayerService;
 import net.programmierecke.radiodroid2.service.MediaSessionUtil;
+import net.programmierecke.radiodroid2.utils.ImageLoader;
 import net.programmierecke.radiodroid2.utils.RecyclerItemSwipeHelper;
 import net.programmierecke.radiodroid2.utils.SwipeableViewHolder;
 import net.programmierecke.radiodroid2.views.TagsView;
@@ -281,7 +282,7 @@ public class ItemAdapterStation
         } else {
             if (station.hasIcon()) {
                 setupIcon(useCircularIcons, holder.imageViewIcon, holder.transparentImageView);
-                MediaSessionUtil.getStationIcon(holder.imageViewIcon, station.IconUrl);
+                MediaSessionUtil.getStationIcon(holder.imageViewIcon, station.IconUrl, stationImagePlaceholder);
             } else {
                 holder.imageViewIcon.setImageDrawable(stationImagePlaceholder);
             }
@@ -464,6 +465,16 @@ public class ItemAdapterStation
         }
         if (holder.viewDetails != null)
             holder.viewDetails.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void onViewRecycled(StationViewHolder holder) {
+        super.onViewRecycled(holder);
+
+        if (holder.imageViewIcon != null) {
+            ImageLoader.cancelRequest(holder.imageViewIcon.getContext(), holder.imageViewIcon);
+            holder.imageViewIcon.setImageDrawable(stationImagePlaceholder);
+        }
     }
 
     @TargetApi(26)
