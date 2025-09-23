@@ -19,6 +19,7 @@ import com.bumptech.glide.load.model.GlideUrl;
 
 import net.programmierecke.radiodroid2.alarm.RadioAlarmManager;
 import net.programmierecke.radiodroid2.history.TrackHistoryRepository;
+import net.programmierecke.radiodroid2.players.RadioPlayer;
 import net.programmierecke.radiodroid2.players.mpd.MPDClient;
 import net.programmierecke.radiodroid2.station.live.metadata.TrackMetadataSearcher;
 import net.programmierecke.radiodroid2.proxy.ProxySettings;
@@ -44,6 +45,7 @@ public class RadioDroidApp extends MultiDexApplication {
     private FallbackStationsManager fallbackStationsManager;
     private RadioAlarmManager alarmManager;
     private TvChannelManager tvChannelManager;
+    private RadioPlayer radioPlayer;
 
     private TrackHistoryRepository trackHistoryRepository;
 
@@ -125,6 +127,7 @@ public class RadioDroidApp extends MultiDexApplication {
         trackHistoryRepository = new TrackHistoryRepository(this);
 
         mpdClient = new MPDClient(this);
+        radioPlayer = new RadioPlayer(this);
 
         castHandler = new CastHandler();
 
@@ -165,6 +168,10 @@ public class RadioDroidApp extends MultiDexApplication {
 
     public RadioAlarmManager getAlarmManager() {
         return alarmManager;
+    }
+
+    public RadioPlayer getRadioPlayer() {
+        return radioPlayer;
     }
 
     public TrackHistoryRepository getTrackHistoryRepository() {

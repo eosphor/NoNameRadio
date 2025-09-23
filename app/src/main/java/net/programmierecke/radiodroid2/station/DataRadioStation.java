@@ -484,4 +484,49 @@ public class DataRadioStation implements Parcelable {
         
         return builder.build();
     }
+    
+    /**
+     * Convert this radio station to MediaMetadataCompat for MediaSession.
+     * Used for MediaSessionService integration.
+     */
+    public android.support.v4.media.MediaMetadataCompat toMediaMetadataCompat() {
+        android.support.v4.media.MediaMetadataCompat.Builder builder = new android.support.v4.media.MediaMetadataCompat.Builder();
+        
+        // Basic metadata
+        builder.putString(android.support.v4.media.MediaMetadataCompat.METADATA_KEY_TITLE, Name);
+        builder.putString(android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ARTIST, "Radio Station");
+        builder.putString(android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ALBUM, Country);
+        builder.putString(android.support.v4.media.MediaMetadataCompat.METADATA_KEY_GENRE, TagsAll);
+        
+        // Additional metadata
+        if (!TextUtils.isEmpty(HomePageUrl)) {
+            builder.putString(android.support.v4.media.MediaMetadataCompat.METADATA_KEY_MEDIA_URI, HomePageUrl);
+        }
+        
+        // Custom metadata for radio stations
+        android.os.Bundle extras = new android.os.Bundle();
+        extras.putString("station_uuid", StationUuid);
+        extras.putString("station_id", StationId);
+        extras.putString("country", Country);
+        extras.putString("language", Language);
+        extras.putString("tags", TagsAll);
+        extras.putString("homepage", HomePageUrl);
+        extras.putString("favicon", IconUrl);
+        extras.putString("codec", Codec);
+        extras.putString("bitrate", String.valueOf(Bitrate));
+        // Note: Samplerate field doesn't exist in DataRadioStation, skipping
+        
+        // Add extras to builder using putString for each key
+        builder.putString("station_uuid", StationUuid);
+        builder.putString("station_id", StationId);
+        builder.putString("station_country", Country);
+        builder.putString("station_language", Language);
+        builder.putString("station_tags", TagsAll);
+        builder.putString("station_homepage", HomePageUrl);
+        builder.putString("station_favicon", IconUrl);
+        builder.putString("station_codec", Codec);
+        builder.putString("station_bitrate", String.valueOf(Bitrate));
+        
+        return builder.build();
+    }
 }

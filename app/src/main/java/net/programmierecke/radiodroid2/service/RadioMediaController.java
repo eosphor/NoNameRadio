@@ -2,107 +2,216 @@ package net.programmierecke.radiodroid2.service;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.media3.common.MediaItem;
-import androidx.media3.session.MediaController;
-import androidx.media3.session.SessionToken;
-
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
 
 import net.programmierecke.radiodroid2.station.DataRadioStation;
 
 /**
- * MediaController wrapper for radio playback control.
- * Provides a simplified interface for controlling the MediaSessionService.
+ * MediaController for NoNameRadio
+ * Provides client-side interface to MediaSessionService
+ * Handles connection to service and media control commands
  */
 public class RadioMediaController {
+    
     private static final String TAG = "RadioMediaController";
     
     private final Context context;
-    private MediaController mediaController;
-    private ListenableFuture<MediaController> controllerFuture;
+    private MediaBrowserCompat mediaBrowser;
+    private MediaControllerCompat mediaController;
+    private boolean isConnected = false;
     
     public RadioMediaController(Context context) {
         this.context = context;
     }
     
-    public void initialize() {
-        SessionToken sessionToken = new SessionToken(
-                context,
-                new ComponentName(context, RadioMediaSessionService.class)
-        );
-        
-        controllerFuture = new MediaController.Builder(context, sessionToken).buildAsync();
-        
-        controllerFuture.addListener(() -> {
-            try {
-                mediaController = controllerFuture.get();
-                Log.d(TAG, "MediaController initialized");
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to initialize MediaController", e);
-            }
-        }, MoreExecutors.directExecutor());
-    }
-    
-    public void playStation(DataRadioStation station) {
-        if (mediaController == null) {
-            Log.w(TAG, "MediaController not initialized");
+    /**
+     * Connect to MediaSessionService
+     */
+    public void connect() {
+        if (isConnected) {
+            Log.w(TAG, "Already connected to MediaSessionService");
             return;
         }
         
-        MediaItem mediaItem = new MediaItem.Builder()
-                .setMediaId(station.StationUuid)
-                .setUri(station.playableUrl)
-                .setMediaMetadata(station.toMediaMetadata())
-                .build();
+        ComponentName serviceComponent = new ComponentName(context, RadioMediaSessionService.class);
         
-        mediaController.setMediaItem(mediaItem);
-        mediaController.prepare();
-        mediaController.play();
+        mediaBrowser = new MediaBrowserCompat(context, serviceComponent, connectionCallback, null);
+        mediaBrowser.connect();
     }
     
+    /**
+     * Disconnect from MediaSessionService
+     */
+    public void disconnect() {
+        if (mediaController != null) {
+            mediaController.unregisterCallback(controllerCallback);
+            mediaController = null;
+        }
+        
+        if (mediaBrowser != null && isConnected) {
+            mediaBrowser.disconnect();
+            mediaBrowser = null;
+        }
+        
+        isConnected = false;
+    }
+    
+    /**
+     * Play current station
+     */
+    public void play() {
+        if (mediaController != null) {
+            mediaController.getTransportControls().play();
+        } else {
+            Log.w(TAG, "MediaController not available");
+        }
+    }
+    
+    /**
+     * Pause playback
+     */
     public void pause() {
         if (mediaController != null) {
-            mediaController.pause();
+            mediaController.getTransportControls().pause();
+        } else {
+            Log.w(TAG, "MediaController not available");
         }
     }
     
-    public void resume() {
-        if (mediaController != null) {
-            mediaController.play();
-        }
-    }
-    
+    /**
+     * Stop playback
+     */
     public void stop() {
         if (mediaController != null) {
-            mediaController.stop();
+            mediaController.getTransportControls().stop();
+        } else {
+            Log.w(TAG, "MediaController not available");
         }
     }
     
-    public boolean isPlaying() {
-        return mediaController != null && mediaController.isPlaying();
-    }
-    
-    public void setVolume(float volume) {
+    /**
+     * Skip to next station
+     */
+    public void skipToNext() {
         if (mediaController != null) {
-            mediaController.setVolume(volume);
+            mediaController.getTransportControls().skipToNext();
+        } else {
+            Log.w(TAG, "MediaController not available");
         }
     }
     
-    public void release() {
-        if (controllerFuture != null) {
-            MediaController.releaseFuture(controllerFuture);
-            controllerFuture = null;
+    /**
+     * Skip to previous station
+     */
+    public void skipToPrevious() {
+        if (mediaController != null) {
+            mediaController.getTransportControls().skipToPrevious();
+        } else {
+            Log.w(TAG, "MediaController not available");
         }
-        mediaController = null;
     }
     
-    public MediaController getMediaController() {
-        return mediaController;
+    /**
+     * Send custom action to service
+     */
+    public void sendCustomAction(String action, android.os.Bundle extras) {
+        if (mediaController != null) {
+            mediaController.getTransportControls().sendCustomAction(action, extras);
+        } else {
+            Log.w(TAG, "MediaController not available");
+        }
     }
+    
+    /**
+     * Add station to favorites
+     */
+    public void addToFavorites(DataRadioStation station) {
+        if (station != null) {
+            android.os.Bundle extras = new android.os.Bundle();
+            extras.putString("station_uuid", station.StationUuid);
+            sendCustomAction("FAVORITE", extras);
+        }
+    }
+    
+    /**
+     * Toggle recording
+     */
+    public void toggleRecording() {
+        sendCustomAction("RECORD", null);
+    }
+    
+    /**
+     * Check if connected to service
+     */
+    public boolean isConnected() {
+        return isConnected && mediaController != null;
+    }
+    
+    /**
+     * Get current playback state
+     */
+    public int getPlaybackState() {
+        if (mediaController != null) {
+            return mediaController.getPlaybackState().getState();
+        }
+        return android.support.v4.media.session.PlaybackStateCompat.STATE_NONE;
+    }
+    
+    /**
+     * Get current metadata
+     */
+    public android.support.v4.media.MediaMetadataCompat getMetadata() {
+        if (mediaController != null) {
+            return mediaController.getMetadata();
+        }
+        return null;
+    }
+    
+    // Connection callback
+    private final MediaBrowserCompat.ConnectionCallback connectionCallback = new MediaBrowserCompat.ConnectionCallback() {
+        @Override
+        public void onConnected() {
+            Log.d(TAG, "Connected to MediaSessionService");
+            MediaSessionCompat.Token token = mediaBrowser.getSessionToken();
+            mediaController = new MediaControllerCompat(context, token);
+            mediaController.registerCallback(controllerCallback);
+            isConnected = true;
+        }
+        
+        @Override
+        public void onConnectionFailed() {
+            Log.e(TAG, "Failed to connect to MediaSessionService");
+            isConnected = false;
+        }
+        
+        @Override
+        public void onConnectionSuspended() {
+            Log.w(TAG, "Connection to MediaSessionService suspended");
+            isConnected = false;
+        }
+    };
+    
+    // Controller callback
+    private final MediaControllerCompat.Callback controllerCallback = new MediaControllerCompat.Callback() {
+        @Override
+        public void onPlaybackStateChanged(@NonNull android.support.v4.media.session.PlaybackStateCompat state) {
+            Log.d(TAG, "Playback state changed: " + state.getState());
+        }
+        
+        @Override
+        public void onMetadataChanged(android.support.v4.media.MediaMetadataCompat metadata) {
+            Log.d(TAG, "Metadata changed");
+        }
+        
+        @Override
+        public void onSessionEvent(@NonNull String event, Bundle extras) {
+            Log.d(TAG, "Session event: " + event);
+        }
+    };
 }
