@@ -41,7 +41,7 @@ import net.programmierecke.radiodroid2.players.PlayStationTask;
 import net.programmierecke.radiodroid2.players.selector.PlayerType;
 import net.programmierecke.radiodroid2.utils.RecyclerItemMoveAndSwipeHelper;
 import net.programmierecke.radiodroid2.service.PlayerService;
-import net.programmierecke.radiodroid2.service.PlayerServiceUtil;
+import net.programmierecke.radiodroid2.service.MediaSessionUtil;
 import net.programmierecke.radiodroid2.utils.RecyclerItemSwipeHelper;
 import net.programmierecke.radiodroid2.utils.SwipeableViewHolder;
 import net.programmierecke.radiodroid2.views.TagsView;
@@ -232,6 +232,7 @@ public class ItemAdapterStation
     }
 
     private void notifyStationsChanged() {
+        android.util.Log.d("ItemAdapterStation", "notifyStationsChanged: stations count=" + (filteredStationsList != null ? filteredStationsList.size() : 0));
         expandedPosition = -1;
         playingStationPosition = -1;
 
@@ -239,7 +240,15 @@ public class ItemAdapterStation
 
         highlightCurrentStation();
 
-        notifyDataSetChanged();
+        // Use a more gentle update approach for large lists
+        if (filteredStationsList != null && filteredStationsList.size() > 1000) {
+            // For large lists, post the update to avoid blocking the UI thread
+            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                notifyDataSetChanged();
+            });
+        } else {
+            notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -272,7 +281,7 @@ public class ItemAdapterStation
         } else {
             if (station.hasIcon()) {
                 setupIcon(useCircularIcons, holder.imageViewIcon, holder.transparentImageView);
-                PlayerServiceUtil.getStationIcon(holder.imageViewIcon, station.IconUrl);
+                MediaSessionUtil.getStationIcon(holder.imageViewIcon, station.IconUrl);
             } else {
                 holder.imageViewIcon.setImageDrawable(stationImagePlaceholder);
             }
@@ -553,19 +562,24 @@ public class ItemAdapterStation
     }
 
     private void highlightCurrentStation() {
-        if (!PlayerServiceUtil.isPlaying()) return;
         if (filteredStationsList == null) return;
 
         int oldPlayingStationPosition = playingStationPosition;
 
-        String currentStationUuid = PlayerServiceUtil.getStationId();
-        for (int i = 0; i < filteredStationsList.size(); i++) {
-            if (filteredStationsList.get(i).StationUuid.equals(currentStationUuid)) {
-                playingStationPosition = i;
-                break;
+        String currentStationUuid = MediaSessionUtil.getStationId();
+        if (currentStationUuid == null || currentStationUuid.isEmpty()) {
+            playingStationPosition = -1;
+        } else {
+            for (int i = 0; i < filteredStationsList.size(); i++) {
+                if (filteredStationsList.get(i).StationUuid.equals(currentStationUuid)) {
+                    playingStationPosition = i;
+                    break;
+                }
             }
         }
+        
         if (playingStationPosition != oldPlayingStationPosition) {
+            android.util.Log.d("ItemAdapterStation", "highlightCurrentStation: old=" + oldPlayingStationPosition + ", new=" + playingStationPosition);
             if (oldPlayingStationPosition > -1)
                 notifyItemChanged(oldPlayingStationPosition);
             if (playingStationPosition > -1)

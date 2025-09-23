@@ -72,7 +72,9 @@ public class FragmentStations extends FragmentBase implements IFragmentSearchabl
         boolean show_broken = sharedPref.getBoolean("show_broken", false);
 
         ArrayList<DataRadioStation> filteredStationsList = new ArrayList<>();
-        List<DataRadioStation> radioStations = DataRadioStation.DecodeJson(getUrlResult());
+        String jsonResult = getUrlResult();
+        if (BuildConfig.DEBUG) Log.d(TAG, "JSON result length: " + (jsonResult != null ? jsonResult.length() : "null"));
+        List<DataRadioStation> radioStations = DataRadioStation.DecodeJson(jsonResult);
         queue.clear();
         queue.addAll(radioStations);
 

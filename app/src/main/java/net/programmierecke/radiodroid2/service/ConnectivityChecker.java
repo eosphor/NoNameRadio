@@ -1,14 +1,10 @@
 package net.programmierecke.radiodroid2.service;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
-import android.os.Build;
 
 import androidx.core.net.ConnectivityManagerCompat;
 
@@ -26,7 +22,6 @@ public class ConnectivityChecker {
     private ConnectivityManager connectivityManager;
 
     private ConnectivityManager.NetworkCallback networkCallback;
-    private BroadcastReceiver networkBroadcastReceiver;
 
     private ConnectivityCallback connectivityCallback;
 
@@ -40,46 +35,36 @@ public class ConnectivityChecker {
     public void startListening(Context context, ConnectivityCallback connectivityCallback) {
         this.connectivityCallback = connectivityCallback;
 
-        if (networkCallback != null || networkBroadcastReceiver != null) {
+        if (networkCallback != null) {
             return;
         }
 
         lastConnectionType = getCurrentConnectionType(context);
 
         connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            networkCallback = new ConnectivityManager.NetworkCallback() {
-                @Override
-                public void onCapabilitiesChanged(Network network, NetworkCapabilities networkCapabilities) {
-                    boolean connected = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-                    boolean metered = !networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
-                    onConnectivityChanged(connected, metered ? ConnectionType.METERED : ConnectionType.NOT_METERED);
-                }
-                // -Snip-
-            };
-            connectivityManager.registerNetworkCallback(new NetworkRequest.Builder().build(), networkCallback);
-        } else {
-            networkBroadcastReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    boolean connected = !intent.hasExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY);
-                    onConnectivityChanged(connected, ConnectivityManagerCompat.isActiveNetworkMetered(connectivityManager) ? ConnectionType.METERED : ConnectionType.NOT_METERED);
-                }
-            };
-            context.registerReceiver(networkBroadcastReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-        }
+        networkCallback = new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onCapabilitiesChanged(Network network, NetworkCapabilities networkCapabilities) {
+                boolean connected = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+                boolean metered = !networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
+                onConnectivityChanged(connected, metered ? ConnectionType.METERED : ConnectionType.NOT_METERED);
+            }
+
+            @Override
+            public void onLost(Network network) {
+                onConnectivityChanged(false, ConnectionType.METERED);
+            }
+        };
+        connectivityManager.registerNetworkCallback(new NetworkRequest.Builder().build(), networkCallback);
     }
 
     public void stopListening(Context context) {
         this.connectivityCallback = null;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && networkCallback != null) {
+        if (networkCallback != null) {
             ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             connectivityManager.unregisterNetworkCallback(networkCallback);
             networkCallback = null;
-        } else if (networkBroadcastReceiver != null) {
-            context.unregisterReceiver(networkBroadcastReceiver);
-            networkBroadcastReceiver = null;
         }
     }
 

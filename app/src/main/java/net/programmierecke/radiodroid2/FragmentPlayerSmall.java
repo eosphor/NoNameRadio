@@ -19,7 +19,7 @@ import net.programmierecke.radiodroid2.history.TrackHistoryRepository;
 import net.programmierecke.radiodroid2.players.mpd.MPDClient;
 import net.programmierecke.radiodroid2.service.PauseReason;
 import net.programmierecke.radiodroid2.service.PlayerService;
-import net.programmierecke.radiodroid2.service.PlayerServiceUtil;
+import net.programmierecke.radiodroid2.service.MediaSessionUtil;
 import net.programmierecke.radiodroid2.station.DataRadioStation;
 import net.programmierecke.radiodroid2.station.StationActions;
 import net.programmierecke.radiodroid2.station.live.StreamLiveInfo;
@@ -83,6 +83,9 @@ public class FragmentPlayerSmall extends Fragment {
                     case PlayerService.PLAYER_SERVICE_BOUND: {
                         tryPlayAtStart();
                     }
+                    case ActivityMain.ACTION_PLAYER_STATE_CHANGED: {
+                        fullUpdate();
+                    }
                 }
             }
         };
@@ -105,12 +108,12 @@ public class FragmentPlayerSmall extends Fragment {
         requireActivity().getApplication().registerActivityLifecycleCallbacks(new LifecycleCallbacks());
 
         buttonPlay.setOnClickListener(v -> {
-            if (PlayerServiceUtil.isPlaying()) {
-                if (PlayerServiceUtil.isRecording()) {
-                    PlayerServiceUtil.stopRecording();
+            if (MediaSessionUtil.isPlaying()) {
+                if (MediaSessionUtil.isRecording()) {
+                    MediaSessionUtil.stopRecording();
                 }
 
-                PlayerServiceUtil.pause(PauseReason.USER);
+                MediaSessionUtil.pause(PauseReason.USER);
             } else {
                 playLastFromHistory();
             }
@@ -149,6 +152,7 @@ public class FragmentPlayerSmall extends Fragment {
         filter.addAction(PlayerService.PLAYER_SERVICE_STATE_CHANGE);
         filter.addAction(PlayerService.PLAYER_SERVICE_META_UPDATE);
         filter.addAction(PlayerService.PLAYER_SERVICE_BOUND);
+        filter.addAction(ActivityMain.ACTION_PLAYER_STATE_CHANGED);
 
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(updateUIReceiver, filter);
 
@@ -178,14 +182,14 @@ public class FragmentPlayerSmall extends Fragment {
 
     private void playLastFromHistory() {
         RadioDroidApp radioDroidApp = (RadioDroidApp) requireActivity().getApplication();
-        DataRadioStation station = PlayerServiceUtil.getCurrentStation();
+        DataRadioStation station = MediaSessionUtil.getCurrentStation();
 
         if (station == null) {
             HistoryManager historyManager = radioDroidApp.getHistoryManager();
             station = historyManager.getFirst();
         }
 
-        if (station != null && !PlayerServiceUtil.isPlaying()) {
+        if (station != null && !MediaSessionUtil.isPlaying()) {
             Utils.showPlaySelection(radioDroidApp, station, getActivity().getSupportFragmentManager());
         }
     }
@@ -195,10 +199,10 @@ public class FragmentPlayerSmall extends Fragment {
 	boolean auto_off = false;
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext().getApplicationContext());
-        if (!firstPlayAttempted && PlayerServiceUtil.isServiceBound()) {
+        if (!firstPlayAttempted && MediaSessionUtil.isServiceBound()) {
             firstPlayAttempted = true;
 
-            if (!PlayerServiceUtil.isPlaying()) {
+            if (!MediaSessionUtil.isPlaying()) {
                 play = sharedPreferences.getBoolean("auto_play_on_startup", false);
             }
         }
@@ -212,7 +216,7 @@ public class FragmentPlayerSmall extends Fragment {
                 } catch(Exception e) {
                     timeout=10;
                 }
-                PlayerServiceUtil.addTimer(timeout * 60);
+                MediaSessionUtil.addTimer(timeout * 60);
             }
             playLastFromHistory();
         }
@@ -229,7 +233,11 @@ public class FragmentPlayerSmall extends Fragment {
     }
 
     private void fullUpdate() {
-        if (PlayerServiceUtil.isPlaying()) {
+        DataRadioStation station = Utils.getCurrentOrLastStation(requireContext());
+        boolean isCurrentlyPlaying = MediaSessionUtil.isPlaying();
+        
+        // Show play button if not playing, pause button if playing
+        if (isCurrentlyPlaying) {
             buttonPlay.setImageResource(R.drawable.ic_pause_circle);
             buttonPlay.setContentDescription(getResources().getString(R.string.detail_pause));
         } else {
@@ -237,14 +245,11 @@ public class FragmentPlayerSmall extends Fragment {
             buttonPlay.setContentDescription(getResources().getString(R.string.detail_play));
         }
 
-        DataRadioStation station = Utils.getCurrentOrLastStation(requireContext());
-
         final String stationName = station != null ? station.Name : "";
-
         textViewStationName.setText(stationName);
 
-        StreamLiveInfo liveInfo = PlayerServiceUtil.getMetadataLive();
-        String streamTitle = liveInfo.getTitle();
+        StreamLiveInfo liveInfo = MediaSessionUtil.getMetadataLive();
+        String streamTitle = liveInfo != null ? liveInfo.getTitle() : null;
         if (!TextUtils.isEmpty(streamTitle)) {
             textViewLiveInfo.setVisibility(View.VISIBLE);
             textViewLiveInfo.setText(streamTitle);
@@ -260,7 +265,7 @@ public class FragmentPlayerSmall extends Fragment {
             imageViewIcon.setVisibility(View.GONE);
         } else if (station != null && station.hasIcon()) {
             imageViewIcon.setVisibility(View.VISIBLE);
-            PlayerServiceUtil.getStationIcon(imageViewIcon, station.IconUrl);
+            MediaSessionUtil.getStationIcon(imageViewIcon, station.IconUrl);
         } else {
             imageViewIcon.setVisibility(View.VISIBLE);
             imageViewIcon.setImageResource(R.drawable.ic_launcher);

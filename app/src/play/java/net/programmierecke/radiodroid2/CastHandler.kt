@@ -13,7 +13,7 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.images.WebImage
 import net.programmierecke.radiodroid2.cast.CastAwareActivity
 import net.programmierecke.radiodroid2.service.PauseReason
-import net.programmierecke.radiodroid2.service.PlayerServiceUtil
+import net.programmierecke.radiodroid2.service.MediaSessionUtil
 
 private sealed class CastState {
     abstract fun setActivity(activity: CastAwareActivity?)
@@ -81,10 +81,10 @@ private class CastAvailable(val castContext: CastContext,
 
         invalidateOptions()
 
-        if (PlayerServiceUtil.isPlaying()) {
-            PlayerServiceUtil.pause(PauseReason.USER)
+        if (MediaSessionUtil.isPlaying()) {
+            MediaSessionUtil.pause(PauseReason.USER)
 
-            val station = PlayerServiceUtil.getCurrentStation()!!
+            val station = MediaSessionUtil.getCurrentStation()!!
             play(station.Name, station.playableUrl, station.IconUrl)
         }
     }

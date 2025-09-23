@@ -72,7 +72,7 @@ import net.programmierecke.radiodroid2.players.mpd.MPDServersRepository;
 import net.programmierecke.radiodroid2.players.selector.PlayerType;
 import net.programmierecke.radiodroid2.service.MediaSessionCallback;
 import net.programmierecke.radiodroid2.service.PlayerService;
-import net.programmierecke.radiodroid2.service.PlayerServiceUtil;
+import net.programmierecke.radiodroid2.service.MediaSessionUtil;
 import net.programmierecke.radiodroid2.station.DataRadioStation;
 import net.programmierecke.radiodroid2.station.StationsFilter;
 
@@ -103,6 +103,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
 
     public static final String ACTION_SHOW_LOADING = "net.programmierecke.radiodroid2.show_loading";
     public static final String ACTION_HIDE_LOADING = "net.programmierecke.radiodroid2.hide_loading";
+    public static final String ACTION_PLAYER_STATE_CHANGED = "net.programmierecke.radiodroid2.player_state_changed";
     public static final int PERM_REQ_STORAGE_FAV_SAVE = 1;
     public static final int PERM_REQ_STORAGE_FAV_LOAD = 2;
     private static final String TAG = "RadioDroid";
@@ -177,7 +178,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
         final Toolbar myToolbar = findViewById(R.id.my_awesome_toolbar);
         setSupportActionBar(myToolbar);
 
-        PlayerServiceUtil.startService(getApplicationContext());
+        MediaSessionUtil.startService(getApplicationContext());
 
         selectedMenuItem = sharedPref.getInt("last_selectedMenuItem", -1);
         instanceStateWasSaved = savedInstanceState != null;
@@ -443,7 +444,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
                 if (useBottomNavigation()) {
                     // I'm giving 3 seconds on making a choice
                     if (lastExitTry != null && new Date().getTime() < lastExitTry.getTime() + 3 * 1000) {
-                        PlayerServiceUtil.shutdownService();
+                        MediaSessionUtil.shutdownService();
                         finish();
                     } else {
                         Toast.makeText(ActivityMain.this, R.string.alert_press_back_to_exit, Toast.LENGTH_SHORT).show();
@@ -530,12 +531,12 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
     public void onDestroy() {
         super.onDestroy();
 
-        if (!PlayerServiceUtil.isNotificationActive()) {
+        if (!MediaSessionUtil.isNotificationActive()) {
             /* If at this point if for whatever reason we have the service without a notification,
              * we must shut it down because user doesn't have a way to interact with it.
              * This is a safeguard since such service should have been destroyed in onPause()
              */
-            PlayerServiceUtil.shutdownService();
+            MediaSessionUtil.shutdownService();
         }
     }
 
@@ -553,8 +554,8 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
 
         super.onPause();
 
-        if (PlayerServiceUtil.getPlayerState() == PlayState.Idle) {
-            PlayerServiceUtil.shutdownService();
+        if (MediaSessionUtil.getPlayerState() == PlayState.Idle) {
+            MediaSessionUtil.shutdownService();
         }
 
         CastHandler castHandler = ((RadioDroidApp) getApplication()).getCastHandler();
@@ -618,7 +619,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
 
         setupBroadcastReceiver();
 
-        PlayerServiceUtil.startService(getApplicationContext());
+        MediaSessionUtil.startService(getApplicationContext());
         CastHandler castHandler = ((RadioDroidApp) getApplication()).getCastHandler();
         castHandler.onResume();
         castHandler.setActivity(this);
@@ -1146,10 +1147,10 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
 
                     switch (playerType) {
                         case RADIODROID:
-                            showMeteredConnectionDialog(() -> Utils.play((RadioDroidApp) getApplication(), PlayerServiceUtil.getCurrentStation()));
+                            showMeteredConnectionDialog(() -> Utils.play((RadioDroidApp) getApplication(), MediaSessionUtil.getCurrentStation()));
                             break;
                         case EXTERNAL:
-                            DataRadioStation currentStation = PlayerServiceUtil.getCurrentStation();
+                            DataRadioStation currentStation = MediaSessionUtil.getCurrentStation();
                             if (currentStation != null) {
                                 showMeteredConnectionDialog(() -> PlayStationTask.playExternal(currentStation, ActivityMain.this).execute());
                             }
@@ -1158,7 +1159,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
                             Log.e(TAG, String.format("broadcastReceiver unexpected PlayerType '%s'", playerType));
                     }
                 } else if (intent.getAction().equals(PlayerService.PLAYER_SERVICE_STATE_CHANGE)) {
-                    if (PlayerServiceUtil.isPlaying()) {
+                    if (MediaSessionUtil.isPlaying()) {
                         if (meteredConnectionAlertDialog != null) {
                             meteredConnectionAlertDialog.cancel();
                             meteredConnectionAlertDialog = null;
@@ -1258,7 +1259,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
             }
         });
 
-        long currenTimerSeconds = PlayerServiceUtil.getTimerSeconds();
+        long currenTimerSeconds = MediaSessionUtil.getTimerSeconds();
         long currentTimer;
         if (currenTimerSeconds <= 0) {
             currentTimer = sharedPref.getInt("sleep_timer_default_minutes", 10);
@@ -1271,8 +1272,8 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
         seekDialog.setPositiveButton(R.string.sleep_timer_apply, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                PlayerServiceUtil.clearTimer();
-                PlayerServiceUtil.addTimer(seekBar.getProgress() * 60);
+                MediaSessionUtil.clearTimer();
+                MediaSessionUtil.addTimer(seekBar.getProgress() * 60);
                 sharedPref.edit().putInt("sleep_timer_default_minutes", seekBar.getProgress()).apply();
             }
         });
@@ -1280,7 +1281,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
         seekDialog.setNegativeButton(R.string.sleep_timer_clear, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                PlayerServiceUtil.clearTimer();
+                MediaSessionUtil.clearTimer();
             }
         });
 
@@ -1350,11 +1351,11 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
                     break;
                 case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
                     // Skip to next station
-                    PlayerServiceUtil.skipToNext();
+                    MediaSessionUtil.skipToNext();
                     return true;
                 case KeyEvent.KEYCODE_MEDIA_REWIND:
                     // Skip to previous station
-                    PlayerServiceUtil.skipToPrevious();
+                    MediaSessionUtil.skipToPrevious();
                     return true;
             }
         }

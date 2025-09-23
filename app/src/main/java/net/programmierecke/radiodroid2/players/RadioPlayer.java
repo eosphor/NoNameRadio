@@ -255,6 +255,14 @@ public class RadioPlayer implements PlayerWrapper.PlayListener, Recordable {
         return lastLiveInfo;
     }
 
+    public boolean isHls() {
+        return currentPlayer.isHls();
+    }
+
+    public String getCurrentRecordFileName() {
+        return currentPlayer.getCurrentRecordFileName();
+    }
+
     private void setState(PlayState state, int audioSessionId) {
         if (BuildConfig.DEBUG) Log.d(TAG, String.format("set state '%s'", state.name()));
 
@@ -289,6 +297,10 @@ public class RadioPlayer implements PlayerWrapper.PlayListener, Recordable {
 
     public boolean isLocal() {
         return currentPlayer.isLocal();
+    }
+
+    public long getLastPlayStartTime() {
+        return currentPlayer.getLastPlayStartTime();
     }
 
     @Override

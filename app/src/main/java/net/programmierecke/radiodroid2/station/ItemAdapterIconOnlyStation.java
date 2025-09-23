@@ -18,7 +18,7 @@ import com.github.zawadz88.materialpopupmenu.MaterialPopupMenu;
 
 import net.programmierecke.radiodroid2.R;
 import net.programmierecke.radiodroid2.Utils;
-import net.programmierecke.radiodroid2.service.PlayerServiceUtil;
+import net.programmierecke.radiodroid2.service.MediaSessionUtil;
 import net.programmierecke.radiodroid2.utils.RecyclerItemMoveAndSwipeHelper;
 import net.programmierecke.radiodroid2.utils.SwipeableViewHolder;
 
@@ -81,7 +81,7 @@ public class ItemAdapterIconOnlyStation extends ItemAdapaterContextMenuStation i
 
         if (station.hasIcon()) {
             setupIcon(useCircularIcons, holder.imageViewIcon, holder.transparentImageView);
-            PlayerServiceUtil.getStationIcon(holder.imageViewIcon, station.IconUrl);
+            MediaSessionUtil.getStationIcon(holder.imageViewIcon, station.IconUrl);
         } else {
             holder.imageViewIcon.setImageDrawable(stationImagePlaceholder);
         }

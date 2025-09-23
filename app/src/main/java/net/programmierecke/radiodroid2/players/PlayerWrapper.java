@@ -39,7 +39,13 @@ public interface PlayerWrapper extends Recordable {
 
     long getCurrentPlaybackTransferredBytes();
 
+    String getCurrentRecordFileName();
+
     boolean isLocal();
+
+    boolean isHls();
+
+    long getLastPlayStartTime();
 
     void setVolume(float newVolume);
 

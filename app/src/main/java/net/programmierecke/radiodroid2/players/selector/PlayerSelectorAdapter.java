@@ -30,7 +30,7 @@ import net.programmierecke.radiodroid2.players.mpd.tasks.MPDResumeTask;
 import net.programmierecke.radiodroid2.players.mpd.tasks.MPDStopTask;
 import net.programmierecke.radiodroid2.service.PauseReason;
 import net.programmierecke.radiodroid2.service.PlayerService;
-import net.programmierecke.radiodroid2.service.PlayerServiceUtil;
+import net.programmierecke.radiodroid2.service.MediaSessionUtil;
 import net.programmierecke.radiodroid2.station.DataRadioStation;
 
 import java.util.ArrayList;
@@ -173,7 +173,7 @@ public class PlayerSelectorAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         if (holder.getItemViewType() == PlayerType.RADIODROID.getValue()) {
             holder.textViewDescription.setText(R.string.app_name);
 
-            if (PlayerServiceUtil.isPlaying()) {
+            if (MediaSessionUtil.isPlaying()) {
                 holder.btnPlay.setImageResource(R.drawable.ic_pause_circle);
                 holder.btnPlay.setContentDescription(context.getResources().getString(R.string.detail_pause));
             } else {
@@ -182,12 +182,12 @@ public class PlayerSelectorAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             }
 
             holder.btnPlay.setOnClickListener(view -> {
-                if (PlayerServiceUtil.isPlaying()) {
-                    if (PlayerServiceUtil.isRecording()) {
-                        PlayerServiceUtil.stopRecording();
+                if (MediaSessionUtil.isPlaying()) {
+                    if (MediaSessionUtil.isRecording()) {
+                        MediaSessionUtil.stopRecording();
                     }
 
-                    PlayerServiceUtil.pause(PauseReason.USER);
+                    MediaSessionUtil.pause(PauseReason.USER);
                 } else {
                     Utils.playAndWarnIfMetered((RadioDroidApp) context.getApplicationContext(), stationToPlay, PlayerType.RADIODROID,
                             () -> Utils.play((RadioDroidApp) context.getApplicationContext(), stationToPlay));

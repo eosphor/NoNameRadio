@@ -52,6 +52,13 @@ public class MediaControllerHelper {
         // Also send command via MediaController for system integration
         mediaController.play();
     }
+
+    /**
+     * Play a station (alias for playStation)
+     */
+    public void play(DataRadioStation station) {
+        playStation(station);
+    }
     
     /**
      * Pause playback
@@ -59,6 +66,13 @@ public class MediaControllerHelper {
     public void pausePlayback() {
         Log.d(TAG, "Pausing playback via MediaController");
         mediaController.pause();
+    }
+
+    /**
+     * Pause playback (alias for pausePlayback)
+     */
+    public void pause() {
+        pausePlayback();
     }
     
     /**
@@ -75,6 +89,13 @@ public class MediaControllerHelper {
     public void stopPlayback() {
         Log.d(TAG, "Stopping playback via MediaController");
         mediaController.stop();
+    }
+
+    /**
+     * Stop playback (alias for stopPlayback)
+     */
+    public void stop() {
+        stopPlayback();
     }
     
     /**

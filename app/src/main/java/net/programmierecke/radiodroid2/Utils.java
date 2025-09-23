@@ -11,6 +11,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
@@ -38,7 +40,7 @@ import net.programmierecke.radiodroid2.players.PlayStationTask;
 import net.programmierecke.radiodroid2.players.selector.PlayerSelectorDialog;
 import net.programmierecke.radiodroid2.players.selector.PlayerType;
 import net.programmierecke.radiodroid2.service.ConnectivityChecker;
-import net.programmierecke.radiodroid2.service.PlayerServiceUtil;
+import net.programmierecke.radiodroid2.service.MediaSessionUtil;
 import net.programmierecke.radiodroid2.station.DataRadioStation;
 
 import net.programmierecke.radiodroid2.proxy.ProxySettings;
@@ -338,7 +340,8 @@ public class Utils {
 
     public static @Nullable
     DataRadioStation getCurrentOrLastStation(@NonNull Context ctx) {
-        DataRadioStation station = PlayerServiceUtil.getCurrentStation();
+        DataRadioStation station = MediaSessionUtil.getCurrentStation();
+        
         if (station == null) {
             RadioDroidApp radioDroidApp = (RadioDroidApp) ctx.getApplicationContext();
             HistoryManager historyManager = radioDroidApp.getHistoryManager();
@@ -384,8 +387,8 @@ public class Utils {
                 (station1, playerType1) -> {
                     // Making sure that resuming from notification or some external event will actually resume
                     // and not issue warning a second time.
-                    PlayerServiceUtil.setStation(station1);
-                    PlayerServiceUtil.warnAboutMeteredConnection(playerType1);
+                    MediaSessionUtil.setStation(station1);
+                    MediaSessionUtil.warnAboutMeteredConnection(playerType1);
                 });
     }
 
@@ -413,7 +416,7 @@ public class Utils {
     }
 
     public static void play(final RadioDroidApp radioDroidApp, final DataRadioStation station) {
-        PlayerServiceUtil.play(station);
+        MediaSessionUtil.play(station);
     }
 
     public static boolean shouldLoadIcons(final Context context) {
@@ -517,16 +520,36 @@ public class Utils {
 
     public static boolean hasWifiConnection(Context context) {
         ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-
-        return mWifi.isConnected();
+        if (connManager == null) return false;
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Network activeNetwork = connManager.getActiveNetwork();
+            if (activeNetwork == null) return false;
+            
+            NetworkCapabilities capabilities = connManager.getNetworkCapabilities(activeNetwork);
+            return capabilities != null && 
+                   capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                   capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
+        } else {
+            // Fallback for older versions (though minSdk is 21, this shouldn't be reached)
+            return false;
+        }
     }
 
     public static boolean hasAnyConnection(Context context) {
         ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = connManager.getActiveNetworkInfo();
-        //should check null because in airplane mode it will be null
-        return (netInfo != null && netInfo.isConnected());
+        if (connManager == null) return false;
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Network activeNetwork = connManager.getActiveNetwork();
+            if (activeNetwork == null) return false;
+            
+            NetworkCapabilities capabilities = connManager.getNetworkCapabilities(activeNetwork);
+            return capabilities != null && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+        } else {
+            // Fallback for older versions (though minSdk is 21, this shouldn't be reached)
+            return false;
+        }
     }
 
     public static boolean bottomNavigationEnabled(Context context) {

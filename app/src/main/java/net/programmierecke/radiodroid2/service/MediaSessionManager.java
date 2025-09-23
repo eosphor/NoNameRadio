@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import net.programmierecke.radiodroid2.ActivityMain;
 import net.programmierecke.radiodroid2.players.RadioPlayer;
 import net.programmierecke.radiodroid2.players.PlayState;
 import net.programmierecke.radiodroid2.station.DataRadioStation;
@@ -109,6 +112,11 @@ public class MediaSessionManager implements RadioPlayer.PlayerListener {
                 mediaSessionService.updateSessionMetadata(currentStation);
             }
         }
+        
+        // Notify UI components about state change
+        Intent stateChangeIntent = new Intent(ActivityMain.ACTION_PLAYER_STATE_CHANGED);
+        stateChangeIntent.putExtra("playState", status.name());
+        LocalBroadcastManager.getInstance(context).sendBroadcast(stateChangeIntent);
     }
     
     @Override

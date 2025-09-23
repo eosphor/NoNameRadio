@@ -24,13 +24,14 @@
             <ImageView
                     android:id="@+id/imageViewIcon"
                     android:layout_width="70dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="70dp"
                     android:layout_gravity="center|start"
                     android:layout_marginEnd="20dp"
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="20dp"
                     android:layout_marginStart="5dp"
-                    android:contentDescription="@null" />
+                    android:contentDescription="@null"
+                    android:scaleType="centerCrop" />
 
             <ImageView
                 android:id="@+id/transparentCircle"

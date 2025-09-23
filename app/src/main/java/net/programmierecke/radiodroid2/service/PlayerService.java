@@ -504,7 +504,7 @@ public class PlayerService extends JobIntentService implements RadioPlayer.Playe
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Service could be started by external forces, e.g. when we had the last media session
         // and user presses play/pause media button.
-        PlayerServiceUtil.bindService(itsContext.getApplicationContext());
+        MediaSessionUtil.bindService(itsContext.getApplicationContext());
 
         if (currentStation == null) {
             RadioDroidApp radioDroidApp = (RadioDroidApp) getApplication();

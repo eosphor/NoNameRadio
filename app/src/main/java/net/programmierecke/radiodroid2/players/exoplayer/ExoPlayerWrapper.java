@@ -67,12 +67,13 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
     private long totalTransferredBytes;
     private long currentPlaybackTransferredBytes;
 
+    private Context context;
     private boolean isHls;
     private boolean isPlayingFlag;
 
     private Handler playerThreadHandler;
 
-    private Context context;
+    private long lastPlayStartTime = 0;
 
     private Runnable fullStopTask;
     private ConnectivityManager connectivityManager;
@@ -129,9 +130,12 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
         
         player.setMediaItem(mediaItem);
         player.prepare();
-        player.setPlayWhenReady(true);
-        
-        // Report playback start event
+                player.setPlayWhenReady(true);
+                
+                // Record play start time
+                lastPlayStartTime = System.currentTimeMillis();
+                
+                // Report playback start event
         YandexMetrica.reportEvent("radio_playback_started", "{\"url\":\"" + streamUrl + "\",\"is_hls\":" + isHls + "}");
 
         if (connectivityManager == null) {
@@ -239,8 +243,14 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
     }
 
     @Override
+    public String getCurrentRecordFileName() {
+        // For now, return null - recording filename not tracked in ExoPlayer
+        return null;
+    }
+
+    @Override
     public boolean isLocal() {
-        return true;
+        return false;
     }
 
     @Override
@@ -382,6 +392,7 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
 
     final class CustomLoadErrorHandlingPolicy extends DefaultLoadErrorHandlingPolicy {
         final int MIN_RETRY_DELAY_MS = 10;
+        final int MAX_RETRY_DELAY_MS = 30000; // 30 seconds max
         final SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         // We need to read the retry delay here on each error again because the user might change
@@ -393,9 +404,16 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
 
         @Override
         public long getRetryDelayMsFor(LoadErrorInfo loadErrorInfo) {
-
             int retryDelay = getSanitizedRetryDelaySettingsMs();
             IOException exception = loadErrorInfo.exception;
+            int errorCount = loadErrorInfo.errorCount;
+
+            // Exponential backoff with jitter for better retry behavior
+            if (errorCount > 1) {
+                retryDelay = Math.min(retryDelay * (1 << Math.min(errorCount - 1, 8)), MAX_RETRY_DELAY_MS);
+                // Add jitter to prevent thundering herd
+                retryDelay = retryDelay + (int)(Math.random() * retryDelay * 0.1);
+            }
 
             if (exception instanceof androidx.media3.datasource.HttpDataSource.InvalidContentTypeException) {
                 stateListener.onPlayerError(R.string.error_play_stream);
@@ -412,7 +430,7 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
 
             if (BuildConfig.DEBUG) {
                 Log.d(TAG, "Providing retry delay of " + retryDelay + "ms " +
-                        "error count: " + loadErrorInfo.errorCount + ", " +
+                        "error count: " + errorCount + ", " +
                         "exception " + exception.getClass() + ", " +
                         "message: " + exception.getMessage());
             }
@@ -421,7 +439,9 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
 
         @Override
         public int getMinimumLoadableRetryCount(int dataType) {
-            return sharedPrefs.getInt("settings_retry_timeout", 10) * 1000 / getSanitizedRetryDelaySettingsMs() + 1;
+            // Increase retry count for better resilience
+            int baseRetries = sharedPrefs.getInt("settings_retry_timeout", 10) * 1000 / getSanitizedRetryDelaySettingsMs() + 1;
+            return Math.min(baseRetries * 2, 50); // Cap at 50 retries
         }
     }
 
@@ -515,6 +535,39 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
         @Override
         public void onDrmSessionReleased(@NonNull EventTime eventTime) {
 
+        }
+    }
+
+    @Override
+    public boolean isHls() {
+        return isHls;
+    }
+
+    @Override
+    public long getLastPlayStartTime() {
+        return lastPlayStartTime;
+    }
+
+    /**
+     * NetworkCallback for modern network monitoring
+     */
+    private class NetworkStateCallback extends ConnectivityManager.NetworkCallback {
+        @Override
+        public void onAvailable(@NonNull Network network) {
+            Log.d(TAG, "Network available: " + network);
+            // Network is available, ExoPlayer will automatically retry
+        }
+
+        @Override
+        public void onLost(@NonNull Network network) {
+            Log.d(TAG, "Network lost: " + network);
+            // Network lost, ExoPlayer will handle retry through CustomLoadErrorHandlingPolicy
+        }
+
+        @Override
+        public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
+            Log.d(TAG, "Network capabilities changed: " + network + ", capabilities: " + networkCapabilities);
+            // Network capabilities changed, ExoPlayer will handle accordingly
         }
     }
 }

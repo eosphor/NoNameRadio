@@ -51,7 +51,7 @@ import net.programmierecke.radiodroid2.recording.RecordingsManager;
 import net.programmierecke.radiodroid2.recording.RunningRecordingInfo;
 import net.programmierecke.radiodroid2.service.PauseReason;
 import net.programmierecke.radiodroid2.service.PlayerService;
-import net.programmierecke.radiodroid2.service.PlayerServiceUtil;
+import net.programmierecke.radiodroid2.service.MediaSessionUtil;
 import net.programmierecke.radiodroid2.station.DataRadioStation;
 import net.programmierecke.radiodroid2.station.StationActions;
 import net.programmierecke.radiodroid2.station.live.ShoutcastInfo;
@@ -328,21 +328,21 @@ public class FragmentPlayerFull extends Fragment {
         btnPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (PlayerServiceUtil.isPlaying()) {
-                    if (PlayerServiceUtil.isRecording()) {
-                        PlayerServiceUtil.stopRecording();
+                if (MediaSessionUtil.isPlaying()) {
+                    if (MediaSessionUtil.isRecording()) {
+                        MediaSessionUtil.stopRecording();
                         updateRunningRecording();
                     }
 
-                    PlayerServiceUtil.pause(PauseReason.USER);
+                    MediaSessionUtil.pause(PauseReason.USER);
                 } else {
                     playLastFromHistory();
                 }
 
                 // Update button state immediately and again after delay to catch service state change
-                updatePlaybackButtons(PlayerServiceUtil.isPlaying(), PlayerServiceUtil.isRecording());
+                updatePlaybackButtons(MediaSessionUtil.isPlaying(), MediaSessionUtil.isRecording());
                 new Handler().postDelayed(() -> {
-                    updatePlaybackButtons(PlayerServiceUtil.isPlaying(), PlayerServiceUtil.isRecording());
+                    updatePlaybackButtons(MediaSessionUtil.isPlaying(), MediaSessionUtil.isRecording());
                     // Also update all station info and album art in case station changed
                     fullUpdate();
                 }, 100);
@@ -350,35 +350,35 @@ public class FragmentPlayerFull extends Fragment {
         });
 
         btnPrev.setOnClickListener(view -> {
-            PlayerServiceUtil.skipToPrevious();
+            MediaSessionUtil.skipToPrevious();
             // Force UI update after station change
             new Handler().postDelayed(this::fullUpdate, 100);
         });
         btnNext.setOnClickListener(view -> {
-            PlayerServiceUtil.skipToNext();
+            MediaSessionUtil.skipToNext();
             // Force UI update after station change
             new Handler().postDelayed(this::fullUpdate, 100);
         });
 
         btnRecord.setOnClickListener(view -> {
-            if (PlayerServiceUtil.isPlaying()) {
-                if (PlayerServiceUtil.isRecording()) {
-                    PlayerServiceUtil.stopRecording();
+            if (MediaSessionUtil.isPlaying()) {
+                if (MediaSessionUtil.isRecording()) {
+                    MediaSessionUtil.stopRecording();
                 } else {
                     if (recordingsManager.hasRecordingPermission()) {
-                        PlayerServiceUtil.startRecording();
+                        MediaSessionUtil.startRecording();
                     } else {
                         requestPermissions(recordingsManager.getRequiredPermissions(), PERM_REQ_STORAGE_RECORD);
                     }
                 }
 
                 // Update UI immediately and schedule another update after brief delay
-                updatePlaybackButtons(PlayerServiceUtil.isPlaying(), PlayerServiceUtil.isRecording());
+                updatePlaybackButtons(MediaSessionUtil.isPlaying(), MediaSessionUtil.isRecording());
                 updateRunningRecording();
                 
                 // Schedule another update after 500ms to catch async state changes
                 new Handler().postDelayed(() -> {
-                    updatePlaybackButtons(PlayerServiceUtil.isPlaying(), PlayerServiceUtil.isRecording());
+                    updatePlaybackButtons(MediaSessionUtil.isPlaying(), MediaSessionUtil.isRecording());
                     updateRunningRecording();
                 }, 500);
 
@@ -506,7 +506,7 @@ public class FragmentPlayerFull extends Fragment {
 
     private void playLastFromHistory() {
         RadioDroidApp radioDroidApp = (RadioDroidApp) requireActivity().getApplication();
-        DataRadioStation station = PlayerServiceUtil.getCurrentStation();
+        DataRadioStation station = MediaSessionUtil.getCurrentStation();
 
         if (station == null) {
             HistoryManager historyManager = radioDroidApp.getHistoryManager();
@@ -525,11 +525,11 @@ public class FragmentPlayerFull extends Fragment {
         DataRadioStation station = Utils.getCurrentOrLastStation(requireContext());
 
         if (station != null) {
-            final ShoutcastInfo shoutcastInfo = PlayerServiceUtil.getShoutcastInfo();
+            final ShoutcastInfo shoutcastInfo = MediaSessionUtil.getShoutcastInfo();
             // TODO: add some of shoutcast info
 
-            final StreamLiveInfo liveInfo = PlayerServiceUtil.getMetadataLive();
-            String streamTitle = liveInfo.getTitle();
+            final StreamLiveInfo liveInfo = MediaSessionUtil.getMetadataLive();
+            String streamTitle = liveInfo != null ? liveInfo.getTitle() : null;
 
             if (!TextUtils.isEmpty(streamTitle)) {
                 textViewGeneralInfo.setText(streamTitle);
@@ -561,7 +561,7 @@ public class FragmentPlayerFull extends Fragment {
 
         updateAlbumArt();
         updateRecordings();
-        updatePlaybackButtons(PlayerServiceUtil.isPlaying(), PlayerServiceUtil.isRecording());
+        updatePlaybackButtons(MediaSessionUtil.isPlaying(), MediaSessionUtil.isRecording());
         updateFavouriteButton();
 
         timedUpdateTask.run();
@@ -607,7 +607,7 @@ public class FragmentPlayerFull extends Fragment {
     }
 
     private void updateRunningRecording() {
-        if (PlayerServiceUtil.isRecording()) {
+        if (MediaSessionUtil.isRecording()) {
             final Map<Recordable, RunningRecordingInfo> runningRecordings = recordingsManager.getRunningRecordings();
             final RunningRecordingInfo recordingInfo = runningRecordings.entrySet().iterator().next().getValue();
 
@@ -622,14 +622,14 @@ public class FragmentPlayerFull extends Fragment {
     }
 
     private void updateAlbumArt() {
-        DataRadioStation station = PlayerServiceUtil.getCurrentStation();
+        DataRadioStation station = MediaSessionUtil.getCurrentStation();
         if (station == null) {
             return;
         }
 
-        final StreamLiveInfo liveInfo = PlayerServiceUtil.getMetadataLive();
+        final StreamLiveInfo liveInfo = MediaSessionUtil.getMetadataLive();
 
-        if (lastLiveInfoForTrackMetadata != null &&
+        if (lastLiveInfoForTrackMetadata != null && liveInfo != null &&
                 TextUtils.equals(lastLiveInfoForTrackMetadata.getArtist(), liveInfo.getArtist()) &&
                 TextUtils.equals(lastLiveInfoForTrackMetadata.getTrack(), liveInfo.getTrack()) &&
                 !TrackMetadataCallback.FailureType.RECOVERABLE.equals(trackMetadataLastFailureType)) {
@@ -910,10 +910,10 @@ public class FragmentPlayerFull extends Fragment {
 
         @Override
         protected void run(FragmentPlayerFull fragmentPlayerFull) {
-            final ShoutcastInfo shoutcastInfo = PlayerServiceUtil.getShoutcastInfo();
+            final ShoutcastInfo shoutcastInfo = MediaSessionUtil.getShoutcastInfo();
 
-            if (PlayerServiceUtil.isPlaying()) {
-                String networkUsageInfo = Utils.getReadableBytes(PlayerServiceUtil.getTransferredBytes());
+            if (MediaSessionUtil.isPlaying()) {
+                String networkUsageInfo = Utils.getReadableBytes(MediaSessionUtil.getTransferredBytes());
                 if (shoutcastInfo != null && shoutcastInfo.bitrate > 0) {
                     networkUsageInfo += " (" + shoutcastInfo.bitrate + " kbps)";
                 }
@@ -921,18 +921,18 @@ public class FragmentPlayerFull extends Fragment {
                 fragmentPlayerFull.textViewNetworkUsageInfo.setText(networkUsageInfo);
 
                 final long now = System.currentTimeMillis();
-                final long startTime = PlayerServiceUtil.getLastPlayStartTime();
+                final long startTime = MediaSessionUtil.getLastPlayStartTime();
                 long deltaSeconds = startTime > 0 ? ((now - startTime) / 1000) : 0;
                 deltaSeconds = Math.max(deltaSeconds, 0);
                 fragmentPlayerFull.textViewTimePlayed.setText(DateUtils.formatElapsedTime(deltaSeconds));
 
-                fragmentPlayerFull.textViewTimeCached.setText(DateUtils.formatElapsedTime(PlayerServiceUtil.getBufferedSeconds()));
+                fragmentPlayerFull.textViewTimeCached.setText(DateUtils.formatElapsedTime(MediaSessionUtil.getBufferedSeconds()));
 
                 fragmentPlayerFull.updateRunningRecording();
             }
             
             // Update play/pause button state to ensure it stays in sync
-            fragmentPlayerFull.updatePlaybackButtons(PlayerServiceUtil.isPlaying(), PlayerServiceUtil.isRecording());
+            fragmentPlayerFull.updatePlaybackButtons(MediaSessionUtil.isPlaying(), MediaSessionUtil.isRecording());
         }
     }
 
@@ -943,14 +943,14 @@ public class FragmentPlayerFull extends Fragment {
         if (requestCode == PERM_REQ_STORAGE_RECORD) {
             if (recordingsManager.hasRecordingPermission()) {
                 storagePermissionsDenied = false;
-                PlayerServiceUtil.startRecording();
+                MediaSessionUtil.startRecording();
             } else {
                 storagePermissionsDenied = true;
                 Toast toast = Toast.makeText(getActivity(), getResources().getString(R.string.error_record_needs_write), Toast.LENGTH_SHORT);
                 toast.show();
             }
 
-            updatePlaybackButtons(PlayerServiceUtil.isPlaying(), PlayerServiceUtil.isRecording());
+            updatePlaybackButtons(MediaSessionUtil.isPlaying(), MediaSessionUtil.isRecording());
             updateRecordings();
         }
     }

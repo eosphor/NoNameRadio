@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import net.programmierecke.radiodroid2.R;
 import net.programmierecke.radiodroid2.Utils;
-import net.programmierecke.radiodroid2.service.PlayerServiceUtil;
+import net.programmierecke.radiodroid2.service.MediaSessionUtil;
 
 public class TrackHistoryAdapter extends PagedListAdapter<TrackHistoryEntry, TrackHistoryAdapter.TrackHistoryItemViewHolder> {
     class TrackHistoryItemViewHolder extends RecyclerView.ViewHolder {
@@ -75,7 +75,7 @@ public class TrackHistoryAdapter extends PagedListAdapter<TrackHistoryEntry, Tra
         if (shouldLoadIcons) {
             if (!TextUtils.isEmpty(historyEntry.stationIconUrl)) {
                 //setupIcon(useCircularIcons, holder.imageViewIcon, holder.transparentImageView);
-                PlayerServiceUtil.getStationIcon(holder.imageViewStationIcon, historyEntry.stationIconUrl);
+                MediaSessionUtil.getStationIcon(holder.imageViewStationIcon, historyEntry.stationIconUrl);
             } else {
                 holder.imageViewStationIcon.setImageDrawable(stationImagePlaceholder);
             }

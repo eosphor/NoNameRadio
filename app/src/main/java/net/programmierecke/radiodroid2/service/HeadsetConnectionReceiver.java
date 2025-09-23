@@ -16,6 +16,7 @@ import net.programmierecke.radiodroid2.HistoryManager;
 import net.programmierecke.radiodroid2.RadioDroidApp;
 import net.programmierecke.radiodroid2.Utils;
 import net.programmierecke.radiodroid2.players.selector.PlayerType;
+import net.programmierecke.radiodroid2.service.MediaSessionUtil;
 import net.programmierecke.radiodroid2.station.DataRadioStation;
 
 public class HeadsetConnectionReceiver extends BroadcastReceiver {
@@ -24,7 +25,7 @@ public class HeadsetConnectionReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (PlayerServiceUtil.getPauseReason() != PauseReason.BECAME_NOISY) {
+        if (MediaSessionUtil.getPauseReason() != PauseReason.BECAME_NOISY) {
             return;
         }
 
@@ -37,7 +38,7 @@ public class HeadsetConnectionReceiver extends BroadcastReceiver {
             return;
         }
 
-        if (PlayerServiceUtil.isPlaying()) {
+        if (MediaSessionUtil.isPlaying()) {
             return;
         }
 
@@ -64,7 +65,7 @@ public class HeadsetConnectionReceiver extends BroadcastReceiver {
             DataRadioStation lastStation = historyManager.getFirst();
 
             if (lastStation != null) {
-                if (!PlayerServiceUtil.isPlaying() && !radioDroidApp.getMpdClient().isMpdEnabled()) {
+                if (!MediaSessionUtil.isPlaying() && !radioDroidApp.getMpdClient().isMpdEnabled()) {
                     Utils.playAndWarnIfMetered(radioDroidApp, lastStation, PlayerType.RADIODROID, () -> Utils.play(radioDroidApp, lastStation));
                 }
             }
