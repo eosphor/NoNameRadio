@@ -8,8 +8,11 @@ import android.util.Log;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import net.programmierecke.radiodroid2.ActivityMain;
-import net.programmierecke.radiodroid2.players.RadioPlayer;
+import net.programmierecke.radiodroid2.RadioDroidApp;
+import net.programmierecke.radiodroid2.history.TrackHistoryEntry;
+import net.programmierecke.radiodroid2.history.TrackHistoryRepository;
 import net.programmierecke.radiodroid2.players.PlayState;
+import net.programmierecke.radiodroid2.players.RadioPlayer;
 import net.programmierecke.radiodroid2.station.DataRadioStation;
 
 /**
@@ -22,16 +25,20 @@ public class MediaSessionManager implements RadioPlayer.PlayerListener {
     
     private final Context context;
     private final RadioPlayer radioPlayer;
+    private final TrackHistoryRepository trackHistoryRepository;
     private RadioMediaSessionService mediaSessionService;
     private RadioMediaController mediaController;
     
     public MediaSessionManager(Context context, RadioPlayer radioPlayer) {
         this.context = context;
         this.radioPlayer = radioPlayer;
-        
+
+        RadioDroidApp app = (RadioDroidApp) context.getApplicationContext();
+        this.trackHistoryRepository = app.getTrackHistoryRepository();
+
         // Set this manager as listener for RadioPlayer
         radioPlayer.setPlayerListener(this);
-        
+
         // Initialize MediaController for client-side control
         mediaController = new RadioMediaController(context);
         mediaController.connect();
@@ -150,7 +157,48 @@ public class MediaSessionManager implements RadioPlayer.PlayerListener {
     
     @Override
     public void foundLiveStreamInfo(net.programmierecke.radiodroid2.station.live.StreamLiveInfo liveInfo) {
-        // Not needed for MediaSession
+        if (liveInfo == null) {
+            return;
+        }
+
+        if (mediaSessionService != null) {
+            DataRadioStation currentStation = radioPlayer.getCurrentStation();
+            if (currentStation != null) {
+                mediaSessionService.updateSessionMetadata(currentStation);
+            }
+        }
+
+        if (trackHistoryRepository == null) {
+            return;
+        }
+
+        final DataRadioStation currentStation = radioPlayer.getCurrentStation();
+        if (currentStation == null) {
+            return;
+        }
+
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        java.util.Date currentTime = calendar.getTime();
+
+        trackHistoryRepository.getLastInsertedHistoryItem((trackHistoryEntry, dao) -> {
+            if (trackHistoryEntry != null && trackHistoryEntry.title.equals(liveInfo.getTitle())) {
+                trackHistoryEntry.endTime = new java.util.Date(0);
+                dao.update(trackHistoryEntry);
+            } else {
+                dao.setCurrentPlayingTrackEndTime(currentTime);
+
+                TrackHistoryEntry newEntry = new TrackHistoryEntry();
+                newEntry.stationUuid = currentStation.StationUuid;
+                newEntry.stationIconUrl = currentStation.IconUrl;
+                newEntry.artist = liveInfo.getArtist();
+                newEntry.track = liveInfo.getTrack();
+                newEntry.title = liveInfo.getTitle();
+                newEntry.startTime = currentTime;
+                newEntry.endTime = new java.util.Date(0);
+
+                trackHistoryRepository.insert(newEntry);
+            }
+        });
     }
     
     /**

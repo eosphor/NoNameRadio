@@ -1,6 +1,7 @@
 package net.programmierecke.radiodroid2.recording;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -65,8 +66,9 @@ public class RecordingsManager {
             try {
                 runningRecordingInfo.getOutputStream().write(buffer, offset, length);
                 runningRecordingInfo.setBytesWritten(runningRecordingInfo.getBytesWritten() + length);
+                runningRecordingInfo.updateLinkedRecordingSize();
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Failed to write bytes", e);
                 runningRecordingInfo.getRecordable().stopRecording();
             }
         }
@@ -86,6 +88,7 @@ public class RecordingsManager {
             }
 
             RecordingsManager.this.stopRecording(runningRecordingInfo.getRecordable());
+            runningRecordingInfo.updateLinkedRecordingFinished();
         }
     }
 
@@ -145,9 +148,23 @@ public class RecordingsManager {
             recordable.startRecording(new RunningRecordableListener(info));
 
             runningRecordings.put(recordable, info);
+            // Don't add to savedRecordings yet - will be added after finalization
 
             prefs.edit().putInt("record_num", recordNum + 1).apply();
         }
+    }
+
+    private DataRecording toDataRecording(RunningRecordingInfo info) {
+        DataRecording dr = new DataRecording();
+        dr.Name = info.getFileName();
+        dr.Time = new Date();
+        dr.ContentUri = info.getMediaStoreUri();
+        if (dr.ContentUri == null && dr.Name != null) {
+            dr.AbsolutePath = getRecordDir() + "/" + dr.Name;
+        }
+        dr.InProgress = true;
+        info.setLinkedDataRecording(dr);
+        return dr;
     }
 
     public void stopRecording(@NonNull Recordable recordable) {
@@ -158,9 +175,10 @@ public class RecordingsManager {
         // Finalize MediaStore entry if using modern storage API
         if (info != null && info.getMediaStoreUri() != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             finalizeMediaStoreEntry(info);
+        } else {
+            // For legacy storage or if MediaStore finalization failed, update list immediately
+            updateRecordingsList();
         }
-
-        updateRecordingsList();
     }
 
     public RunningRecordingInfo getRecordingInfo(Recordable recordable) {
@@ -173,6 +191,39 @@ public class RecordingsManager {
 
     public List<DataRecording> getSavedRecordings() {
         return new ArrayList<>(savedRecordings);
+    }
+
+    public void deleteRecording(@NonNull DataRecording recording) {
+        boolean deleted = false;
+
+        try {
+            if (recording.ContentUri != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                ContentResolver resolver = context.getContentResolver();
+                deleted = resolver.delete(recording.ContentUri, null, null) > 0;
+            }
+
+            if (!deleted) {
+                String absolutePath = recording.AbsolutePath;
+                if (absolutePath == null) {
+                    absolutePath = getRecordDir() + "/" + recording.Name;
+                }
+
+                if (absolutePath != null) {
+                    File file = new File(absolutePath);
+                    if (file.exists()) {
+                        deleted = file.delete();
+                    }
+                }
+            }
+        } catch (SecurityException se) {
+            Log.e(TAG, "Failed to delete recording", se);
+        }
+
+        if (!deleted) {
+            Log.w(TAG, "Could not delete recording: " + recording.Name);
+        }
+
+        updateRecordingsList();
     }
 
     public Observable getSavedRecordingsObservable() {
@@ -224,9 +275,13 @@ public class RecordingsManager {
             int updated = resolver.update(info.getMediaStoreUri(), contentValues, null, null);
             if (updated > 0) {
                 Log.d(TAG, "Successfully finalized MediaStore entry for: " + info.getFileName());
-                
-                // Schedule a delayed update to ensure the MediaStore change is visible
-                new android.os.Handler().postDelayed(this::updateRecordingsList, 1200);
+
+                // Mark recording as finished and add to saved recordings
+                info.updateLinkedRecordingFinished();
+                DataRecording finishedRecording = toDataRecording(info);
+                finishedRecording.InProgress = false; // Ensure it's marked as finished
+                savedRecordings.add(0, finishedRecording);
+                savedRecordingsObservable.notifyObservers();
             } else {
                 Log.w(TAG, "Failed to finalize MediaStore entry for: " + info.getFileName());
             }
@@ -296,9 +351,11 @@ public class RecordingsManager {
             ContentResolver resolver = context.getContentResolver();
             
             String[] projection = {
+                MediaStore.Audio.Media._ID,
                 MediaStore.Audio.Media.DISPLAY_NAME,
                 MediaStore.Audio.Media.DATE_MODIFIED,
-                MediaStore.Audio.Media.RELATIVE_PATH
+                MediaStore.Audio.Media.RELATIVE_PATH,
+                MediaStore.Audio.Media.DATA
             };
             
             String selection = MediaStore.Audio.Media.RELATIVE_PATH + " LIKE ?";
@@ -316,6 +373,8 @@ public class RecordingsManager {
                 if (cursor != null) {
                     int nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME);
                     int dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_MODIFIED);
+                    int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID);
+                    int dataColumn = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
                     
                     while (cursor.moveToNext()) {
                         String fileName = cursor.getString(nameColumn);
@@ -324,6 +383,15 @@ public class RecordingsManager {
                         DataRecording dr = new DataRecording();
                         dr.Name = fileName;
                         dr.Time = new Date(dateModified);
+                        dr.ContentUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                                cursor.getLong(idColumn));
+
+                        if (dataColumn >= 0) {
+                            String absolutePath = cursor.getString(dataColumn);
+                            if (absolutePath != null && !absolutePath.isEmpty()) {
+                                dr.AbsolutePath = absolutePath;
+                            }
+                        }
                         savedRecordings.add(dr);
                         
                         if (BuildConfig.DEBUG) {
@@ -352,6 +420,7 @@ public class RecordingsManager {
                 DataRecording dr = new DataRecording();
                 dr.Name = f.getName();
                 dr.Time = new Date(f.lastModified());
+                dr.AbsolutePath = f.getAbsolutePath();
                 savedRecordings.add(dr);
             }
         } else {
@@ -389,4 +458,5 @@ public class RecordingsManager {
             return new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE};
         }
     }
+
 }

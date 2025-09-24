@@ -261,6 +261,10 @@ public class FragmentPlayerFull extends Fragment {
         });
 
         recordingsAdapter = new RecordingsAdapter(requireContext());
+        recordingsAdapter.setOnDeleteClickListener(recording -> {
+            recordingsManager.deleteRecording(recording);
+            updateRecordings();
+        });
         recordingsAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             public void onItemRangeInserted(int positionStart, int itemCount) {
                 final LinearLayoutManager lm = (LinearLayoutManager) historyAndRecordsPagerAdapter.recyclerViewRecordings.getLayoutManager();
@@ -607,9 +611,9 @@ public class FragmentPlayerFull extends Fragment {
     }
 
     private void updateRunningRecording() {
-        if (MediaSessionUtil.isRecording()) {
-            final Map<Recordable, RunningRecordingInfo> runningRecordings = recordingsManager.getRunningRecordings();
-            final RunningRecordingInfo recordingInfo = runningRecordings.entrySet().iterator().next().getValue();
+        Map<Recordable, RunningRecordingInfo> runningRecordings = recordingsManager.getRunningRecordings();
+        if (MediaSessionUtil.isRecording() && !runningRecordings.isEmpty()) {
+            RunningRecordingInfo recordingInfo = runningRecordings.entrySet().iterator().next().getValue();
 
             groupRecordings.setVisibility(View.VISIBLE);
             imgRecordingIcon.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.blink_recording));
@@ -628,6 +632,18 @@ public class FragmentPlayerFull extends Fragment {
         }
 
         final StreamLiveInfo liveInfo = MediaSessionUtil.getMetadataLive();
+
+        if (liveInfo == null) {
+            forceAlbumArtRefresh = false;
+
+            if (station.hasIcon()) {
+                ImageLoader.loadImage(requireContext(), station.IconUrl, artAndInfoPagerAdapter.imageViewArt);
+            } else {
+                artAndInfoPagerAdapter.imageViewArt.setImageResource(R.drawable.ic_launcher);
+            }
+
+            return;
+        }
 
         if (lastLiveInfoForTrackMetadata != null && liveInfo != null &&
                 TextUtils.equals(lastLiveInfoForTrackMetadata.getArtist(), liveInfo.getArtist()) &&
@@ -927,10 +943,11 @@ public class FragmentPlayerFull extends Fragment {
                 fragmentPlayerFull.textViewTimePlayed.setText(DateUtils.formatElapsedTime(deltaSeconds));
 
                 fragmentPlayerFull.textViewTimeCached.setText(DateUtils.formatElapsedTime(MediaSessionUtil.getBufferedSeconds()));
-
-                fragmentPlayerFull.updateRunningRecording();
             }
-            
+
+            // Update recording UI regardless of playback state
+            fragmentPlayerFull.updateRunningRecording();
+
             // Update play/pause button state to ensure it stays in sync
             fragmentPlayerFull.updatePlaybackButtons(MediaSessionUtil.isPlaying(), MediaSessionUtil.isRecording());
         }

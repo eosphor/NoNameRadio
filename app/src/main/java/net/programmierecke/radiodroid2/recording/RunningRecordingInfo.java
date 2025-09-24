@@ -11,6 +11,7 @@ public class RunningRecordingInfo {
     private OutputStream outputStream;
     private long bytesWritten;
     private Uri mediaStoreUri;
+    private DataRecording linkedDataRecording;
 
     public Recordable getRecordable() {
         return recordable;
@@ -18,6 +19,26 @@ public class RunningRecordingInfo {
 
     protected void setRecordable(Recordable recordable) {
         this.recordable = recordable;
+    }
+
+    public DataRecording getLinkedDataRecording() {
+        return linkedDataRecording;
+    }
+
+    protected void setLinkedDataRecording(DataRecording linkedDataRecording) {
+        this.linkedDataRecording = linkedDataRecording;
+    }
+
+    void updateLinkedRecordingSize() {
+        if (linkedDataRecording != null) {
+            linkedDataRecording.SizeBytes = bytesWritten;
+        }
+    }
+
+    void updateLinkedRecordingFinished() {
+        if (linkedDataRecording != null) {
+            linkedDataRecording.InProgress = false;
+        }
     }
 
     public String getTitle() {
@@ -50,6 +71,7 @@ public class RunningRecordingInfo {
 
     protected void setBytesWritten(long bytesWritten) {
         this.bytesWritten = bytesWritten;
+        updateLinkedRecordingSize();
     }
 
     public Uri getMediaStoreUri() {
@@ -58,5 +80,8 @@ public class RunningRecordingInfo {
 
     protected void setMediaStoreUri(Uri mediaStoreUri) {
         this.mediaStoreUri = mediaStoreUri;
+        if (linkedDataRecording != null) {
+            linkedDataRecording.ContentUri = mediaStoreUri;
+        }
     }
 }

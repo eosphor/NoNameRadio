@@ -187,4 +187,7 @@
     <string name="notify_stream_url_copied">Ссылка на стрим была успешно скопирована!</string>
 
     <string name="refresh">Обновить</string>
+    <string name="recording_delete_failed">Не удалось удалить запись</string>
+    <string name="recording_limit_reached">Запись остановлена: превышен лимит 60 минут</string>
+    <string name="recording_in_progress_size">Идёт запись… %1$s</string>
 </resources>

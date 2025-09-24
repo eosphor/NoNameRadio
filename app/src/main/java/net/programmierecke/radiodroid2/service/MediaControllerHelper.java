@@ -7,6 +7,7 @@ import net.programmierecke.radiodroid2.RadioDroidApp;
 import net.programmierecke.radiodroid2.players.RadioPlayer;
 import net.programmierecke.radiodroid2.players.PlayState;
 import net.programmierecke.radiodroid2.station.DataRadioStation;
+import net.programmierecke.radiodroid2.recording.RecordingsManager;
 
 /**
  * Helper class for UI integration with MediaController
@@ -143,7 +144,14 @@ public class MediaControllerHelper {
      */
     public void toggleRecording() {
         Log.d(TAG, "Toggling recording via MediaController");
-        mediaController.toggleRecording();
+        RadioDroidApp app = (RadioDroidApp) context;
+        RecordingsManager recordingsManager = app.getRecordingsManager();
+        RadioPlayer player = app.getRadioPlayer();
+        if (player.isRecording()) {
+            recordingsManager.stopRecording(player);
+        } else {
+            recordingsManager.record(context, player);
+        }
     }
     
     /**

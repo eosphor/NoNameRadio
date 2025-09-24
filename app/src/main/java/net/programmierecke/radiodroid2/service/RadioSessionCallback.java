@@ -12,6 +12,7 @@ import net.programmierecke.radiodroid2.RadioDroidApp;
 import net.programmierecke.radiodroid2.players.RadioPlayer;
 import net.programmierecke.radiodroid2.players.PlayState;
 import net.programmierecke.radiodroid2.station.DataRadioStation;
+import net.programmierecke.radiodroid2.recording.RecordingsManager;
 
 /**
  * Callback for MediaSession events
@@ -126,11 +127,12 @@ public class RadioSessionCallback extends MediaSessionCompat.Callback {
     
     private void handleRecordAction(Bundle extras) {
         if (radioPlayer != null) {
+            RadioDroidApp app = (RadioDroidApp) service.getApplication();
+            RecordingsManager recordingsManager = app.getRecordingsManager();
             if (radioPlayer.isRecording()) {
-                radioPlayer.stopRecording();
+                recordingsManager.stopRecording(radioPlayer);
             } else {
-                // For now, just log - in real implementation, we'd need a RecordableListener
-                Log.d(TAG, "Start recording command received - need to implement RecordableListener");
+                recordingsManager.record(service, radioPlayer);
             }
         }
     }

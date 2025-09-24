@@ -10,6 +10,7 @@ import android.net.NetworkRequest;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -31,8 +32,11 @@ import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.exoplayer.source.MediaSource;
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 import androidx.media3.datasource.DataSource;
+import androidx.media3.datasource.DataSpec;
+import androidx.media3.datasource.TransferListener;
 import androidx.media3.datasource.okhttp.OkHttpDataSource;
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy;
+import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy.LoadErrorInfo;
 import com.yandex.metrica.YandexMetrica;
 import com.yandex.metrica.YandexMetricaConfig;
 
@@ -47,7 +51,9 @@ import net.programmierecke.radiodroid2.station.live.StreamLiveInfo;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 
@@ -62,7 +68,7 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
 
     //private DefaultBandwidthMeter bandwidthMeter;
 
-    private RecordableListener recordableListener;
+    private final RecordingCoordinator recordingCoordinator = new RecordingCoordinator();
 
     private long totalTransferredBytes;
     private long currentPlaybackTransferredBytes;
@@ -98,14 +104,31 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
             player.stop();
         }
 
-        if (player == null) {
-            player = new ExoPlayer.Builder(context).build();
-            player.setAudioAttributes(new AudioAttributes.Builder().setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
-                    .setUsage(isAlarm ? C.USAGE_ALARM : C.USAGE_MEDIA).build(), false);
-
-            player.addListener(this);
-            player.addAnalyticsListener(new AnalyticEventListener());
+        // Always recreate player with our custom MediaSourceFactory for recording
+        if (player != null) {
+            player.release();
         }
+
+        // Create OkHttpDataSource.Factory with custom OkHttpClient
+        OkHttpDataSource.Factory httpDataSourceFactory = new OkHttpDataSource.Factory(httpClient)
+                .setUserAgent("NoNameRadio");
+
+        DataSource.Factory recordingAwareFactory = new RecordingDataSourceFactory(httpDataSourceFactory);
+
+        // Create DefaultMediaSourceFactory with our recording-aware data source
+        DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(recordingAwareFactory)
+                .setLoadErrorHandlingPolicy(new CustomLoadErrorHandlingPolicy());
+
+        // Create player with our custom MediaSourceFactory
+        player = new ExoPlayer.Builder(context)
+                .setMediaSourceFactory(mediaSourceFactory)
+                .build();
+
+        player.setAudioAttributes(new AudioAttributes.Builder().setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                .setUsage(isAlarm ? C.USAGE_ALARM : C.USAGE_MEDIA).build(), false);
+
+        player.addListener(this);
+        player.addAnalyticsListener(new AnalyticEventListener());
 
         if (playerThreadHandler == null) {
             playerThreadHandler = new Handler(Looper.getMainLooper());
@@ -117,17 +140,9 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
         final int retryTimeout = prefs.getInt("settings_retry_timeout", 10);
         final int retryDelay = prefs.getInt("settings_retry_delay", 100);
 
-        // Create OkHttpDataSource.Factory with custom OkHttpClient
-        OkHttpDataSource.Factory httpDataSourceFactory = new OkHttpDataSource.Factory(httpClient)
-                .setUserAgent("NoNameRadio");
-
-        // Create DefaultMediaSourceFactory with OkHttp data source - automatically handles HLS/Progressive
-        DefaultMediaSourceFactory mediaSourceFactory = new DefaultMediaSourceFactory(httpDataSourceFactory)
-                .setLoadErrorHandlingPolicy(new CustomLoadErrorHandlingPolicy());
-
         // Create MediaItem and set it directly to player
         MediaItem mediaItem = MediaItem.fromUri(Uri.parse(streamUrl));
-        
+
         player.setMediaItem(mediaItem);
         player.prepare();
                 player.setPlayWhenReady(true);
@@ -176,6 +191,7 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
         Log.i(TAG, "Pause. Stopping exoplayer.");
 
         cancelStopTask();
+        recordingCoordinator.stop(false, false);
 
         if (player != null) {
             if (connectivityManager != null && networkCallback != null) {
@@ -196,6 +212,7 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
         YandexMetrica.reportEvent("radio_playback_stopped");
 
         cancelStopTask();
+        recordingCoordinator.stop(false, false);
 
         if (player != null) {
             if (connectivityManager != null && networkCallback != null) {
@@ -207,7 +224,7 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
             player = null;
         }
 
-        stopRecording();
+        recordingCoordinator.stop(false, false);
     }
 
     @Override
@@ -337,20 +354,23 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
 
     @Override
     public void startRecording(@NonNull RecordableListener recordableListener) {
-        this.recordableListener = recordableListener;
+        if (player == null) {
+            Log.w(TAG, "startRecording: player not ready");
+            recordableListener.onRecordingEnded();
+            return;
+        }
+
+        recordingCoordinator.start(recordableListener);
     }
 
     @Override
     public void stopRecording() {
-        if (recordableListener != null) {
-            recordableListener.onRecordingEnded();
-            recordableListener = null;
-        }
+        recordingCoordinator.stop(false, false);
     }
 
     @Override
     public boolean isRecording() {
-        return recordableListener != null;
+        return recordingCoordinator.isActive();
     }
 
     @Override
@@ -568,6 +588,161 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
         public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
             Log.d(TAG, "Network capabilities changed: " + network + ", capabilities: " + networkCapabilities);
             // Network capabilities changed, ExoPlayer will handle accordingly
+        }
+    }
+
+    private class RecordingDataSourceFactory implements DataSource.Factory {
+        private final DataSource.Factory upstreamFactory;
+
+        RecordingDataSourceFactory(DataSource.Factory upstreamFactory) {
+            this.upstreamFactory = upstreamFactory;
+        }
+
+        @Override
+        public DataSource createDataSource() {
+            return new RecordingDataSource(upstreamFactory.createDataSource());
+        }
+    }
+
+    private class RecordingDataSource implements DataSource {
+        private final DataSource upstream;
+
+        RecordingDataSource(DataSource upstream) {
+            this.upstream = upstream;
+        }
+
+        @Override
+        public void addTransferListener(TransferListener transferListener) {
+            upstream.addTransferListener(transferListener);
+        }
+
+        @Override
+        public long open(DataSpec dataSpec) throws IOException {
+            return upstream.open(dataSpec);
+        }
+
+        @Override
+        public int read(byte[] buffer, int offset, int length) throws IOException {
+            int bytesRead = upstream.read(buffer, offset, length);
+            if (bytesRead > 0) {
+                recordingCoordinator.onBytesRead(buffer, offset, bytesRead);
+            }
+            return bytesRead;
+        }
+
+        @Override
+        public Uri getUri() {
+            return upstream.getUri();
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+                recordingCoordinator.stop(false, true);
+            } finally {
+                upstream.close();
+            }
+        }
+
+        @Override
+        public Map<String, List<String>> getResponseHeaders() {
+            return upstream.getResponseHeaders();
+        }
+    }
+
+    private class RecordingCoordinator {
+        private static final long MAX_DURATION_MS = TimeUnit.MINUTES.toMillis(60);
+
+        private final Handler handler = new Handler(Looper.getMainLooper());
+
+        private RecordableListener listener;
+        private long startElapsedMs;
+        private boolean active;
+        private final Runnable timeoutRunnable = this::handleTimeout;
+
+        void start(@NonNull RecordableListener newListener) {
+            if (active) {
+                Log.w(TAG, "Recording already active, restarting");
+                stop(false, true);
+            }
+
+            listener = newListener;
+            startElapsedMs = SystemClock.elapsedRealtime();
+            active = true;
+            handler.postDelayed(timeoutRunnable, MAX_DURATION_MS);
+        }
+
+        void stop(boolean dueToLimit) {
+            if (!active) {
+                return;
+            }
+
+            handler.removeCallbacks(timeoutRunnable);
+
+            RecordableListener finishingListener = listener;
+            listener = null;
+            active = false;
+
+            deliverStopCallback(finishingListener, dueToLimit);
+        }
+
+        void stop(boolean dueToLimit, boolean suppressedListener) {
+            if (!active) {
+                return;
+            }
+
+            handler.removeCallbacks(timeoutRunnable);
+
+            RecordableListener finishingListener = listener;
+            listener = null;
+            active = false;
+
+            if (!suppressedListener) {
+                deliverStopCallback(finishingListener, dueToLimit);
+            } else if (dueToLimit && stateListener != null) {
+                stateListener.onPlayerWarning(R.string.recording_limit_reached);
+            }
+        }
+
+        boolean isActive() {
+            return active;
+        }
+
+        void onBytesRead(byte[] buffer, int offset, int length) {
+            if (!active || listener == null) {
+                return;
+            }
+
+            long elapsed = SystemClock.elapsedRealtime() - startElapsedMs;
+            if (elapsed >= MAX_DURATION_MS) {
+                stop(true);
+                return;
+            }
+
+            try {
+                listener.onBytesAvailable(buffer, offset, length);
+            } catch (Exception e) {
+                Log.e(TAG, "Recording write failed", e);
+                stop(false);
+            }
+        }
+
+        private void handleTimeout() {
+            stop(true);
+        }
+
+        private void deliverStopCallback(RecordableListener finishingListener, boolean dueToLimit) {
+            if (finishingListener != null) {
+                try {
+                    finishingListener.onRecordingEnded();
+                } catch (Exception e) {
+                    Log.e(TAG, "Recording end callback failed", e);
+                }
+            }
+
+            if (dueToLimit && stateListener != null) {
+                stateListener.onPlayerWarning(R.string.recording_limit_reached);
+            }
         }
     }
 }

@@ -140,11 +140,9 @@ public class MediaSessionUtil {
      * Check if recording
      */
     public static boolean isRecording() {
-        // For now, delegate to RadioPlayer directly
-        // In future, this could be managed through MediaSession
         if (mediaControllerHelper != null) {
             RadioDroidApp app = (RadioDroidApp) mediaControllerHelper.getContext();
-            return app.getRadioPlayer().isRecording();
+            return app.getRecordingsManager().getRecordingInfo(app.getRadioPlayer()) != null;
         }
         return false;
     }
@@ -324,11 +322,10 @@ public class MediaSessionUtil {
      * Start recording (compatibility method)
      */
     public static void startRecording() {
-        // Recording functionality delegated to RadioPlayer
         if (mediaControllerHelper != null) {
             RadioDroidApp app = (RadioDroidApp) mediaControllerHelper.getContext();
             try {
-                app.getRadioPlayer().startRecording(null); // No listener for now
+                app.getRecordingsManager().record(app, app.getRadioPlayer());
             } catch (Exception e) {
                 Log.e(TAG, "Failed to start recording", e);
             }
@@ -339,10 +336,9 @@ public class MediaSessionUtil {
      * Stop recording (compatibility method)
      */
     public static void stopRecording() {
-        // Recording functionality delegated to RadioPlayer
         if (mediaControllerHelper != null) {
             RadioDroidApp app = (RadioDroidApp) mediaControllerHelper.getContext();
-            app.getRadioPlayer().stopRecording();
+            app.getRecordingsManager().stopRecording(app.getRadioPlayer());
         }
     }
     

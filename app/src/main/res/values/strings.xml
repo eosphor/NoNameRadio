@@ -264,8 +264,11 @@
     <string name="player_info_status_recording">recording</string>
     <string name="player_info_status_playing_and_recording">playing and recording</string>
     <string name="player_info_transferred">Transferred data: %1$s</string>
-    <string name="player_info_recording_to">Recording to:\n%1$s</string>
-    <string name="player_info_recorded_to">Last recording:\n%1$s</string>
+    <string name="player_info_recording_to">Recording to:
+ %1$s</string>
+    <string name="player_info_recorded_to">Last recording:
+ %1$s</string>
+    <string name="recording_delete_content_description">Delete recording</string>
 
     <string name="tab_player_art">Album art</string>
     <string name="tab_player_info">Info</string>
@@ -281,6 +284,13 @@
     <string name="image_button_record_request_permission">Request permissions for recording</string>
     <string name="image_button_recordings">Recordings</string>
     <string name="image_button_delete">Delete</string>
+    <string name="recording_delete_title">Delete recording</string>
+    <string name="recording_delete_message">Delete recording "%1$s"?</string>
+    <string name="recording_delete_confirm">Delete</string>
+    <string name="recording_delete_success">Recording deleted</string>
+    <string name="recording_delete_failed">Could not delete recording</string>
+    <string name="recording_limit_reached">Recording stopped: 60 minute limit reached</string>
+    <string name="recording_in_progress_size">Recording… %1$s</string>
     <string name="image_button_more">More</string>
     <string name="image_button_less">Less</string>
     <string name="image_button_repeat">Repeat</string>

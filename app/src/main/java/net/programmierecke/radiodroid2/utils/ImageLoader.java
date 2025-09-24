@@ -123,14 +123,22 @@ public class ImageLoader {
      * Cancel image loading for a specific ImageView
      */
     public static void cancelRequest(Context context, ImageView imageView) {
-        Glide.with(context).clear(imageView);
+        if (context == null) {
+            return;
+        }
+
+        Glide.with(context.getApplicationContext()).clear(imageView);
     }
 
     /**
      * Cancel image loading for a specific target
      */
     public static void cancelRequest(Context context, CustomTarget<?> target) {
-        Glide.with(context).clear(target);
+        if (context == null) {
+            return;
+        }
+
+        Glide.with(context.getApplicationContext()).clear(target);
     }
 
     /**
