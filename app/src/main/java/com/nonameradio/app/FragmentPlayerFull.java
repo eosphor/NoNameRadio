@@ -29,7 +29,7 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.Group;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.paging.PagedList;
 import androidx.preference.PreferenceManager;
@@ -252,7 +252,7 @@ public class FragmentPlayerFull extends Fragment {
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(historyAndRecordsPagerAdapter.recyclerViewSongHistory.getContext(), llmHistory.getOrientation());
         historyAndRecordsPagerAdapter.recyclerViewSongHistory.addItemDecoration(dividerItemDecoration);
 
-        trackHistoryViewModel = ViewModelProviders.of(this).get(TrackHistoryViewModel.class);
+        trackHistoryViewModel = new ViewModelProvider(this).get(TrackHistoryViewModel.class);
         trackHistoryViewModel.getAllHistoryPaged().observe(getViewLifecycleOwner(), new Observer<PagedList<TrackHistoryEntry>>() {
             @Override
             public void onChanged(@Nullable PagedList<TrackHistoryEntry> songHistoryEntries) {

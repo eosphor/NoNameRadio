@@ -4,14 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.fragment.app.Fragment;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -49,7 +47,7 @@ public class FragmentStarred extends Fragment implements IAdapterRefreshable, Ob
 
     private RecyclerView rvStations;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private AsyncTask task = null;
+    private boolean isDownloading = false;
 
     private FavouriteManager favouriteManager;
 
@@ -160,17 +158,16 @@ public class FragmentStarred extends Fragment implements IAdapterRefreshable, Ob
         }
         Log.d(TAG, "Search for items: "+listUUids.size());
 
-        task = new AsyncTask<Void, Void, List<DataRadioStation>>() {
-            @Override
-            protected List<DataRadioStation> doInBackground(Void... params) {
-                return Utils.getStationsByUuid(httpClient, getActivity(), listUUids);
-            }
+        if (isDownloading) return;
+        isDownloading = true;
 
-            @Override
-            protected void onPostExecute(List<DataRadioStation> result) {
+        com.nonameradio.app.core.utils.AsyncExecutor.executeIOTask(
+            () -> Utils.getStationsByUuid(httpClient, getActivity(), listUUids),
+            result -> {
+                isDownloading = false;
                 DownloadFinished();
                 if(getContext() != null)
-                    LocalBroadcastManager.getInstance(getContext()).sendBroadcast(new Intent(ActivityMain.ACTION_HIDE_LOADING));
+                    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(getContext()).sendBroadcast(new Intent(ActivityMain.ACTION_HIDE_LOADING));
                 if (BuildConfig.DEBUG) {
                     Log.d(TAG, "Download relativeUrl finished");
                 }
@@ -190,9 +187,22 @@ public class FragmentStarred extends Fragment implements IAdapterRefreshable, Ob
                         Log.e("ERR",e.toString());
                     }
                 }
-                super.onPostExecute(result);
+            },
+            throwable -> {
+                isDownloading = false;
+                DownloadFinished();
+                if(getContext() != null)
+                    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(getContext()).sendBroadcast(new Intent(ActivityMain.ACTION_HIDE_LOADING));
+                Log.e(TAG, "Error downloading stations", throwable);
+                try {
+                    Toast toast = Toast.makeText(getContext(), getResources().getText(R.string.error_list_update), Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+                catch(Exception e){
+                    Log.e("ERR",e.toString());
+                }
             }
-        }.execute();
+        );
     }
 
     private void SyncList(List<DataRadioStation> list_new) {

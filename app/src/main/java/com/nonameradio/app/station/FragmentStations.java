@@ -208,7 +208,7 @@ public class FragmentStations extends FragmentBase implements IFragmentSearchabl
         if (searchEnabled && Utils.isRunningOnTV(getContext())) {
             Log.d("STATIONS", "onResume: TV detected, will attempt to auto-focus search after delay");
             // Use a longer delay to ensure the activity and search view are fully ready
-            new android.os.Handler().postDelayed(() -> {
+            com.nonameradio.app.core.utils.UiHandler.postDelayed(() -> {
                 Log.d("STATIONS", "Delayed runnable executing for TV auto-focus, activity=" + getActivity() + ", isAdded=" + isAdded());
                 if (getActivity() instanceof ActivityMain && isAdded()) {
                     Log.d("STATIONS", "Calling focusSearchView on ActivityMain");
