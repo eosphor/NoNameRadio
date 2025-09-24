@@ -55,6 +55,10 @@ public class StationManager implements IStationManager {
         return "default";
     }
 
+    protected Context getContext() {
+        return context;
+    }
+
     public void setStationStatusListener(ModernStationStatusListener stationStatusListener) {
         this.stationStatusListener = stationStatusListener;
     }

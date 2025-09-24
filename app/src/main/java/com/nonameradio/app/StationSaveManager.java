@@ -25,7 +25,6 @@ import java.util.Observable;
  *
  * @deprecated Use StationManager instead for new code
  */
-@Deprecated
 public class StationSaveManager extends Observable {
     public interface StationStatusListener {
         void onStationStatusChanged(DataRadioStation station, boolean favourite);

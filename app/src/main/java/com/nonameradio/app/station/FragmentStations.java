@@ -26,7 +26,6 @@ import com.nonameradio.app.BuildConfig;
 import com.nonameradio.app.FragmentBase;
 import com.nonameradio.app.R;
 import com.nonameradio.app.NoNameRadioApp;
-import com.nonameradio.app.StationSaveManager;
 import com.nonameradio.app.Utils;
 import com.nonameradio.app.interfaces.IFragmentSearchable;
 import com.nonameradio.app.service.MediaSessionUtil;
@@ -35,6 +34,7 @@ import com.nonameradio.app.utils.CustomFilter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedList;
 
 public class FragmentStations extends FragmentBase implements IFragmentSearchable {
     private static final String TAG = "FragmentStations";
@@ -53,7 +53,7 @@ public class FragmentStations extends FragmentBase implements IFragmentSearchabl
     private StationsFilter stationsFilter;
     private StationsFilter.SearchStyle lastSearchStyle = StationsFilter.SearchStyle.ByName;
     private String lastQuery = "";
-    private StationSaveManager queue;
+    private List<DataRadioStation> stationsList;
 
     void onStationClick(DataRadioStation theStation, int pos) {
         // Check if this station is currently playing
@@ -87,8 +87,8 @@ public class FragmentStations extends FragmentBase implements IFragmentSearchabl
         String jsonResult = getUrlResult();
         if (BuildConfig.DEBUG) Log.d(TAG, "JSON result length: " + (jsonResult != null ? jsonResult.length() : "null"));
         List<DataRadioStation> radioStations = DataRadioStation.DecodeJson(jsonResult);
-        queue.clear();
-        queue.addAll(radioStations);
+        stationsList.clear();
+        stationsList.addAll(radioStations);
 
         if (BuildConfig.DEBUG) Log.d(TAG, "station count:" + radioStations.size());
 
@@ -111,7 +111,7 @@ public class FragmentStations extends FragmentBase implements IFragmentSearchabl
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.d("STATIONS","onCreateView()");
-        queue = new StationSaveManager(getContext());
+        stationsList = new LinkedList<>();
         Bundle bundle = getArguments();
         if (bundle != null) {
             searchEnabled = bundle.getBoolean(KEY_SEARCH_ENABLED, false);

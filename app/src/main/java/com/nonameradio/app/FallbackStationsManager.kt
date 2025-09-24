@@ -1,17 +1,16 @@
 package com.nonameradio.app
 
 import android.content.Context
+import com.nonameradio.app.core.architecture.IStationRepository
+import com.nonameradio.app.data.repository.impl.StationRepository
+import com.nonameradio.app.service.StationManager
 import com.nonameradio.app.station.DataRadioStation
 
-class FallbackStationsManager(ctx: Context?) : StationSaveManager(ctx) {
+class FallbackStationsManager(ctx: Context?) : StationManager(ctx, StationRepository(ctx, "fallback")) {
 
     init {
         // Load fallback stations immediately
         loadFallbackStations()
-    }
-
-    override fun getSaveId(): String {
-        return "fallback" // Different save ID to not conflict with regular stations
     }
 
     private fun loadFallbackStations() {
