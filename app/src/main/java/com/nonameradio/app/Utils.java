@@ -252,7 +252,6 @@ public class Utils {
         return null;
     }
 
-    @Deprecated
     public static DataRadioStation getStationById(OkHttpClient httpClient, Context ctx, String stationId) {
         Log.w("UTIL", "Search by id:" + stationId);
         String result = Utils.downloadFeed(httpClient, ctx, "json/stations/byid/" + stationId, true, null);

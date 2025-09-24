@@ -70,7 +70,6 @@ public class DataRadioStation implements Parcelable {
 
 	public IStationManager queue;
 
-	@Deprecated
 	public String StationId = "";
 
 	public String getShortDetails(Context ctx) {

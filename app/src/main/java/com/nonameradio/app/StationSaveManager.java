@@ -23,7 +23,6 @@ import java.util.Observable;
  * This class now delegates to the modern StationManager and related services.
  * TODO: Migrate all usage to StationManager directly.
  *
- * @deprecated Use StationManager instead for new code
  */
 public class StationSaveManager extends Observable {
     public interface StationStatusListener {
@@ -199,18 +198,16 @@ public class StationSaveManager extends Observable {
     }
 
     /**
-     * @deprecated Loading is now handled automatically by StationManager
+     * Loading is now handled automatically by StationManager
      */
-    @Deprecated
     void Load() {
         // Loading is handled by StationManager constructor
         Log.w("StationSaveManager", "Load() is deprecated. Loading is handled automatically.");
     }
 
     /**
-     * @deprecated Saving is now handled automatically by StationManager
+     * Saving is now handled automatically by StationManager
      */
-    @Deprecated
     void Save() {
         // Saving is handled automatically by StationManager
         Log.w("StationSaveManager", "Save() is deprecated. Saving is handled automatically.");
