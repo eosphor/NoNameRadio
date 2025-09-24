@@ -7,7 +7,7 @@
         android:orientation="vertical">
     <!--android:visibility="gone">-->
 
-    <net.programmierecke.radiodroid2.views.TagsView
+    <com.nonameradio.app.views.TagsView
             android:id="@+id/viewTags"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -13,7 +13,7 @@
         android:layout_height="1dp"
         android:background="?android:attr/dividerVertical" />
 
-    <net.programmierecke.radiodroid2.views.RecyclerAwareNestedScrollView
+    <com.nonameradio.app.views.RecyclerAwareNestedScrollView
         android:id="@+id/scrollViewContent"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -211,7 +211,7 @@
             </androidx.viewpager.widget.ViewPager>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </net.programmierecke.radiodroid2.views.RecyclerAwareNestedScrollView>
+    </com.nonameradio.app.views.RecyclerAwareNestedScrollView>
 
     <View
         android:id="@+id/dividerBottom"

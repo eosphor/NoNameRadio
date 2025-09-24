@@ -16,7 +16,7 @@
         android:minLines="1"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
-    <net.programmierecke.radiodroid2.views.TagsView
+    <com.nonameradio.app.views.TagsView
         android:id="@+id/viewTags"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

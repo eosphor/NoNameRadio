@@ -39,7 +39,7 @@
 
     <application
         android:banner="@mipmap/ic_banner"
-        android:name=".RadioDroidApp"
+        android:name=".NoNameRadioApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -75,7 +75,7 @@
         </activity>
 
         <service
-            android:name="net.programmierecke.radiodroid2.service.PlayerService"
+            android:name="com.nonameradio.app.service.PlayerService"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback"
             android:permission="android.permission.BIND_JOB_SERVICE">
@@ -86,7 +86,7 @@
         </service>
 
         <service
-            android:name="net.programmierecke.radiodroid2.service.RadioMediaSessionService"
+            android:name="com.nonameradio.app.service.RadioMediaSessionService"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback">
             <intent-filter>
@@ -95,7 +95,7 @@
         </service>
 
         <service
-            android:name="net.programmierecke.radiodroid2.service.RadioDroidBrowserService"
+            android:name="com.nonameradio.app.service.NoNameRadioBrowserService"
             android:exported="true"
             tools:ignore="ExportedService">
             <intent-filter>
@@ -104,7 +104,7 @@
         </service>
 
         <receiver
-            android:name="net.programmierecke.radiodroid2.alarm.AlarmReceiver"
+            android:name="com.nonameradio.app.alarm.AlarmReceiver"
             android:exported="true"
             android:enabled="true">
             <intent-filter>
@@ -122,7 +122,7 @@
         </receiver>
 
         <receiver
-            android:name="net.programmierecke.radiodroid2.BootReceiver"
+            android:name="com.nonameradio.app.BootReceiver"
             android:exported="true"
             android:enabled="true">
             <intent-filter>

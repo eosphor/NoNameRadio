@@ -27,7 +27,7 @@ fun Project.collectAvailableLocales(): List<String> {
 }
 
 android {
-    namespace = "net.programmierecke.radiodroid2"
+    namespace = "com.nonameradio.app"
     compileSdk = 36
     flavorDimensions += "one"
 
@@ -70,7 +70,7 @@ android {
         val escapedLocales = collectAvailableLocales().joinToString(",") { "\"$it\"" }
         buildConfigField("String[]", "AVAILABLE_LOCALES", "{ $escapedLocales }")
 
-        testInstrumentationRunner = "net.programmierecke.radiodroid2.tests.CustomTestRunner"
+        testInstrumentationRunner = "com.nonameradio.app.tests.CustomTestRunner"
         testInstrumentationRunnerArguments["clearPackageData"] = "true"
 
         buildConfigField("boolean", "IS_TESTING", "false")

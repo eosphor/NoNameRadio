@@ -94,7 +94,7 @@ cd NoNameRadio/RadioDroid
 ### **Project Structure**
 ```
 RadioDroid/
-├── 📁 app/src/main/java/net/programmierecke/radiodroid2/
+├── 📁 app/src/main/java/com/nonameradio/app/
 │   ├── 📁 core/          # Core business logic
 │   │   ├── 📁 di/        # Dependency injection
 │   │   ├── 📁 domain/    # Domain entities & interfaces
