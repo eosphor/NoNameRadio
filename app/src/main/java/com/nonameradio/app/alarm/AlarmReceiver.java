@@ -172,7 +172,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                     url = result;
 
                     SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-                    boolean play_external = sharedPref.getBoolean("alarm_external", false);
+                    boolean play_external = false;
                     String packageName = sharedPref.getString("shareapp_package",null);
                     String activityName = sharedPref.getString("shareapp_activity",null);
                     try {
@@ -181,7 +181,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                         timeout = 10;
                     }
                     try {
-                        if (play_external && packageName != null && activityName != null){
+                        if (false && packageName != null && activityName != null){
                             Intent share = new Intent(Intent.ACTION_VIEW);
                             share.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             share.setClassName(packageName,activityName);

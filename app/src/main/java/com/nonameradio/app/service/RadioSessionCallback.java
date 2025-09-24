@@ -99,6 +99,28 @@ public class RadioSessionCallback extends MediaSessionCompat.Callback {
         Log.d(TAG, "onSetShuffleMode called: " + shuffleMode);
         // Could implement shuffle mode for playlist functionality
     }
+
+    @Override
+    public void onPlayFromSearch(String query, Bundle extras) {
+        Log.d(TAG, "onPlayFromSearch called: query='" + query + "'");
+
+        if (query == null || query.trim().isEmpty()) {
+            Log.w(TAG, "Empty search query, ignoring");
+            return;
+        }
+
+        // For voice search, we can try to find a station by name
+        // This is a basic implementation - could be enhanced with more sophisticated search
+        try {
+            NoNameRadioApp app = (NoNameRadioApp) service.getApplication();
+            // We could implement a search here or use existing search functionality
+            // For now, just log the request
+            Log.i(TAG, "Voice search requested for: " + query);
+            // TODO: Implement actual station search and playback
+        } catch (Exception e) {
+            Log.e(TAG, "Error handling voice search", e);
+        }
+    }
     
     @Override
     public void onCustomAction(@NonNull String action, Bundle extras) {

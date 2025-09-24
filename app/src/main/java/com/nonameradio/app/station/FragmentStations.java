@@ -27,6 +27,8 @@ import com.nonameradio.app.NoNameRadioApp;
 import com.nonameradio.app.StationSaveManager;
 import com.nonameradio.app.Utils;
 import com.nonameradio.app.interfaces.IFragmentSearchable;
+import com.nonameradio.app.service.MediaSessionUtil;
+import com.nonameradio.app.service.PauseReason;
 import com.nonameradio.app.utils.CustomFilter;
 
 import java.util.ArrayList;
@@ -52,8 +54,16 @@ public class FragmentStations extends FragmentBase implements IFragmentSearchabl
     private StationSaveManager queue;
 
     void onStationClick(DataRadioStation theStation, int pos) {
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getActivity().getApplication();
-        Utils.showPlaySelection(radioDroidApp, theStation, getActivity().getSupportFragmentManager());
+        // Check if this station is currently playing
+        DataRadioStation currentStation = MediaSessionUtil.getCurrentStation();
+
+        if (currentStation != null && currentStation.StationUuid.equals(theStation.StationUuid) && MediaSessionUtil.isPlaying()) {
+            // Same station is playing - pause it
+            MediaSessionUtil.pause(PauseReason.USER);
+        } else {
+            // Different station or nothing playing - start this station
+            Utils.play((NoNameRadioApp) getActivity().getApplication(), theStation);
+        }
     }
 
     @Override
@@ -244,6 +254,18 @@ public class FragmentStations extends FragmentBase implements IFragmentSearchabl
             stationsFilter.filter(query);
         }else{
             Log.d("STATIONS", "query b = "+query + " " + searchEnabled + " ");
+        }
+    }
+
+    @Override
+    public void clearSearch() {
+        Log.d("STATIONS", "clearSearch");
+        lastQuery = null;
+        lastSearchStyle = StationsFilter.SearchStyle.ByName;
+
+        if (rvStations != null && searchEnabled) {
+            stationsFilter.setSearchStyle(StationsFilter.SearchStyle.ByName);
+            stationsFilter.filter("");
         }
     }
 

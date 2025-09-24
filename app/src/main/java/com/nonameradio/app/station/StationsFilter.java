@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 import okhttp3.OkHttpClient;
@@ -93,8 +94,13 @@ public class StationsFilter extends CustomFilter {
     List<DataRadioStation> searchGlobal(final @NotNull String query) {
         Log.d("FILTER", "searchGlobal 1:" + query);
         NoNameRadioApp radioDroidApp = (NoNameRadioApp) context.getApplicationContext();
-        // TODO: use http client with custom timeouts
-        OkHttpClient httpClient = radioDroidApp.getHttpClient();
+
+        // Create HTTP client with extended timeouts for station search
+        OkHttpClient httpClient = radioDroidApp.newHttpClient()
+                .connectTimeout(15, TimeUnit.SECONDS)  // Extended from 10s
+                .writeTimeout(15, TimeUnit.SECONDS)    // Extended from 10s
+                .readTimeout(30, TimeUnit.SECONDS)     // Extended from 10s for large responses
+                .build();
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.context);
         final boolean show_broken = sharedPref.getBoolean("show_broken", false);

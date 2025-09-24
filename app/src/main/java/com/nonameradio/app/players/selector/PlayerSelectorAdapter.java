@@ -115,7 +115,7 @@ public class PlayerSelectorAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         this.stationToPlay = stationToPlay;
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-        showPlayInExternal = sharedPref.getBoolean("play_external", false) && stationToPlay != null;
+        showPlayInExternal = false;
         warnOnMeteredConnection = sharedPref.getBoolean(PlayerService.METERED_CONNECTION_WARNING_KEY, false);
 
         fixedViewsCount = 0;
@@ -124,10 +124,7 @@ public class PlayerSelectorAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             viewTypes.add(PlayerType.RADIODROID.getValue());
         }
 
-        if (showPlayInExternal) {
-            fixedViewsCount++;
-            viewTypes.add(PlayerType.EXTERNAL.getValue());
-        }
+        // External playback removed: do not add EXTERNAL to view types
 
         if (radioDroidApp.getCastHandler().isCastSessionAvailable()) {
             fixedViewsCount++;
@@ -193,12 +190,6 @@ public class PlayerSelectorAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                             () -> Utils.play((NoNameRadioApp) context.getApplicationContext(), stationToPlay));
                 }
             });
-        } else if (holder.getItemViewType() == PlayerType.EXTERNAL.getValue()) {
-            holder.textViewDescription.setText(R.string.action_play_in_external);
-
-            holder.btnPlay.setOnClickListener(v -> Utils.playAndWarnIfMetered((NoNameRadioApp) context.getApplicationContext(), stationToPlay,
-                    PlayerType.EXTERNAL, () -> PlayStationTask.playExternal(stationToPlay, context).execute()));
-
         } else if (holder.getItemViewType() == PlayerType.CAST.getValue()) {
             holder.textViewDescription.setText(R.string.media_route_menu_title);
 

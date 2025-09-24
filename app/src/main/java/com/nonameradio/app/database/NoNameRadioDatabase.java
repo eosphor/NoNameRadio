@@ -11,16 +11,19 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.nonameradio.app.history.TrackHistoryDao;
 import com.nonameradio.app.history.TrackHistoryEntry;
+import com.nonameradio.app.recording.RecordingMetadataDao;
+import com.nonameradio.app.recording.RecordingMetadata;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import static com.nonameradio.app.history.TrackHistoryEntry.MAX_UNKNOWN_TRACK_DURATION;
 
-@Database(entities = {TrackHistoryEntry.class}, version = 1)
+@Database(entities = {TrackHistoryEntry.class, RecordingMetadata.class}, version = 2)
 @TypeConverters({Converters.class})
 public abstract class NoNameRadioDatabase extends RoomDatabase {
     public abstract TrackHistoryDao songHistoryDao();
+    public abstract RecordingMetadataDao recordingMetadataDao();
 
     private static volatile NoNameRadioDatabase INSTANCE;
 

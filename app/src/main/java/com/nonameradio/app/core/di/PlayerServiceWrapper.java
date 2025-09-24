@@ -1,60 +1,74 @@
 package com.nonameradio.app.core.di;
 
+import android.content.Context;
 import com.nonameradio.app.core.domain.interfaces.IPlayerService;
+import com.nonameradio.app.players.selector.PlayerType;
+import com.nonameradio.app.service.PlayerServiceUtil;
 import com.nonameradio.app.station.DataRadioStation;
 
 /**
- * Stub implementation of IPlayerService for refactored architecture.
- * Will be properly implemented when integrating with existing PlayerService.
+ * Wrapper implementation of IPlayerService that integrates with existing PlayerService.
+ * Uses PlayerServiceUtil for communication with the actual PlayerService.
  */
 public class PlayerServiceWrapper implements IPlayerService {
+    private final Context context;
+
+    public PlayerServiceWrapper(Context context) {
+        this.context = context.getApplicationContext();
+        // Ensure service is bound
+        PlayerServiceUtil.bindService(this.context);
+    }
 
     @Override
     public void play(DataRadioStation station) {
-        // TODO: Implement when integrating with PlayerService
+        PlayerServiceUtil.play(station);
     }
 
     @Override
     public void pause() {
-        // TODO: Implement when integrating with PlayerService
+        PlayerServiceUtil.pause(null); // Use default pause reason
     }
 
     @Override
     public void stop() {
-        // TODO: Implement when integrating with PlayerService
+        PlayerServiceUtil.stop();
     }
 
     @Override
     public boolean isPlaying() {
-        // TODO: Implement when integrating with PlayerService
-        return false;
+        return PlayerServiceUtil.isPlaying();
     }
 
     @Override
     public boolean isRecording() {
-        // TODO: Implement when integrating with PlayerService
-        return false;
+        return PlayerServiceUtil.isRecording();
     }
 
     @Override
     public void startRecording() {
-        // TODO: Implement when integrating with PlayerService
+        PlayerServiceUtil.startRecording();
     }
 
     @Override
     public void stopRecording() {
-        // TODO: Implement when integrating with PlayerService
+        PlayerServiceUtil.stopRecording();
     }
 
     @Override
     public DataRadioStation getCurrentStation() {
-        // TODO: Implement when integrating with PlayerService
-        return null;
+        return PlayerServiceUtil.getCurrentStation();
     }
 
     @Override
     public long getCurrentPosition() {
-        // TODO: Implement when integrating with PlayerService
+        // For radio streams, return elapsed time since playback started
+        if (PlayerServiceUtil.isPlaying()) {
+            final long now = System.currentTimeMillis();
+            final long startTime = PlayerServiceUtil.getLastPlayStartTime();
+            if (startTime > 0) {
+                return (now - startTime) / 1000; // Return seconds elapsed
+            }
+        }
         return 0;
     }
 }

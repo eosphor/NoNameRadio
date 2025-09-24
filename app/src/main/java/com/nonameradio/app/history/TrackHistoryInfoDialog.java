@@ -70,13 +70,27 @@ public class TrackHistoryInfoDialog extends BottomSheetDialogFragment {
                 .apply(options)
                 .into(imageViewTrackArt);
 
-        // TODO: Icons for date and duration
+        // Add icons for date and duration
+        Drawable dateIcon = AppCompatResources.getDrawable(requireContext(), R.drawable.ic_query_builder_black_24dp);
+        Drawable durationIcon = AppCompatResources.getDrawable(requireContext(), R.drawable.ic_hourglass_empty_black_24dp);
+
+        if (dateIcon != null) {
+            dateIcon.setBounds(0, 0, 24, 24);
+            textViewDate.setCompoundDrawables(dateIcon, null, null, null);
+            textViewDate.setCompoundDrawablePadding(8);
+        }
 
         textViewDate.setText(DateFormat.getDateInstance().format(historyEntry.startTime));
 
         if (historyEntry.endTime.after(historyEntry.startTime)) {
             String elapsedTime = DateUtils.formatElapsedTime((historyEntry.endTime.getTime() - historyEntry.startTime.getTime()) / 1000);
             textViewDuration.setText(elapsedTime);
+
+            if (durationIcon != null) {
+                durationIcon.setBounds(0, 0, 24, 24);
+                textViewDuration.setCompoundDrawables(durationIcon, null, null, null);
+                textViewDuration.setCompoundDrawablePadding(8);
+            }
         } else {
             textViewDuration.setText("");
         }

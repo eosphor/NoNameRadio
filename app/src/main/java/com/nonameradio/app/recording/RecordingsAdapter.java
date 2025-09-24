@@ -28,12 +28,22 @@ import com.nonameradio.app.R;
 import com.nonameradio.app.Utils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 public class RecordingsAdapter extends RecyclerView.Adapter<RecordingsAdapter.RecordingItemViewHolder> {
     final static String TAG = "RecordingsAdapter";
+
+    private RecordingsManager recordingsManager;
+
+    public RecordingsAdapter(Context context, RecordingsManager recordingsManager) {
+        this.context = context;
+        this.recordingsManager = recordingsManager;
+        this.recordings = new ArrayList<>();
+        this.deleteClickListener = null;
+    }
 
     class RecordingItemViewHolder extends RecyclerView.ViewHolder {
         final ViewGroup viewRoot;
@@ -76,16 +86,47 @@ public class RecordingsAdapter extends RecyclerView.Adapter<RecordingsAdapter.Re
     public void onBindViewHolder(@NonNull RecordingItemViewHolder holder, int position) {
         final DataRecording recording = recordings.get(position);
 
-        holder.textViewTitle.setText(recording.Name);
-        if (recording.InProgress) {
-            holder.textViewTime.setText(context.getString(R.string.recording_in_progress_size,
-                    Utils.getReadableBytes(recording.SizeBytes)));
-        } else if (recording.Time != null) {
-            holder.textViewTime.setText(DateFormat.getMediumDateFormat(context).format(recording.Time) + " " +
-                    DateFormat.getTimeFormat(context).format(recording.Time));
-        } else {
-            holder.textViewTime.setText(" ");
+        // Get metadata for enhanced display
+        RecordingMetadata metadata = recordingsManager.getRecordingMetadata(recording.Name);
+
+        // Set title - use metadata title if available, otherwise file name
+        String title = recording.Name;
+        if (metadata != null && metadata.getDisplayName() != null) {
+            title = metadata.getDisplayName();
         }
+        holder.textViewTitle.setText(title);
+
+        // Set time/size info
+        StringBuilder info = new StringBuilder();
+
+        if (recording.InProgress) {
+            info.append(context.getString(R.string.recording_in_progress_size,
+                    Utils.getReadableBytes(recording.SizeBytes)));
+        } else {
+            // Add recording date
+            if (metadata != null && metadata.getStartDate() != null) {
+                info.append(DateFormat.getMediumDateFormat(context).format(metadata.getStartDate()));
+                info.append(" ");
+                info.append(DateFormat.getTimeFormat(context).format(metadata.getStartDate()));
+            } else if (recording.Time != null) {
+                info.append(DateFormat.getMediumDateFormat(context).format(recording.Time));
+                info.append(" ");
+                info.append(DateFormat.getTimeFormat(context).format(recording.Time));
+            }
+
+            // Add duration and size if metadata available
+            if (metadata != null) {
+                if (info.length() > 0) info.append(" • ");
+                info.append(metadata.getDurationString());
+                info.append(" • ");
+                info.append(metadata.getFileSizeString());
+            } else if (recording.SizeBytes > 0) {
+                if (info.length() > 0) info.append(" • ");
+                info.append(Utils.getReadableBytes(recording.SizeBytes));
+            }
+        }
+
+        holder.textViewTime.setText(info.toString());
 
         holder.viewRoot.setOnClickListener(view -> openRecording(recording));
         holder.buttonDelete.setOnClickListener(view -> confirmDelete(recording));
@@ -120,14 +161,7 @@ public class RecordingsAdapter extends RecyclerView.Adapter<RecordingsAdapter.Re
                 .setDataAndType(fileUri, "audio/*")
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            ClipData clip = ClipData.newUri(context.getContentResolver(), "Record", fileUri);
-            intent.setClipData(clip);
-        } else {
-            grantUriPermissionsLegacy(fileUri, intent);
-        }
+        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
         context.startActivity(intent);
     }

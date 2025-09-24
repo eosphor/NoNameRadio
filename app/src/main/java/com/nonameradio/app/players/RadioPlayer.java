@@ -94,7 +94,7 @@ public class RadioPlayer implements PlayerWrapper.PlayListener, Recordable {
 
         NoNameRadioApp radioDroidApp = (NoNameRadioApp) mainContext.getApplicationContext();
 
-        // TODO: Should we not pass http client if currentPlayer is external?
+        // External player режим удалён; используем кастомный HTTP‑клиент всегда
 
         final OkHttpClient customizedHttpClient = radioDroidApp.newHttpClient()
                 .connectTimeout(connectTimeout, TimeUnit.SECONDS)

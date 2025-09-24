@@ -341,7 +341,7 @@ public class StationSaveManager extends Observable {
             Log.d("SAVE", "wrote: " + str);
         }
         editor.putString(getSaveId(), str);
-        editor.commit();
+        editor.apply();
     }
 
     public static String getSaveDir() {

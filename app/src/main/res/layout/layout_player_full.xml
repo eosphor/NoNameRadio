@@ -224,6 +224,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <ProgressBar
+            android:id="@+id/progressBarLoading"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/buttonRecord"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
         <ImageButton
             android:id="@+id/buttonRecord"
             android:layout_width="48dp"

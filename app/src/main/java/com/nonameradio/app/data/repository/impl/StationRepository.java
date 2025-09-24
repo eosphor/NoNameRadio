@@ -15,9 +15,7 @@ public class StationRepository implements IStationRepository {
 
     @Override
     public List<DataRadioStation> getStations() {
-        // Since listStations is not public, we need to work around this
-        // For now, return empty list - this needs to be implemented properly
-        return new ArrayList<>();
+        return stationSaveManager.getList();
     }
 
     @Override

@@ -61,7 +61,7 @@
     <string name="nav_item_settings">Settings</string>
     <string name="nav_item_alarm">Alarm</string>
 
-    <string name="about_text">NoNameRadio is an open-source fork of RadioDroid.\n\nProject home:\nhttps://github.com/eosphor/NoNameRadio\n\nThis app uses the free radio station directory at\nhttps://www.radio-browser.info\nAnyone can contribute stations; it works like a wiki for online (streaming) radio.\n\nOriginal project:\nhttps://github.com/morckx/RadioDroid\n(initially: https://github.com/segler-alex/RadioDroid)\n\nThis app is free software licensed under the GPLv3.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
+    <string name="about_text">NoNameRadio is an open-source fork of RadioDroid.\n\nProject home:\nhttps://github.com/eosphor/NoNameRadio\n\nThis app uses the free radio station directory at\nhttps://www.radio-browser.info\nAnyone can contribute stations; it works like a wiki for online (streaming) radio.\n\nOriginal project:\nhttps://github.com/segler-alex/RadioDroid\n\nThis app is free software licensed under the GPLv3.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
     <string name="about_version">Version: %1$s</string>
     <string name="detail_star">Add to favorites</string>
     <string name="detail_unstar">Delete from favorites</string>
@@ -258,6 +258,7 @@
     <string name="giving_up_resume">Giving up attempt to resume playback</string>
 
     <string name="error_record_needs_write">Need write permission for recording</string>
+    <string name="error_insufficient_disk_space">Insufficient disk space. Need at least 100 MB free space for recording.</string>
     <string name="error_grant_audiofocus">Request for audio focus was not granted by the system</string>
 
     <string name="error_no_equalizer_found">No equalizer app found</string>
@@ -372,5 +373,7 @@
     <string name="context_menu_add_alarm">@string/action_alarm</string>
     <string name="context_menu_create_shortcut">@string/detail_create_shortcut</string>
     <string name="context_menu_delete">@string/action_delete</string>
+
+    <string name="alarm_no_station_selected">Для создания будильника сначала выберите радиостанцию</string>
 
 </resources>

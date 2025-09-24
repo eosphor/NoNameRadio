@@ -31,8 +31,7 @@ public class DependencyInjector {
         recordingRepository = new RecordingRepository(app.getRecordingsManager());
 
         // Initialize services
-        // PlayerService wrapper will be initialized later when needed
-        playerService = null;
+        playerService = new PlayerServiceWrapper(context);
 
         // Initialize managers
         navigationManager = null; // Will be initialized per activity

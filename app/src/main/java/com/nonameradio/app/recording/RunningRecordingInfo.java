@@ -12,6 +12,7 @@ public class RunningRecordingInfo {
     private long bytesWritten;
     private Uri mediaStoreUri;
     private DataRecording linkedDataRecording;
+    private RecordingMetadata metadata;
 
     public Recordable getRecordable() {
         return recordable;
@@ -83,5 +84,13 @@ public class RunningRecordingInfo {
         if (linkedDataRecording != null) {
             linkedDataRecording.ContentUri = mediaStoreUri;
         }
+    }
+
+    public RecordingMetadata getMetadata() {
+        return metadata;
+    }
+
+    protected void setMetadata(RecordingMetadata metadata) {
+        this.metadata = metadata;
     }
 }

@@ -50,11 +50,11 @@ android {
 
     defaultConfig {
         applicationId = "com.nonameradio.app"
-        minSdk = 21
+        minSdk = 24
         targetSdk = 36
 
         versionCode = 99
-        versionName = "0.86.903-morckx"
+        versionName = "0.86.903"
 
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
@@ -115,6 +115,7 @@ android {
     productFlavors {
         create("play") {
             dimension = "one"
+            // Google Cast available only in Play flavor
         }
         create("free") {
             dimension = "one"
@@ -238,6 +239,9 @@ dependencies {
 
     // Analytics
     implementation(libs.yandex.metrica)
+
+    // Google Cast (used in play flavor sources)
+    implementation(libs.play.services.cast.framework)
 
     // Testing
     testImplementation(libs.junit4)

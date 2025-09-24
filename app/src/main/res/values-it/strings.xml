@@ -58,7 +58,7 @@
     <string name="nav_item_settings">Impostazioni</string>
     <string name="nav_item_alarm">Sveglia</string>
 
-    <string name="about_text">Questa applicazione usa il direttorio libero di stazioni radio presso\nhttps://www.radio-browser.info\nChiunque può aggiungere stazioni. Funziona come una wiki per le stazioni radio online (streaming).\n\nBugtracker:\nhttps://github.com/morckx/NoNameRadio/issues\n(originariamente: https://github.com/segler-alex/NoNameRadio/issues)\n\nQuesta applicazione è software libero sotto licenza GPLv3.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
+    <string name="about_text">Questa applicazione usa il direttorio libero di stazioni radio presso\nhttps://www.radio-browser.info\nChiunque può aggiungere stazioni. Funziona come una wiki per le stazioni radio online (streaming).\n\nBugtracker:\nhttps://github.com/eosphor/NoNameRadio/issues\n(originariamente: https://github.com/segler-alex/RadioDroid/issues)\n\nQuesta applicazione è software libero sotto licenza GPLv3.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
     <string name="about_version">Versione: %1$s</string>
     <string name="detail_star">Aggiungi ai preferiti</string>
     <string name="detail_unstar">Cancella dai favoriti</string>

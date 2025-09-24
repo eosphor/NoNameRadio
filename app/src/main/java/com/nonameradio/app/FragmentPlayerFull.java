@@ -24,6 +24,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Iterator;
+import java.util.Map;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.Group;
@@ -66,6 +69,7 @@ import com.nonameradio.app.views.TagsView;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Observable;
 
@@ -100,6 +104,8 @@ public class FragmentPlayerFull extends Fragment {
     private RecordingsManager recordingsManager;
     private java.util.Observer recordingsObserver;
 
+    private com.nonameradio.app.presentation.ui.PlayerUIController playerUIController;
+
     private FavouriteManager favouriteManager;
     private final FavouritesObserver favouritesObserver = new FavouritesObserver();
 
@@ -114,28 +120,31 @@ public class FragmentPlayerFull extends Fragment {
     private RecyclerAwareNestedScrollView scrollViewContent;
 
     private ViewPager pagerArtAndInfo;
-    private ArtAndInfoPagerAdapter artAndInfoPagerAdapter;
 
-    private TextView textViewGeneralInfo;
-    private TextView textViewTimePlayed;
-    private TextView textViewNetworkUsageInfo;
-    private TextView textViewTimeCached;
+    public TextView textViewGeneralInfo;
+    public TextView textViewTimePlayed;
+    public TextView textViewNetworkUsageInfo;
+    public TextView textViewTimeCached;
 
-    private Group groupRecordings;
-    private ImageView imgRecordingIcon;
-    private TextView textViewRecordingSize;
-    private TextView textViewRecordingName;
+    public Group groupRecordings;
+    public ImageView imgRecordingIcon;
+    public TextView textViewRecordingSize;
+    public TextView textViewRecordingName;
 
     private ViewPager pagerHistoryAndRecordings;
     private HistoryAndRecordsPagerAdapter historyAndRecordsPagerAdapter;
 
     private TrackHistoryViewModel trackHistoryViewModel;
 
-    private ImageButton btnPlay;
-    private ImageButton btnPrev;
-    private ImageButton btnNext;
-    private ImageButton btnRecord;
-    private ImageButton btnFavourite;
+    public ImageButton btnPlay;
+    public ImageButton btnPrev;
+    public ImageButton btnNext;
+    public ImageButton btnRecord;
+    public ImageButton btnFavourite;
+    public android.widget.ProgressBar progressBarLoading;
+
+    public ArtAndInfoPagerAdapter artAndInfoPagerAdapter;
+    public android.view.animation.Animation recordingAnimation;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -146,6 +155,10 @@ public class FragmentPlayerFull extends Fragment {
         recordingsObserver = (observable, o) -> updateRecordings();
 
         favouriteManager = radioDroidApp.getFavouriteManager();
+
+        // Initialize PlayerUIController
+        playerUIController = new com.nonameradio.app.presentation.ui.PlayerUIController(
+            this, com.nonameradio.app.core.di.DependencyInjector.getPlayerService());
 
         trackHistoryAdapter = new TrackHistoryAdapter(requireActivity());
         trackHistoryAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
@@ -242,6 +255,7 @@ public class FragmentPlayerFull extends Fragment {
         btnNext = view.findViewById(R.id.buttonNext);
         btnRecord = view.findViewById(R.id.buttonRecord);
         btnFavourite = view.findViewById(R.id.buttonFavorite);
+        progressBarLoading = view.findViewById(R.id.progressBarLoading);
 
         historyAndRecordsPagerAdapter.recyclerViewSongHistory.setAdapter(trackHistoryAdapter);
 
@@ -260,7 +274,7 @@ public class FragmentPlayerFull extends Fragment {
             }
         });
 
-        recordingsAdapter = new RecordingsAdapter(requireContext());
+        recordingsAdapter = new RecordingsAdapter(requireContext(), recordingsManager);
         recordingsAdapter.setOnDeleteClickListener(recording -> {
             recordingsManager.deleteRecording(recording);
             updateRecordings();
@@ -530,7 +544,7 @@ public class FragmentPlayerFull extends Fragment {
 
         if (station != null) {
             final ShoutcastInfo shoutcastInfo = MediaSessionUtil.getShoutcastInfo();
-            // TODO: add some of shoutcast info
+            // Shoutcast info is now displayed via PlayerUIController.buildStationInfo()
 
             final StreamLiveInfo liveInfo = MediaSessionUtil.getMetadataLive();
             String streamTitle = liveInfo != null ? liveInfo.getTitle() : null;
@@ -548,13 +562,11 @@ public class FragmentPlayerFull extends Fragment {
                 flag.setBounds(0, 0, (int) (k * viewHeight), (int) viewHeight);
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                artAndInfoPagerAdapter.textViewStationDescription.setCompoundDrawablesRelative(flag, null, null, null);
-            } else {
-                artAndInfoPagerAdapter.textViewStationDescription.setCompoundDrawables(flag, null, null, null);
-            }
+            artAndInfoPagerAdapter.textViewStationDescription.setCompoundDrawablesRelative(flag, null, null, null);
 
-            // TODO: add votes/clicks/trend
+            // Add votes/clicks/trend statistics
+            String statsText = buildStationStatsText(station);
+            artAndInfoPagerAdapter.textViewStationStats.setText(statsText);
 
             artAndInfoPagerAdapter.textViewStationDescription.setText(station.getLongDetails(requireContext()));
 
@@ -566,7 +578,11 @@ public class FragmentPlayerFull extends Fragment {
         updateAlbumArt();
         updateRecordings();
         updatePlaybackButtons(MediaSessionUtil.isPlaying(), MediaSessionUtil.isRecording());
-        updateFavouriteButton();
+
+        // Update UI via PlayerUIController
+        if (playerUIController != null) {
+            playerUIController.performFullUpdate();
+        }
 
         timedUpdateTask.run();
 
@@ -613,12 +629,19 @@ public class FragmentPlayerFull extends Fragment {
     private void updateRunningRecording() {
         Map<Recordable, RunningRecordingInfo> runningRecordings = recordingsManager.getRunningRecordings();
         if (MediaSessionUtil.isRecording() && !runningRecordings.isEmpty()) {
-            RunningRecordingInfo recordingInfo = runningRecordings.entrySet().iterator().next().getValue();
+            // Get first recording info safely
+            Iterator<Map.Entry<Recordable, RunningRecordingInfo>> iterator = runningRecordings.entrySet().iterator();
+            if (iterator.hasNext()) {
+                RunningRecordingInfo recordingInfo = iterator.next().getValue();
 
-            groupRecordings.setVisibility(View.VISIBLE);
-            imgRecordingIcon.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.blink_recording));
-            textViewRecordingSize.setText(Utils.getReadableBytes(recordingInfo.getBytesWritten()));
-            textViewRecordingName.setText(recordingInfo.getFileName());
+                groupRecordings.setVisibility(View.VISIBLE);
+                imgRecordingIcon.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.blink_recording));
+                textViewRecordingSize.setText(Utils.getReadableBytes(recordingInfo.getBytesWritten()));
+                textViewRecordingName.setText(recordingInfo.getFileName());
+            } else {
+                groupRecordings.setVisibility(View.GONE);
+                imgRecordingIcon.clearAnimation();
+            }
         } else {
             groupRecordings.setVisibility(View.GONE);
             imgRecordingIcon.clearAnimation();
@@ -814,6 +837,7 @@ public class FragmentPlayerFull extends Fragment {
 
         ImageView imageViewArt;
         TextView textViewStationDescription;
+        TextView textViewStationStats;
         TagsView viewTags;
 
         ArtAndInfoPagerAdapter(@NonNull Context context, @NonNull ViewGroup parent) {
@@ -827,6 +851,7 @@ public class FragmentPlayerFull extends Fragment {
             imageViewArt = layoutAlbumArt.findViewById(R.id.imageViewArt);
 
             textViewStationDescription = layoutStationInfo.findViewById(R.id.textViewStationDescription);
+            textViewStationStats = layoutStationInfo.findViewById(R.id.textViewStationStats);
             viewTags = layoutStationInfo.findViewById(R.id.viewTags);
         }
 
@@ -969,6 +994,63 @@ public class FragmentPlayerFull extends Fragment {
 
             updatePlaybackButtons(MediaSessionUtil.isPlaying(), MediaSessionUtil.isRecording());
             updateRecordings();
+        }
+    }
+
+    /**
+     * Build formatted statistics text for the station
+     */
+    private String buildStationStatsText(DataRadioStation station) {
+        if (station == null) {
+            return "";
+        }
+
+        StringBuilder stats = new StringBuilder();
+
+        // Add votes
+        if (station.Votes > 0) {
+            stats.append("👥 ");
+            stats.append(formatNumber(station.Votes));
+            stats.append(" votes");
+        }
+
+        // Add clicks
+        if (station.ClickCount > 0) {
+            if (stats.length() > 0) {
+                stats.append(" • ");
+            }
+            stats.append("👆 ");
+            stats.append(formatNumber(station.ClickCount));
+            stats.append(" clicks");
+        }
+
+        // Add trend
+        if (station.ClickTrend != 0) {
+            if (stats.length() > 0) {
+                stats.append(" • ");
+            }
+            if (station.ClickTrend > 0) {
+                stats.append("📈 +");
+                stats.append(station.ClickTrend);
+            } else if (station.ClickTrend < 0) {
+                stats.append("📉 ");
+                stats.append(station.ClickTrend);
+            }
+        }
+
+        return stats.toString();
+    }
+
+    /**
+     * Format large numbers with K/M suffixes
+     */
+    private String formatNumber(int number) {
+        if (number >= 1000000) {
+            return String.format(Locale.ROOT, "%.1fM", number / 1000000.0);
+        } else if (number >= 1000) {
+            return String.format(Locale.ROOT, "%.1fK", number / 1000.0);
+        } else {
+            return String.valueOf(number);
         }
     }
 }

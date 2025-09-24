@@ -21,31 +21,13 @@ import com.nonameradio.app.players.selector.PlayerType
 object StationPopupMenu {
     fun open(view: View, context: Context, activity: FragmentActivity, station: DataRadioStation, itemAdapterStation: ItemAdapterStation): MaterialPopupMenu {
         val rootView = view.rootView
-        val sharedPref = PreferenceManager.getDefaultSharedPreferences(activity.applicationContext)
-        val play_external = sharedPref.getBoolean("play_external", false)
+        // External playback removed
         val gravity = if (view.y + view.height > view.rootView.height / 2) Gravity.TOP else Gravity.BOTTOM
         val popupMenu = popupMenu {
             dropdownGravity = gravity
             style = if (Utils.isDarkTheme(context)) R.style.Widget_MPM_Menu_Dark else R.style.Widget_MPM_Menu
             section {
-                if (play_external) {
-                    item {
-                        labelRes = R.string.context_menu_play_in_radiodroid
-                        icon = R.drawable.ic_play_in_radiodroid_24dp
-                        callback = {
-                            StationActions.playInRadioDroid(context, station)
-                        }
-                    }
-                } else {
-                    item {
-                        labelRes = R.string.context_menu_play_in_external_player
-                        iconDrawable = IconicsDrawable(context, CommunityMaterial.Icon2.cmd_play_box_outline).apply { sizeDp = 24 }
-                        callback = {
-                            Utils.playAndWarnIfMetered(context.applicationContext as NoNameRadioApp, station,
-                                    PlayerType.EXTERNAL) { PlayStationTask.playExternal(station, context).execute() }
-                        }
-                    }
-                }
+                // Removed external/internal toggle item
                 item {
                     labelRes = R.string.context_menu_visit_homepage
                     iconDrawable = IconicsDrawable(context, GoogleMaterial.Icon.gmd_home).apply { sizeDp = 24 }

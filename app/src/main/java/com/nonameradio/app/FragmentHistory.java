@@ -24,6 +24,8 @@ import com.nonameradio.app.station.DataRadioStation;
 import com.nonameradio.app.interfaces.IAdapterRefreshable;
 import com.nonameradio.app.station.StationActions;
 import com.nonameradio.app.station.StationsFilter;
+import com.nonameradio.app.service.MediaSessionUtil;
+import com.nonameradio.app.service.PauseReason;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,8 +42,16 @@ public class FragmentHistory extends Fragment implements IAdapterRefreshable {
     private HistoryManager historyManager;
 
     void onStationClick(DataRadioStation theStation) {
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getActivity().getApplication();
-        Utils.showPlaySelection(radioDroidApp, theStation, getActivity().getSupportFragmentManager());
+        // Check if this station is currently playing
+        DataRadioStation currentStation = MediaSessionUtil.getCurrentStation();
+
+        if (currentStation != null && currentStation.StationUuid.equals(theStation.StationUuid) && MediaSessionUtil.isPlaying()) {
+            // Same station is playing - pause it
+            MediaSessionUtil.pause(PauseReason.USER);
+        } else {
+            // Different station or nothing playing - start this station
+            Utils.play((NoNameRadioApp) getActivity().getApplication(), theStation);
+        }
 
         RefreshListGui();
         rvStations.smoothScrollToPosition(0);

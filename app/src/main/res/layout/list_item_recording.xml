@@ -40,7 +40,7 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/recording_delete_content_description"
         android:padding="4dp"
-        android:tint="?attr/colorOnSurface"
+        app:tint="?attr/colorOnSurface"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"

@@ -2,7 +2,9 @@ package com.nonameradio.app.station;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
@@ -15,6 +17,7 @@ import android.content.pm.ShortcutManager;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.FragmentActivity;
@@ -25,6 +28,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
@@ -70,7 +74,25 @@ public class ItemAdapterStation
     List<DataRadioStation> stationsList;
     List<DataRadioStation> filteredStationsList = new ArrayList<>();
 
+    // Map for fast UUID to position lookup
+    private final Map<String, Integer> uuidToPositionMap = new HashMap<>();
+
     int resourceId;
+
+    /**
+     * Rebuilds the UUID to position mapping for fast lookups
+     */
+    private void rebuildPositionMap() {
+        uuidToPositionMap.clear();
+        if (filteredStationsList != null) {
+            for (int i = 0; i < filteredStationsList.size(); i++) {
+                DataRadioStation station = filteredStationsList.get(i);
+                if (station != null && station.StationUuid != null) {
+                    uuidToPositionMap.put(station.StationUuid, i);
+                }
+            }
+        }
+    }
 
     StationActionsListener stationActionsListener;
     private FilterListener filterListener;
@@ -116,6 +138,9 @@ public class ItemAdapterStation
         TextView textViewShortDescription;
         TextView textViewTags;
         ImageButton buttonMore;
+        ImageButton buttonFavorite;
+
+        private boolean iconClicked = false;
 
         View viewDetails;
         ViewStub stubDetails;
@@ -138,18 +163,18 @@ public class ItemAdapterStation
             imageViewIcon = itemView.findViewById(R.id.imageViewIcon);
             imageTrend = itemView.findViewById(R.id.trendStatusIcon);
             transparentImageView = itemView.findViewById(R.id.transparentCircle);
-            starredStatusIcon = itemView.findViewById(R.id.starredStatusIcon);
             textViewTitle = itemView.findViewById(R.id.textViewTitle);
             textViewShortDescription = itemView.findViewById(R.id.textViewShortDescription);
             textViewTags = itemView.findViewById(R.id.textViewTags);
             buttonMore = itemView.findViewById(R.id.buttonMore);
+            buttonFavorite = itemView.findViewById(R.id.buttonFavorite);
             stubDetails = itemView.findViewById(R.id.stubDetails);
 
-            itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
+            Log.d("StationClick", "Card clicked for station: " + filteredStationsList.get(getAdapterPosition()).Name + ", view: " + view.getClass().getSimpleName());
             if (stationActionsListener != null) {
                 int pos = getAdapterPosition();
                 stationActionsListener.onStationClick(filteredStationsList.get(pos), pos);
@@ -237,6 +262,9 @@ public class ItemAdapterStation
         expandedPosition = -1;
         playingStationPosition = -1;
 
+        // Rebuild the position map for fast lookups
+        rebuildPositionMap();
+
         shouldLoadIcons = Utils.shouldLoadIcons(getContext());
 
         highlightCurrentStation();
@@ -277,6 +305,9 @@ public class ItemAdapterStation
             holder.itemView.setBackgroundColor(0x00000000);
         }
 
+        // Set click listener on the entire card (excluding buttons) for playback
+        holder.itemView.setOnClickListener(holder);
+
         if (!shouldLoadIcons) {
             holder.imageViewIcon.setVisibility(View.GONE);
         } else {
@@ -287,37 +318,53 @@ public class ItemAdapterStation
                 holder.imageViewIcon.setImageDrawable(stationImagePlaceholder);
             }
 
+            // Make sure imageViewIcon is not clickable
+            holder.imageViewIcon.setClickable(false);
+            holder.imageViewIcon.setFocusable(false);
+
             if (prefs.getBoolean("compact_style", false))
                 setupCompactStyle(holder);
 
-            if (prefs.getBoolean("icon_click_toggles_favorite", true)) {
+            // Set up favorite button
+            final boolean isInFavorites = favouriteManager.has(station.StationUuid);
+            holder.buttonFavorite.setContentDescription(getContext().getApplicationContext().getString(isInFavorites ? R.string.detail_unstar : R.string.detail_star));
+            holder.buttonFavorite.setImageResource(isInFavorites ? R.drawable.ic_heart_24dp : R.drawable.ic_heart_border_24dp);
+            holder.buttonFavorite.setClickable(true);
+            holder.buttonFavorite.setFocusable(true);
 
-                final boolean isInFavorites = favouriteManager.has(station.StationUuid);
-                holder.imageViewIcon.setContentDescription(getContext().getApplicationContext().getString(isInFavorites ? R.string.detail_unstar : R.string.detail_star));
-                holder.imageViewIcon.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (favouriteManager.has(station.StationUuid)) {
-                            StationActions.removeFromFavourites(getContext(), view, station);
-                        } else {
-                            StationActions.markAsFavourite(getContext(), station);
-                        }
+            // Enable favorite button click to toggle favourites without triggering card click
+            holder.buttonFavorite.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.d("StationClick", "Favorite button clicked for station: " + station.Name);
 
-                        int position = holder.getAdapterPosition();
+                    if (favouriteManager.has(station.StationUuid)) {
+                        StationActions.removeFromFavourites(getContext(), view, station);
+                    } else {
+                        StationActions.markAsFavourite(getContext(), station);
+                    }
+
+                    int position = holder.getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
                         notifyItemChanged(position);
                     }
-                });
-            }
+                }
+            });
+
         }
+
 
         final boolean isExpanded = holder.getAdapterPosition() == expandedPosition;
         holder.textViewTags.setVisibility(isExpanded ? View.GONE : View.VISIBLE);
 
         holder.buttonMore.setImageResource(isExpanded ? R.drawable.ic_expand_less_black_24dp : R.drawable.ic_expand_more_black_24dp);
         holder.buttonMore.setContentDescription(getContext().getApplicationContext().getString(isExpanded ? R.string.image_button_less : R.string.image_button_more));
+
+
         holder.buttonMore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d("StationClick", "More button clicked for station: " + filteredStationsList.get(holder.getAdapterPosition()).Name);
                 // Notify prev item change
                 if (expandedPosition != -1) {
                     notifyItemChanged(expandedPosition);
@@ -360,9 +407,6 @@ public class ItemAdapterStation
         holder.textViewShortDescription.setText(station.getShortDetails(getContext()));
         holder.textViewTags.setText(station.TagsAll.replace(",", ", "));
 
-        boolean inFavourites = favouriteManager.has(station.StationUuid);
-        holder.starredStatusIcon.setVisibility(inFavourites ? View.VISIBLE : View.GONE);
-        holder.starredStatusIcon.setContentDescription(inFavourites ? getContext().getString(R.string.action_favorite) : "");
 
         if (prefs.getBoolean("click_trend_icon_visible", true)) {
             if (station.ClickTrend < 0) {
@@ -387,11 +431,7 @@ public class ItemAdapterStation
             flag.setBounds(0, 0, (int) (k * viewHeight), (int) viewHeight);
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            holder.textViewShortDescription.setCompoundDrawablesRelative(flag, null, null, null);
-        } else {
-            holder.textViewShortDescription.setCompoundDrawables(flag, null, null, null);
-        }
+        holder.textViewShortDescription.setCompoundDrawablesRelative(flag, null, null, null);
 
         if (isExpanded) {
             holder.viewDetails = holder.stubDetails == null ? holder.viewDetails : holder.stubDetails.inflate();
@@ -444,21 +484,8 @@ public class ItemAdapterStation
                 }
             });
 
-            if (prefs.getBoolean("play_external", false)) {
-                holder.buttonPlayInternalOrExternal.setOnClickListener(v -> {
-                    StationActions.playInRadioDroid(getContext(), station);
-                });
-            } else {
-                Context context = getContext();
-                holder.buttonPlayInternalOrExternal.setContentDescription(getContext().getString(R.string.detail_play_in_external_player));
-                IconicsDrawable drawable = new IconicsDrawable(getContext(), CommunityMaterial.Icon2.cmd_play_box_outline);
-                float density = getContext().getResources().getDisplayMetrics().density;
-                drawable.setSizeXPx((int)(24 * density));
-                drawable.setSizeYPx((int)(24 * density));
-                holder.buttonPlayInternalOrExternal.setImageDrawable(drawable);
-                holder.buttonPlayInternalOrExternal.setOnClickListener(v -> Utils.playAndWarnIfMetered((NoNameRadioApp) context.getApplicationContext(), station,
-                        PlayerType.EXTERNAL, () -> PlayStationTask.playExternal(station, context).execute()));
-            }
+            // External player functionality removed. Hide the button in expanded card.
+            holder.buttonPlayInternalOrExternal.setVisibility(View.GONE);
             String[] tags = station.TagsAll.split(",");
             holder.viewTags.setTags(Arrays.asList(tags));
             holder.viewTags.setTagSelectionCallback(tagSelectionCallback);
@@ -599,12 +626,10 @@ public class ItemAdapterStation
     }
 
     private void notifyChangedByStationUuid(String uuid) {
-        // TODO: Iterate through view holders instead of whole collection
-        for (int i = 0; i < filteredStationsList.size(); i++) {
-            if (filteredStationsList.get(i).StationUuid.equals(uuid)) {
-                notifyItemChanged(i);
-                break;
-            }
+        // Use the position map for O(1) lookup instead of O(n) iteration
+        Integer position = uuidToPositionMap.get(uuid);
+        if (position != null) {
+            notifyItemChanged(position);
         }
     }
 }

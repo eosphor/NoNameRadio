@@ -379,7 +379,7 @@ This project is free software licensed under the [GPLv3](https://www.gnu.org/lic
 
 - **🏠 Project Home**: [https://github.com/eosphor/NoNameRadio](https://github.com/eosphor/NoNameRadio)
 - **📖 Documentation**: [Clean Architecture Guide](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-- **🔗 Original Project**: [https://github.com/morckx/RadioDroid](https://github.com/morckx/RadioDroid)
+- **🔗 Original Project**: [https://github.com/segler-alex/RadioDroid](https://github.com/segler-alex/RadioDroid)
 - **📊 Build Status**: ![Build Status](https://github.com/eosphor/NoNameRadio/workflows/Android%20CI/badge.svg)
 
 ## 👨‍💻 Author & Team

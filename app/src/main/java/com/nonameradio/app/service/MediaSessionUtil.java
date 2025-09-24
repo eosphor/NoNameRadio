@@ -290,24 +290,23 @@ public class MediaSessionUtil {
      * Clear timer (compatibility method)
      */
     public static void clearTimer() {
-        // Timer functionality not implemented in MediaSession yet
-        Log.d(TAG, "clearTimer not implemented in MediaSession");
+        PlayerServiceUtil.clearTimer();
+        Log.d(TAG, "Timer cleared");
     }
-    
+
     /**
      * Add timer (compatibility method)
      */
     public static void addTimer(int secondsAdd) {
-        // Timer functionality not implemented in MediaSession yet
-        Log.d(TAG, "addTimer not implemented in MediaSession");
+        PlayerServiceUtil.addTimer(secondsAdd);
+        Log.d(TAG, "Timer set to " + secondsAdd + " seconds");
     }
-    
+
     /**
      * Get timer seconds (compatibility method)
      */
     public static long getTimerSeconds() {
-        // Timer functionality not implemented in MediaSession yet
-        return 0;
+        return PlayerServiceUtil.getTimerSeconds();
     }
     
     /**
@@ -401,8 +400,8 @@ public class MediaSessionUtil {
      * Warn about metered connection (compatibility method)
      */
     public static void warnAboutMeteredConnection(PlayerType playerType) {
-        // Metered connection warning not implemented in MediaSession
-        Log.d(TAG, "warnAboutMeteredConnection not implemented in MediaSession");
+        PlayerServiceUtil.warnAboutMeteredConnection(playerType);
+        Log.d(TAG, "Metered connection warning shown for player type: " + playerType);
     }
     
     /**

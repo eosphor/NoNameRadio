@@ -131,12 +131,7 @@
         search:ignore="true"
         android:key="pref_category_player">
 
-        <CheckBoxPreference
-            android:disableDependentsState="true"
-            android:key="play_external"
-            android:summaryOff="@string/settings_play_external_desc_off"
-            android:summaryOn="@string/settings_play_external_desc_on"
-            android:title="@string/settings_play_external" />
+        <!-- External player preference removed -->
 
         <CheckBoxPreference
             android:defaultValue="false"

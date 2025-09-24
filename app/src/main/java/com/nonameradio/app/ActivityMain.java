@@ -48,6 +48,12 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+
+import com.nonameradio.app.presentation.navigation.NavigationManager;
+import com.nonameradio.app.presentation.ui.MenuHandler;
+import com.nonameradio.app.presentation.ui.SearchHandler;
 
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResult;
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResultListener;
@@ -95,7 +101,6 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
 
     public static final String EXTRA_SEARCH_TAG = "search_tag";
 
-    public static final int LAUNCH_EQUALIZER_REQUEST = 1;
 
     public final static int MAX_DYNAMIC_LAUNCHER_SHORTCUTS = 4;
 
@@ -112,26 +117,27 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
     private static final int ACTION_LOAD_FILE = 2;
     private final String TAG_SEARCH_URL = "json/stations/bytagexact";
     private final String SAVE_LAST_MENU_ITEM = "LAST_MENU_ITEM";
-    DrawerLayout mDrawerLayout;
-    NavigationView mNavigationView;
-    BottomNavigationView mBottomNavigationView;
-    FragmentManager mFragmentManager;
+    public DrawerLayout mDrawerLayout;
+    public NavigationView mNavigationView;
+    public BottomNavigationView mBottomNavigationView;
+    public FragmentManager mFragmentManager;
     BroadcastReceiver broadcastReceiver;
-    MenuItem menuItemSearch;
-    MenuItem menuItemDelete;
-    MenuItem menuItemSleepTimer;
-    MenuItem menuItemSave;
-    MenuItem menuItemLoad;
-    MenuItem menuItemIconsView;
-    MenuItem menuItemListView;
-    MenuItem menuItemAddAlarm;
-    MenuItem menuItemMpd;
-    private SearchView mSearchView;
+    public MenuItem menuItemSearch;
+    public MenuItem menuItemDelete;
+    public MenuItem menuItemSleepTimer;
+    public MenuItem menuItemSave;
+    public MenuItem menuItemLoad;
+    public MenuItem menuItemIconsView;
+    public MenuItem menuItemListView;
+    public MenuItem menuItemAddAlarm;
+    public MenuItem menuItemMpd;
+    public SearchView mSearchView;
     private AppBarLayout appBarLayout;
-    private TabLayout tabsView;
+    public TabLayout tabsView;
     private BottomSheetBehavior playerBottomSheet;
     private FragmentPlayerSmall smallPlayerFragment;
     private FragmentPlayerFull fullPlayerFragment;
+
     private SharedPreferences sharedPref;
 
     private int selectedMenuItem;
@@ -139,6 +145,10 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
     private boolean instanceStateWasSaved;
 
     private Date lastExitTry;
+
+    // Activity Result Launchers for modern Android
+    private ActivityResultLauncher<Intent> saveFileLauncher;
+    private ActivityResultLauncher<Intent> loadFileLauncher;
 
     private AlertDialog meteredConnectionAlertDialog;
 
@@ -152,8 +162,12 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
             PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
             sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         }
+
         setTheme(Utils.getThemeResId(this));
         setContentView(R.layout.layout_main);
+
+        // Initialize Activity Result Launchers
+        initializeActivityResultLaunchers();
 
         Log.d(TAG, "FilesDir: " + getFilesDir().getAbsolutePath());
         Log.d(TAG, "CacheDir: " + getCacheDir().getAbsolutePath());
@@ -397,7 +411,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
         else
             fragmentTransaction.replace(R.id.containerView, f).addToBackStack(backStackTag).commit();
 
-        // User selected a menuItem. Let's hide progressBar
+        // User selected a menuItem. Update menu state and hide progressBar
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ActivityMain.ACTION_HIDE_LOADING));
         invalidateOptionsMenu();
         checkMenuItems();
@@ -651,22 +665,20 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
         menuItemIconsView = menu.findItem(R.id.action_icons_view);
         menuItemAddAlarm = menu.findItem(R.id.action_add_alarm);
         menuItemMpd = menu.findItem(R.id.action_mpd);
-        mSearchView = (SearchView) menuItemSearch.getActionView();
+        mSearchView = (SearchView) androidx.core.view.MenuItemCompat.getActionView(menuItemSearch);
         mSearchView.setOnQueryTextListener(this);
-        mSearchView.setFocusableInTouchMode(true);
-        showSoftKeyboard(mSearchView);
         mSearchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
             private int prevTabsVisibility = View.GONE;
 
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
+                if (Utils.bottomNavigationEnabled(ActivityMain.this)) {
+                    mBottomNavigationView.setVisibility(hasFocus ? View.GONE : View.VISIBLE);
+                }
+
                 if (hasFocus) {
-                    Log.d(TAG, "SearchView has focus");
                     prevTabsVisibility = tabsView.getVisibility();
                     tabsView.setVisibility(View.GONE);
-                    if (isRunningOnTV()) {
-                        showSoftKeyboard(mSearchView);
-                    }
                 } else {
                     tabsView.setVisibility(prevTabsVisibility);
                 }
@@ -686,11 +698,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
         boolean mpd_is_visible = false;
         NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
         if (radioDroidApp != null) {
-            MPDClient mpdClient = radioDroidApp.getMpdClient();
-            if (mpdClient != null) {
-                MPDServersRepository repository = mpdClient.getMpdServersRepository();
-                mpd_is_visible = !repository.isEmpty();
-            }
+            mpd_is_visible = sharedPref.getBoolean("mpd_visible", false);
         }
         menuItemMpd.setVisible(mpd_is_visible);
 
@@ -698,10 +706,6 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
             case R.id.nav_item_stations: {
                 menuItemSleepTimer.setVisible(true);
                 menuItemSearch.setVisible(true);
-                menuItemSearch.getActionView().setActivated(true);
-                menuItemSearch.getActionView().setFocusable(true);
-                ((SearchView) menuItemSearch.getActionView()).setIconifiedByDefault(false);
-//                ((SearchView) menuItemSearch.getActionView()).setIconified(false);
                 myToolbar.setTitle(R.string.nav_item_stations);
                 break;
             }
@@ -712,11 +716,12 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
                 menuItemLoad.setVisible(true);
                 menuItemSave.setTitle(R.string.nav_item_save_playlist);
 
-                if (sharedPref.getBoolean("icons_only_favorites_style", false)) {
-                    menuItemListView.setVisible(true);
-                } else if (sharedPref.getBoolean("load_icons", false)) {
-                    menuItemIconsView.setVisible(true);
-                }
+                // Toggle view buttons removed for favorites page
+                // if (sharedPref.getBoolean("icons_only_favorites_style", false)) {
+                //     menuItemListView.setVisible(true);
+                // } else if (sharedPref.getBoolean("load_icons", false)) {
+                //     menuItemIconsView.setVisible(true);
+                // }
                 if (radioDroidApp.getFavouriteManager().isEmpty()) {
                     menuItemDelete.setVisible(false);
                 } else {
@@ -742,12 +747,6 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
                 myToolbar.setTitle(R.string.nav_item_alarm);
                 break;
             }
- /* settings fragment sets the toolbar title depending on the current preference screen
-            case R.id.nav_item_settings: {
-                myToolbar.setTitle(R.string.nav_item_settings);
-                break;
-            }
- */
         }
 
         ((NoNameRadioApp) getApplication()).getCastHandler().getRouteItem(getApplicationContext(), menu);
@@ -765,63 +764,6 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
         }
     }
 
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent resultData) {
-        super.onActivityResult(requestCode, resultCode, resultData);
-
-        if (requestCode == ACTION_SAVE_FILE && resultCode == RESULT_OK) {
-            Uri uri = null;
-            if (resultData != null) {
-                uri = resultData.getData();
-                Log.d(TAG, "Choosen save path: " + uri);
-                NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-                FavouriteManager favouriteManager = radioDroidApp.getFavouriteManager();
-                HistoryManager historyManager = radioDroidApp.getHistoryManager();
-                try {
-                    OutputStream os = getContentResolver().openOutputStream(uri);
-                    OutputStreamWriter writer = new OutputStreamWriter(os);
-                    if (selectedMenuItem == R.id.nav_item_starred) {
-                        favouriteManager.SaveM3UWriter(writer);
-                    } else if (selectedMenuItem == R.id.nav_item_history) {
-                        historyManager.SaveM3UWriter(writer);
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "Unable to write to file " + e);
-                }
-            }
-        }
-        if (requestCode == ACTION_LOAD_FILE && resultCode == RESULT_OK) {
-            Uri uri = null;
-            if (resultData != null) {
-                uri = resultData.getData();
-                Log.d(TAG, "Choosen load path: " + uri);
-                NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-                FavouriteManager favouriteManager = radioDroidApp.getFavouriteManager();
-                try {
-                    InputStream is = getContentResolver().openInputStream(uri);
-                    InputStreamReader reader = new InputStreamReader(is);
-                    // Extract display name from SAF Uri
-                    String displayName = "";
-                    if (uri != null) {
-                        try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
-                            if (cursor != null && cursor.moveToFirst()) {
-                                int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                                if (nameIndex >= 0) {
-                                    displayName = cursor.getString(nameIndex);
-                                }
-                            }
-                        } catch (Exception e) {
-                            Log.e(TAG, "Unable to get display name from SAF Uri", e);
-                        }
-                    }
-                    favouriteManager.LoadM3USimple(reader, displayName);
-                } catch (Exception e) {
-                    Log.e(TAG, "Unable to load to file " + e);
-                }
-            }
-        }
-    }
 
     @Override
     public void onFileSelected(FileDialog dialog, File file) {
@@ -845,7 +787,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
         }
     }
 
-    void SaveFavourites() {
+    public void SaveFavourites() {
         SaveFileDialog dialog = new SaveFileDialog();
         dialog.setStyle(DialogFragment.STYLE_NO_TITLE, Utils.getThemeResId(this));
         Bundle args = new Bundle();
@@ -860,10 +802,10 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("audio/x-mpegurl");
         intent.putExtra(Intent.EXTRA_TITLE, "playlist.m3u");
-        startActivityForResult(intent, ACTION_SAVE_FILE);
+        saveFileLauncher.launch(intent);
     }
 
-    void LoadFavourites() {
+    public void LoadFavourites() {
         // Use Storage Access Framework to let the user pick any .m3u playlist file
         LoadFavouritesSimple();
     }
@@ -874,7 +816,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("audio/x-mpegurl");
         intent.putExtra(Intent.EXTRA_TITLE, "playlist.m3u");
-        startActivityForResult(intent, ACTION_LOAD_FILE);
+        loadFileLauncher.launch(intent);
     }
 
     @Override
@@ -983,11 +925,30 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
         NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-        HistoryManager historyManager = radioDroidApp.getHistoryManager();
-        Fragment currentFragment = mFragmentManager.getFragments().get(mFragmentManager.getFragments().size() - 2);
-        if (historyManager.size() > 0 && currentFragment instanceof FragmentAlarm) {
-            DataRadioStation station = historyManager.getList().get(0);
-            ((FragmentAlarm) currentFragment).getRam().add(station, hourOfDay, minute);
+
+        // Prefer current or last played station; fallback to recent history
+        DataRadioStation station = Utils.getCurrentOrLastStation(this);
+
+        // If no station available, show error message
+        if (station == null) {
+            Toast.makeText(this, R.string.alarm_no_station_selected, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // Find the visible fragment in container and ensure it's Alarm
+        Fragment containerFragment = getSupportFragmentManager().findFragmentById(R.id.containerView);
+        if (containerFragment instanceof FragmentAlarm) {
+            ((FragmentAlarm) containerFragment).getRam().add(station, hourOfDay, minute);
+        } else {
+            // Try to locate FragmentAlarm in fragment list as a fallback (dialog overlays may be present)
+            java.util.List<Fragment> fragments = mFragmentManager.getFragments();
+            for (int i = fragments.size() - 1; i >= 0; i--) {
+                Fragment f = fragments.get(i);
+                if (f instanceof FragmentAlarm) {
+                    ((FragmentAlarm) f).getRam().add(station, hourOfDay, minute);
+                    break;
+                }
+            }
         }
     }
 
@@ -1156,12 +1117,6 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
                         case RADIODROID:
                             showMeteredConnectionDialog(() -> Utils.play((NoNameRadioApp) getApplication(), MediaSessionUtil.getCurrentStation()));
                             break;
-                        case EXTERNAL:
-                            DataRadioStation currentStation = MediaSessionUtil.getCurrentStation();
-                            if (currentStation != null) {
-                                showMeteredConnectionDialog(() -> PlayStationTask.playExternal(currentStation, ActivityMain.this).execute());
-                            }
-                            break;
                         default:
                             Log.e(TAG, String.format("broadcastReceiver unexpected PlayerType '%s'", playerType));
                     }
@@ -1240,7 +1195,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
         }
     }
 
-    private void changeTimer() {
+    public void changeTimer() {
         final AlertDialog.Builder seekDialog = new AlertDialog.Builder(this);
         View seekView = View.inflate(this, R.layout.layout_timer_chooser, null);
 
@@ -1296,13 +1251,37 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
         seekDialog.show();
     }
 
-    private void selectMPDServer() {
+    public void selectMPDServer() {
         NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
         Utils.showMpdServersDialog(radioDroidApp, getSupportFragmentManager(), null);
     }
 
     public final Toolbar getToolbar() {
         return findViewById(R.id.my_awesome_toolbar);
+    }
+
+    // Methods needed by SearchHandler
+    public int getContainerViewId() {
+        return R.id.containerView;
+    }
+
+    public boolean useBottomNavigationPublic() {
+        return mBottomNavigationView != null && mBottomNavigationView.getVisibility() == View.VISIBLE;
+    }
+
+    public boolean isRunningOnTVPublic() {
+        UiModeManager uiModeManager = (UiModeManager) getSystemService(UI_MODE_SERVICE);
+        return uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
+    }
+
+    public void showSoftKeyboardPublic(View view) {
+        view.requestFocus();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && view.getWindowInsetsController() != null) {
+            view.getWindowInsetsController().show(WindowInsets.Type.ime());
+        } else {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
+        }
     }
 
     @Override
@@ -1653,5 +1632,80 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
         }
 
         return false;
+    }
+
+    /**
+     * Initialize Activity Result Launchers for modern Android API
+     */
+    private void initializeActivityResultLaunchers() {
+        // Launcher for saving files
+        saveFileLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Uri uri = result.getData().getData();
+                    if (uri != null) {
+                        Log.d(TAG, "Choosen save path: " + uri);
+                        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
+                        FavouriteManager favouriteManager = radioDroidApp.getFavouriteManager();
+                        HistoryManager historyManager = radioDroidApp.getHistoryManager();
+                        try {
+                            OutputStream os = getContentResolver().openOutputStream(uri);
+                            OutputStreamWriter writer = new OutputStreamWriter(os);
+                            if (selectedMenuItem == R.id.nav_item_starred) {
+                                favouriteManager.SaveM3UWriter(writer);
+                            } else if (selectedMenuItem == R.id.nav_item_history) {
+                                historyManager.SaveM3UWriter(writer);
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Unable to write to file " + e);
+                        }
+                    }
+                }
+            }
+        );
+
+        // Launcher for loading files
+        loadFileLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Uri uri = result.getData().getData();
+                    if (uri != null) {
+                        handleFileLoad(uri);
+                    }
+                }
+            }
+        );
+    }
+
+    /**
+     * Handle file loading from Activity Result
+     */
+    private void handleFileLoad(Uri uri) {
+        Log.d(TAG, "Choosen load path: " + uri);
+        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
+        FavouriteManager favouriteManager = radioDroidApp.getFavouriteManager();
+        try {
+            InputStream is = getContentResolver().openInputStream(uri);
+            InputStreamReader reader = new InputStreamReader(is);
+            // Extract display name from SAF Uri
+            String displayName = "";
+            if (uri != null) {
+                try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+                    if (cursor != null && cursor.moveToFirst()) {
+                        int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                        if (nameIndex >= 0) {
+                            displayName = cursor.getString(nameIndex);
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Unable to get display name from SAF Uri", e);
+                }
+            }
+            favouriteManager.LoadM3USimple(reader, displayName);
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to load to file " + e);
+        }
     }
 }

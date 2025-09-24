@@ -54,13 +54,6 @@
                 android:scaleType="fitCenter"
                 app:srcCompat="@drawable/ic_trending_flat_black_24dp" />
 
-            <ImageView
-                    android:id="@+id/starredStatusIcon"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_gravity="top|end"
-                    android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/ic_heart_24dp" />
 
         </FrameLayout>
 
@@ -106,17 +99,37 @@
 
         </LinearLayout>
 
-        <ImageButton
-                android:id="@+id/buttonMore"
+        <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/image_button_more"
-                android:minWidth="50dp"
-                android:padding="5dp"
-                app:tint="?attr/iconsInItemBackgroundColor"
-                app:srcCompat="@drawable/ic_expand_more_white_24dp" />
+                android:orientation="vertical">
+
+            <ImageButton
+                    android:id="@+id/buttonFavorite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/detail_star"
+                    android:minWidth="50dp"
+                    android:padding="5dp"
+                    app:tint="?attr/iconsInItemBackgroundColor"
+                    app:srcCompat="@drawable/ic_heart_24dp" />
+
+            <ImageButton
+                    android:id="@+id/buttonMore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/image_button_more"
+                    android:minWidth="50dp"
+                    android:padding="5dp"
+                    app:tint="?attr/iconsInItemBackgroundColor"
+                    app:srcCompat="@drawable/ic_expand_more_white_24dp" />
+
+        </LinearLayout>
     </LinearLayout>
 
     <ViewStub

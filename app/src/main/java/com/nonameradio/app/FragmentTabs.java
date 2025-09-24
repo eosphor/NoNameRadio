@@ -205,6 +205,15 @@ public class FragmentTabs extends Fragment implements IFragmentRefreshable, IFra
         }
     }
 
+    public void clearSearch() {
+        Log.d("TABS","clearSearch");
+        if (fragments[IDX_SEARCH] instanceof IFragmentSearchable) {
+            ((IFragmentSearchable)fragments[IDX_SEARCH]).clearSearch();
+        }
+        queuedSearchQuery = null;
+        queuedSearchStyle = null;
+    }
+
     @Override
     public void Refresh() {
         Fragment fragment = fragments[viewPager.getCurrentItem()];

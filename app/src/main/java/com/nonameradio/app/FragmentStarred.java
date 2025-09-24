@@ -31,6 +31,8 @@ import com.nonameradio.app.station.ItemAdapterIconOnlyStation;
 import com.nonameradio.app.interfaces.IAdapterRefreshable;
 import com.nonameradio.app.station.StationActions;
 import com.nonameradio.app.station.StationsFilter;
+import com.nonameradio.app.service.MediaSessionUtil;
+import com.nonameradio.app.service.PauseReason;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -52,8 +54,16 @@ public class FragmentStarred extends Fragment implements IAdapterRefreshable, Ob
     private FavouriteManager favouriteManager;
 
     void onStationClick(DataRadioStation theStation) {
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getActivity().getApplication();
-        Utils.showPlaySelection(radioDroidApp, theStation, getActivity().getSupportFragmentManager());
+        // Check if this station is currently playing
+        DataRadioStation currentStation = MediaSessionUtil.getCurrentStation();
+
+        if (currentStation != null && currentStation.StationUuid.equals(theStation.StationUuid) && MediaSessionUtil.isPlaying()) {
+            // Same station is playing - pause it
+            MediaSessionUtil.pause(PauseReason.USER);
+        } else {
+            // Different station or nothing playing - start this station
+            Utils.play((NoNameRadioApp) getActivity().getApplication(), theStation);
+        }
     }
 
     public void RefreshListGui() {
@@ -78,30 +88,18 @@ public class FragmentStarred extends Fragment implements IAdapterRefreshable, Ob
         View view = inflater.inflate(R.layout.fragment_stations, container, false);
         rvStations = view.findViewById(R.id.recyclerViewStations);
 
+        // Always use ItemAdapterStation for unified card appearance across all pages
         ItemAdapterStation adapter;
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        if (sharedPref.getBoolean("load_icons", false) && sharedPref.getBoolean("icons_only_favorites_style", true)) {
-            adapter = new ItemAdapterIconOnlyStation(getActivity(), R.layout.list_item_icon_only_station, StationsFilter.FilterType.LOCAL);
-            Context ctx = getContext();
-            DisplayMetrics displayMetrics = ctx.getResources().getDisplayMetrics();
-            int itemWidth = (int) ctx.getResources().getDimension(R.dimen.regular_style_icon_container_width);
-            int noOfColumns = displayMetrics.widthPixels / itemWidth;
-            GridLayoutManager glm = new GridLayoutManager(ctx, noOfColumns);
-            rvStations.setAdapter(adapter);
-            rvStations.setLayoutManager(glm);
-            ((ItemAdapterIconOnlyStation)adapter).enableItemMove(rvStations);
-        } else {
-            adapter = new ItemAdapterStation(getActivity(), R.layout.list_item_station, StationsFilter.FilterType.LOCAL);
-            LinearLayoutManager llm = new LinearLayoutManager(getContext());
-            llm.setOrientation(RecyclerView.VERTICAL);
+        adapter = new ItemAdapterStation(getActivity(), R.layout.list_item_station, StationsFilter.FilterType.LOCAL);
+        LinearLayoutManager llm = new LinearLayoutManager(getContext());
+        llm.setOrientation(RecyclerView.VERTICAL);
 
-            rvStations.setAdapter(adapter);
-            rvStations.setLayoutManager(llm);
-            DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rvStations.getContext(),
-                    llm.getOrientation());
-            rvStations.addItemDecoration(dividerItemDecoration);
-            adapter.enableItemMoveAndRemoval(rvStations);
-        }
+        rvStations.setAdapter(adapter);
+        rvStations.setLayoutManager(llm);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rvStations.getContext(),
+                llm.getOrientation());
+        rvStations.addItemDecoration(dividerItemDecoration);
+        adapter.enableItemMoveAndRemoval(rvStations);
 
         adapter.setStationActionsListener(new ItemAdapterStation.StationActionsListener() {
             @Override

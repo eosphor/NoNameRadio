@@ -87,17 +87,7 @@ public class PlayStationTask extends AsyncTask<Void, Void, String> {
         HistoryManager historyManager = radioDroidApp.getHistoryManager();
         historyManager.add(stationToPlay);
 
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(ctx);
-        boolean autoFavorite = sharedPref.getBoolean("auto_favorite", false);
-
-        if (autoFavorite) {
-            FavouriteManager favouriteManager = radioDroidApp.getFavouriteManager();
-            if (!favouriteManager.has(stationToPlay.StationUuid)) {
-                favouriteManager.add(stationToPlay);
-                Toast toast = Toast.makeText(ctx, ctx.getString(R.string.notify_autostarred), Toast.LENGTH_SHORT);
-                toast.show();
-            }
-        }
+        // Do not auto-add to favourites on play. Favourite should change only on explicit heart click.
     }
 
     @Override

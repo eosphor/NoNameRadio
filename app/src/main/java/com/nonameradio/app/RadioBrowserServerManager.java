@@ -47,11 +47,7 @@ public class RadioBrowserServerManager {
             return true;
         }
         
-        // On API level 24 and below, always return true to avoid potential compatibility issues
-        if (android.os.Build.VERSION.SDK_INT <= 24) {
-            Log.i("DNS", "API level <= 24: Skipping server availability check for " + serverName);
-            return true;
-        }
+        // Server availability check is always performed on API 24+
 
         try {
             Request request = new Request.Builder()
@@ -125,25 +121,6 @@ public class RadioBrowserServerManager {
         return serverList;
     }
 
-    /**
-     * Blocking: return current cached server list. Generate list if still null.
-     * @deprecated Use getServerList(boolean, OkHttpClient, Context) instead for proper SSL/TLS handling
-     */
-    @Deprecated
-    public static String[] getServerList(boolean forceRefresh){
-        // Fallback to HttpClient.getInstance() for backward compatibility
-        return getServerList(forceRefresh, HttpClient.getInstance(), null);
-    }
-    
-    /**
-     * Blocking: return current cached server list. Generate list if still null.
-     * @deprecated Use getServerList(boolean, OkHttpClient, Context) instead for proper SSL/TLS handling and preference support
-     */
-    @Deprecated
-    public static String[] getServerList(boolean forceRefresh, OkHttpClient httpClient){
-        // Fallback to null context for backward compatibility
-        return getServerList(forceRefresh, httpClient, null);
-    }
 
     /**
      * Blocking: return current selected server. Select one, if there is no current server.
@@ -164,25 +141,6 @@ public class RadioBrowserServerManager {
         return currentServer;
     }
 
-    /**
-     * Blocking: return current selected server. Select one, if there is no current server.
-     * @deprecated Use getCurrentServer(OkHttpClient, Context) instead for proper SSL/TLS handling and preference support
-     */
-    @Deprecated
-    public static String getCurrentServer() {
-        // Fallback to HttpClient.getInstance() for backward compatibility
-        return getCurrentServer(HttpClient.getInstance(), null);
-    }
-    
-    /**
-     * Blocking: return current selected server. Select one, if there is no current server.
-     * @deprecated Use getCurrentServer(OkHttpClient, Context) instead for proper SSL/TLS handling and preference support
-     */
-    @Deprecated
-    public static String getCurrentServer(OkHttpClient httpClient) {
-        // Fallback to null context for backward compatibility
-        return getCurrentServer(httpClient, null);
-    }
 
     /**
      * Set new server as current

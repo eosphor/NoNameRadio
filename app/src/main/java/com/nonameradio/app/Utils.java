@@ -363,7 +363,7 @@ public class Utils {
 
     public static void showPlaySelection(final NoNameRadioApp radioDroidApp, final DataRadioStation station, final FragmentManager fragmentManager) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(radioDroidApp);
-        final boolean externalAvailable = sharedPref.getBoolean("play_external", false);
+        final boolean externalAvailable = false;
 
         CastHandler castHandler = radioDroidApp.getCastHandler();
         final boolean castAvailable = castHandler.isCastSessionAvailable();
@@ -375,7 +375,7 @@ public class Utils {
                     url -> castHandler.playRemote(station.Name, url, station.IconUrl),
                     null)
                     .execute();
-        } else if (externalAvailable || mpdAvailable) {
+        } else if (mpdAvailable) {
             showMpdServersDialog(radioDroidApp, fragmentManager, station);
         } else {
             playAndWarnIfMetered(radioDroidApp, station, PlayerType.RADIODROID, () -> play(radioDroidApp, station));

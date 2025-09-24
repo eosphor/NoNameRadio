@@ -12,11 +12,14 @@ import android.os.Bundle;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.Toolbar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.Preference.OnPreferenceClickListener;
 import androidx.preference.PreferenceScreen;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import android.os.PowerManager;
 import android.provider.Settings;
@@ -34,6 +37,8 @@ import com.nonameradio.app.proxy.ProxySettingsDialog;
 import static com.nonameradio.app.ActivityMain.FRAGMENT_FROM_BACKSTACK;
 
 public class FragmentSettings extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener, IApplicationSelected, PreferenceFragmentCompat.OnPreferenceStartScreenCallback  {
+
+    private ActivityResultLauncher<Intent> equalizerLauncher;
 
     public static FragmentSettings openNewSettingsSubFragment(ActivityMain activity, String key) {
         FragmentSettings f = new FragmentSettings();
@@ -102,6 +107,15 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Shared
 
     @Override
     public void onCreatePreferences(Bundle bundle, String s) {
+        // Initialize Activity Result Launcher for equalizer
+        equalizerLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                // Handle equalizer result if needed
+                Log.d("FragmentSettings", "Equalizer activity result: " + result.getResultCode());
+            }
+        );
+
         setPreferencesFromResource(R.xml.preferences, s);
         refreshToolbar();
         if (s == null) {
@@ -120,7 +134,7 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Shared
                         Toast.makeText(getContext(), R.string.error_no_equalizer_found, Toast.LENGTH_SHORT).show();
                     } else {
                         intent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
-                        startActivityForResult(intent, ActivityMain.LAUNCH_EQUALIZER_REQUEST);
+                        equalizerLauncher.launch(intent);
                     }
 
                     return false;
@@ -141,14 +155,8 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Shared
             });
 
             // Hide Radio Browser server check preference on API <= 24
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N) {
-                findPreference("settings_check_radio_browser_server").setVisible(false);
-            }
-
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-                findPreference("settings_retry_timeout").setVisible(false);
-                findPreference("settings_retry_delay").setVisible(false);
-            }
+            // Since minSdk = 24, this preference is always hidden
+            findPreference("settings_check_radio_browser_server").setVisible(false);
         } else if (s.equals("pref_category_mpd")) {
             findPreference("mpd_servers_viewer").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
@@ -260,6 +268,22 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Shared
     public void onPause() {
         getPreferenceManager().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
         super.onPause();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ActivityMain activity = (ActivityMain) getActivity();
+        if (activity != null) {
+            // Если выходим из настроек, возвращаем заголовок к имени приложения
+            Fragment current = activity.getSupportFragmentManager().findFragmentById(R.id.containerView);
+            if (!(current instanceof FragmentSettings)) {
+                Toolbar toolbar = activity.getToolbar();
+                if (toolbar != null) {
+                    toolbar.setTitle(R.string.app_name);
+                }
+            }
+        }
     }
 
     @RequiresApi(23)

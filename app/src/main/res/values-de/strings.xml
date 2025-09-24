@@ -35,7 +35,7 @@
     <string name="nav_item_alarm">Wecker</string>
     <string name="tab_player_recordings">Aufnahmen</string>
 
-    <string name="about_text">Diese App nutzt das kostenlose Radiostation-Verzeichnis von\nhttps://www.radio-browser.info\nJeder kann Stationen hinzufügen. Es funktioniert wie ein Wiki für Online-(Streaming-)Radiostationen.\n\nBugtracker:\nhttps://github.com/morckx/NoNameRadio/issues\n(ursprünglich: https://github.com/segler-alex/NoNameRadio/issues)\n\nDiese App ist freie Software, lizenziert unter der GPLv3.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
+    <string name="about_text">Diese App nutzt das kostenlose Radiostation-Verzeichnis von\nhttps://www.radio-browser.info\nJeder kann Stationen hinzufügen. Es funktioniert wie ein Wiki für Online-(Streaming-)Radiostationen.\n\nBugtracker:\nhttps://github.com/eosphor/NoNameRadio/issues\n(ursprünglich: https://github.com/segler-alex/RadioDroid/issues)\n\nDiese App ist freie Software, lizenziert unter der GPLv3.\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
     <string name="detail_star">Als Favorit setzen</string>
     <string name="detail_unstar">Als Favorit löschen</string>
     <string name="progress_loading">Lade...</string>

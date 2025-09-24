@@ -226,16 +226,8 @@ public class RadioAlarmManager {
                     + " " + calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE)
             );
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                if(BuildConfig.DEBUG) { Log.d("ALARM","START setAlarmClock"); }
-                alarmMgr.setAlarmClock(new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis(),alarmIntent),alarmIntent);
-            }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                if(BuildConfig.DEBUG) { Log.d("ALARM","START setExact"); }
-                alarmMgr.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmIntent);
-            }else{
-                if(BuildConfig.DEBUG) { Log.d("ALARM","START set"); }
-                alarmMgr.set(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),alarmIntent);
-            }
+            if(BuildConfig.DEBUG) { Log.d("ALARM","START setAlarmClock"); }
+            alarmMgr.setAlarmClock(new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis(),alarmIntent),alarmIntent);
         }
     }
 

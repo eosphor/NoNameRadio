@@ -36,7 +36,7 @@
     <string name="nav_item_statistics">Статистика</string>
     <string name="nav_item_about">О приложении</string>>
 
-    <string name="about_text">NoNameRadio — это открытый форк RadioDroid.\n\nДом проекта:\nhttps://github.com/eosphor/NoNameRadio\n\nПриложение использует свободный каталог радиостанций:\nhttps://www.radio-browser.info\nЛюбой может добавлять станции — каталог работает как вики для онлайн‑радио.\n\nОригинальный проект:\nhttps://github.com/morckx/RadioDroid\n(изначально: https://github.com/segler-alex/RadioDroid)\n\nПриложение распространяется по лицензии GPLv3:\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
+    <string name="about_text">NoNameRadio — это открытый форк RadioDroid.\n\nДом проекта:\nhttps://github.com/eosphor/NoNameRadio\n\nПриложение использует свободный каталог радиостанций:\nhttps://www.radio-browser.info\nЛюбой может добавлять станции — каталог работает как вики для онлайн‑радио.\n\nОригинальный проект:\nhttps://github.com/segler-alex/RadioDroid\n\nПриложение распространяется по лицензии GPLv3:\nhttps://www.gnu.org/licenses/gpl-3.0.html</string>
     <string name="about_version">Версия: %1$s</string>
     <string name="detail_star">Добавить в избранное</string>
     <string name="detail_unstar">Удалить из избранного</string>
