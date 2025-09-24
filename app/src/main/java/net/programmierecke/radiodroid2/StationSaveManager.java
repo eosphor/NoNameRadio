@@ -280,40 +280,33 @@ public class StationSaveManager extends Observable {
     private void refreshStationsFromServer() {
         final RadioDroidApp radioDroidApp = (RadioDroidApp) context.getApplicationContext();
         final OkHttpClient httpClient = radioDroidApp.getHttpClient();
+        final ArrayList<DataRadioStation> savedStations = new ArrayList<>(listStations);
+
         LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ActivityMain.ACTION_SHOW_LOADING));
 
-        new AsyncTask<Void, Void, ArrayList<DataRadioStation>>() {
-            private ArrayList<DataRadioStation> savedStations;
-
-            @Override
-            protected void onPreExecute() {
-                savedStations = new ArrayList<>(listStations);
-            }
-
-            @Override
-            protected ArrayList<DataRadioStation> doInBackground(Void... params) {
+        net.programmierecke.radiodroid2.core.utils.AsyncExecutor.executeIOTask(
+            () -> {
                 ArrayList<DataRadioStation> stationsToRemove = new ArrayList<>();
                 for (DataRadioStation station : savedStations) {
                     if (!station.refresh(httpClient, context) && !station.hasValidUuid() && station.RefreshRetryCount > DataRadioStation.MAX_REFRESH_RETRIES) {
                         stationsToRemove.add(station);
                     }
                 }
-
                 return stationsToRemove;
-            }
-
-            @Override
-            protected void onPostExecute(ArrayList<DataRadioStation> stationsToRemove) {
+            },
+            stationsToRemove -> {
+                // onSuccess
                 listStations.removeAll(stationsToRemove);
-
                 Save();
-
                 notifyObservers();
-
                 LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ActivityMain.ACTION_HIDE_LOADING));
-                super.onPostExecute(stationsToRemove);
+            },
+            throwable -> {
+                // onError
+                LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(ActivityMain.ACTION_HIDE_LOADING));
+                // Log error if needed
             }
-        }.execute();
+        );
     }
 
     void Load() {
@@ -373,82 +366,84 @@ public class StationSaveManager extends Observable {
         Toast toast = Toast.makeText(context, context.getResources().getString(R.string.notify_save_playlist_now, filePath, fileName), Toast.LENGTH_LONG);
         toast.show();
 
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                return SaveM3UInternal(filePath, fileName);
-            }
-
-            @Override
-            protected void onPostExecute(Boolean result) {
-                if (result.booleanValue()) {
+        net.programmierecke.radiodroid2.core.utils.AsyncExecutor.executeIOTask(
+            () -> SaveM3UInternal(filePath, fileName),
+            result -> {
+                // onSuccess
+                if (result) {
                     Log.i("SAVE", "OK");
-                    Toast toast = Toast.makeText(context, context.getResources().getString(R.string.notify_save_playlist_ok, filePath, fileName), Toast.LENGTH_LONG);
-                    toast.show();
+                    Toast successToast = Toast.makeText(context, context.getResources().getString(R.string.notify_save_playlist_ok, filePath, fileName), Toast.LENGTH_LONG);
+                    successToast.show();
                 } else {
                     Log.i("SAVE", "NOK");
-                    Toast toast = Toast.makeText(context, context.getResources().getString(R.string.notify_save_playlist_nok, filePath, fileName), Toast.LENGTH_LONG);
-                    toast.show();
+                    Toast errorToast = Toast.makeText(context, context.getResources().getString(R.string.notify_save_playlist_nok, filePath, fileName), Toast.LENGTH_LONG);
+                    errorToast.show();
                 }
-                super.onPostExecute(result);
+            },
+            throwable -> {
+                // onError
+                Log.i("SAVE", "NOK - Exception: " + throwable.getMessage());
+                Toast exceptionToast = Toast.makeText(context, context.getResources().getString(R.string.notify_save_playlist_nok, filePath, fileName), Toast.LENGTH_LONG);
+                exceptionToast.show();
             }
-        }.execute();
+        );
     }
 
     public void SaveM3USimple(final String filePath, final String fileName) {
         Toast toast = Toast.makeText(context, context.getResources().getString(R.string.notify_save_playlist_now, filePath, fileName), Toast.LENGTH_LONG);
         toast.show();
 
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                return SaveM3UInternal(filePath, fileName);
-            }
-
-            @Override
-            protected void onPostExecute(Boolean result) {
-                if (result.booleanValue()) {
+        net.programmierecke.radiodroid2.core.utils.AsyncExecutor.executeIOTask(
+            () -> SaveM3UInternal(filePath, fileName),
+            result -> {
+                // onSuccess
+                if (result) {
                     Log.i("SAVE", "OK");
-                    Toast toast = Toast.makeText(context, context.getResources().getString(R.string.notify_save_playlist_ok, filePath, fileName), Toast.LENGTH_LONG);
-                    toast.show();
+                    Toast successToast = Toast.makeText(context, context.getResources().getString(R.string.notify_save_playlist_ok, filePath, fileName), Toast.LENGTH_LONG);
+                    successToast.show();
                 } else {
                     Log.i("SAVE", "NOK");
-                    Toast toast = Toast.makeText(context, context.getResources().getString(R.string.notify_save_playlist_nok, filePath, fileName), Toast.LENGTH_LONG);
-                    toast.show();
+                    Toast errorToast = Toast.makeText(context, context.getResources().getString(R.string.notify_save_playlist_nok, filePath, fileName), Toast.LENGTH_LONG);
+                    errorToast.show();
                 }
-                super.onPostExecute(result);
+            },
+            throwable -> {
+                // onError
+                Log.i("SAVE", "NOK - Exception: " + throwable.getMessage());
+                Toast exceptionToast = Toast.makeText(context, context.getResources().getString(R.string.notify_save_playlist_nok, filePath, fileName), Toast.LENGTH_LONG);
+                exceptionToast.show();
             }
-        }.execute();
+        );
     }
 
     public void LoadM3U(final String filePath, final String fileName) {
         Toast toast = Toast.makeText(context, context.getResources().getString(R.string.notify_load_playlist_now, filePath, fileName), Toast.LENGTH_LONG);
         toast.show();
 
-        new AsyncTask<Void, Void, List<DataRadioStation>>() {
-            @Override
-            protected List<DataRadioStation> doInBackground(Void... params) {
-                return LoadM3UInternal(filePath, fileName);
-            }
-
-            @Override
-            protected void onPostExecute(List<DataRadioStation> result) {
+        net.programmierecke.radiodroid2.core.utils.AsyncExecutor.executeIOTask(
+            () -> LoadM3UInternal(filePath, fileName),
+            result -> {
+                // onSuccess
                 if (result != null) {
                     Log.i("LOAD", "Loaded " + result.size() + "stations");
                     addMultiple(result);
-                    Toast toast = Toast.makeText(context, context.getResources().getString(R.string.notify_load_playlist_ok, result.size(), filePath, fileName), Toast.LENGTH_LONG);
-                    toast.show();
+                    Toast successToast = Toast.makeText(context, context.getResources().getString(R.string.notify_load_playlist_ok, result.size(), filePath, fileName), Toast.LENGTH_LONG);
+                    successToast.show();
                 } else {
                     Log.e("LOAD", "Load failed");
-                    Toast toast = Toast.makeText(context, context.getResources().getString(R.string.notify_load_playlist_nok, filePath, fileName), Toast.LENGTH_LONG);
-                    toast.show();
+                    Toast errorToast = Toast.makeText(context, context.getResources().getString(R.string.notify_load_playlist_nok, filePath, fileName), Toast.LENGTH_LONG);
+                    errorToast.show();
                 }
-
                 notifyObservers();
-
-                super.onPostExecute(result);
+            },
+            throwable -> {
+                // onError
+                Log.e("LOAD", "Load failed - Exception: " + throwable.getMessage());
+                Toast exceptionToast = Toast.makeText(context, context.getResources().getString(R.string.notify_load_playlist_nok, filePath, fileName), Toast.LENGTH_LONG);
+                exceptionToast.show();
+                notifyObservers();
             }
-        }.execute();
+        );
     }
 
     public void LoadM3USimple(final Reader reader, final String displayName) {
@@ -456,30 +451,30 @@ public class StationSaveManager extends Observable {
         Toast toast = Toast.makeText(context, context.getResources().getString(R.string.notify_load_playlist_now_saf, displayName), Toast.LENGTH_LONG);
         toast.show();
 
-        new AsyncTask<Void, Void, List<DataRadioStation>>() {
-            @Override
-            protected List<DataRadioStation> doInBackground(Void... params) {
-                return LoadM3UReader(reader);
-            }
-
-            @Override
-            protected void onPostExecute(List<DataRadioStation> result) {
+        net.programmierecke.radiodroid2.core.utils.AsyncExecutor.executeIOTask(
+            () -> LoadM3UReader(reader),
+            result -> {
+                // onSuccess
                 if (result != null) {
                     Log.i("LOAD", "Loaded " + result.size() + "stations");
-                    Toast toast = Toast.makeText(context, context.getResources().getString(R.string.notify_load_playlist_ok_nf, result.size()), Toast.LENGTH_LONG);
+                    Toast successToast = Toast.makeText(context, context.getResources().getString(R.string.notify_load_playlist_ok_nf, result.size()), Toast.LENGTH_LONG);
                     addMultiple(result);
-                    toast.show();
+                    successToast.show();
                 } else {
                     Log.e("LOAD", "Load failed");
-                    Toast toast = Toast.makeText(context, context.getResources().getString(R.string.notify_load_playlist_nok, displayName, ""), Toast.LENGTH_LONG);
-                    toast.show();
+                    Toast errorToast = Toast.makeText(context, context.getResources().getString(R.string.notify_load_playlist_nok, displayName, ""), Toast.LENGTH_LONG);
+                    errorToast.show();
                 }
-
                 notifyObservers();
-
-                super.onPostExecute(result);
+            },
+            throwable -> {
+                // onError
+                Log.e("LOAD", "Load failed - Exception: " + throwable.getMessage());
+                Toast exceptionToast = Toast.makeText(context, context.getResources().getString(R.string.notify_load_playlist_nok, displayName, ""), Toast.LENGTH_LONG);
+                exceptionToast.show();
+                notifyObservers();
             }
-        }.execute();
+        );
     }
 
     protected final String M3U_PREFIX = "#RADIOBROWSERUUID:";

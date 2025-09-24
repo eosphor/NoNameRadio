@@ -138,6 +138,9 @@ public class RadioDroidApp extends MultiDexApplication {
         trackMetadataSearcher = new TrackMetadataSearcher(httpClient);
 
         recordingsManager.updateRecordingsList();
+
+        // Initialize dependency injection
+        net.programmierecke.radiodroid2.core.di.DependencyInjector.initialize(this);
     }
 
     public void setTestsInterceptor(Interceptor testsInterceptor) {

@@ -345,7 +345,7 @@ public class FragmentPlayerFull extends Fragment {
 
                 // Update button state immediately and again after delay to catch service state change
                 updatePlaybackButtons(MediaSessionUtil.isPlaying(), MediaSessionUtil.isRecording());
-                new Handler().postDelayed(() -> {
+                net.programmierecke.radiodroid2.core.utils.UiHandler.postDelayed(() -> {
                     updatePlaybackButtons(MediaSessionUtil.isPlaying(), MediaSessionUtil.isRecording());
                     // Also update all station info and album art in case station changed
                     fullUpdate();
@@ -356,12 +356,12 @@ public class FragmentPlayerFull extends Fragment {
         btnPrev.setOnClickListener(view -> {
             MediaSessionUtil.skipToPrevious();
             // Force UI update after station change
-            new Handler().postDelayed(this::fullUpdate, 100);
+            net.programmierecke.radiodroid2.core.utils.UiHandler.postDelayed(this::fullUpdate, 100);
         });
         btnNext.setOnClickListener(view -> {
             MediaSessionUtil.skipToNext();
             // Force UI update after station change
-            new Handler().postDelayed(this::fullUpdate, 100);
+            net.programmierecke.radiodroid2.core.utils.UiHandler.postDelayed(this::fullUpdate, 100);
         });
 
         btnRecord.setOnClickListener(view -> {
@@ -381,7 +381,7 @@ public class FragmentPlayerFull extends Fragment {
                 updateRunningRecording();
                 
                 // Schedule another update after 500ms to catch async state changes
-                new Handler().postDelayed(() -> {
+                net.programmierecke.radiodroid2.core.utils.UiHandler.postDelayed(() -> {
                     updatePlaybackButtons(MediaSessionUtil.isPlaying(), MediaSessionUtil.isRecording());
                     updateRunningRecording();
                 }, 500);
@@ -413,7 +413,7 @@ public class FragmentPlayerFull extends Fragment {
             stopUpdating();
         } else {
             startUpdating();
-            new Handler().postDelayed(this::fullUpdate, 100);
+            net.programmierecke.radiodroid2.core.utils.UiHandler.postDelayed(this::fullUpdate, 100);
         }
 
         if (touchInterceptListener != null) {
@@ -435,7 +435,7 @@ public class FragmentPlayerFull extends Fragment {
         super.onResume();
 
         startUpdating();
-        new Handler().postDelayed(this::fullUpdate, 100);
+        net.programmierecke.radiodroid2.core.utils.UiHandler.postDelayed(this::fullUpdate, 100);
     }
 
     @Override
