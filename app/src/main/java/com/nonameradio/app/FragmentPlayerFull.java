@@ -708,10 +708,10 @@ public class FragmentPlayerFull extends Fragment {
         DataRadioStation station = Utils.getCurrentOrLastStation(requireContext());
 
         if (station != null && favouriteManager.has(station.StationUuid)) {
-            btnFavourite.setImageResource(R.drawable.ic_star_24dp);
+            btnFavourite.setImageResource(R.drawable.ic_heart_24dp);
             btnFavourite.setContentDescription(requireContext().getApplicationContext().getString(R.string.detail_unstar));
         } else {
-            btnFavourite.setImageResource(R.drawable.ic_star_border_24dp);
+            btnFavourite.setImageResource(R.drawable.ic_heart_border_24dp);
             btnFavourite.setContentDescription(requireContext().getApplicationContext().getString(R.string.detail_star));
         }
     }

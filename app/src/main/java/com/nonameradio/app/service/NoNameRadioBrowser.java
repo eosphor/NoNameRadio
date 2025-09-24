@@ -250,14 +250,14 @@ public class NoNameRadioBrowser {
         mediaItems.add(new MediaBrowserCompat.MediaItem(new MediaDescriptionCompat.Builder()
                 .setMediaId(MEDIA_ID_MUSICS_FAVORITE)
                 .setTitle(resources.getString(R.string.nav_item_starred))
-                .setIconUri(resourceToUri(resources, R.drawable.ic_star_white_24))
+                .setIconUri(resourceToUri(resources, R.drawable.ic_heart_24dp))
                 .build(),
                 MediaBrowserCompat.MediaItem.FLAG_BROWSABLE));
 
         mediaItems.add(new MediaBrowserCompat.MediaItem(new MediaDescriptionCompat.Builder()
                 .setMediaId(MEDIA_ID_MUSICS_HISTORY)
                 .setTitle(resources.getString(R.string.nav_item_history))
-                .setIconUri(resourceToUri(resources, R.drawable.ic_star_white_24))
+                .setIconUri(resourceToUri(resources, R.drawable.ic_heart_24dp))
                 .build(),
                 MediaBrowserCompat.MediaItem.FLAG_BROWSABLE));
 

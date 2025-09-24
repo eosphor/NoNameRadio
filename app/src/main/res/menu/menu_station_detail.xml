@@ -18,12 +18,12 @@
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/action_star"
-        android:icon="@drawable/ic_star_border_black_24dp"
+        android:icon="@drawable/ic_heart_border_black_24dp"
         android:title="@string/detail_star"
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/action_unstar"
-        android:icon="@drawable/ic_star_black_24dp"
+        android:icon="@drawable/ic_heart_black_24dp"
         android:title="@string/detail_unstar"
         app:showAsAction="ifRoom"/>
     <item

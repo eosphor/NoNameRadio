@@ -292,7 +292,7 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/buttonNext"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_star_24dp" />
+            app:srcCompat="@drawable/ic_heart_24dp" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

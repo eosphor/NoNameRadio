@@ -55,7 +55,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/detail_star"
                 app:tint="?attr/iconsInItemBackgroundColor"
-                app:srcCompat="@drawable/ic_star_border_black_24dp" />
+                app:srcCompat="@drawable/ic_heart_border_black_24dp" />
 
         <ImageButton
                 android:id="@+id/buttonAddAlarm"
