@@ -1,0 +1,152 @@
+INFO         | Android emulator version 36.1.9.0 (build_id 13823996) (CL:N/A)
+INFO         | Graphics backend: gfxstream
+INFO         | Found systemPath /Users/dmitry/Library/Android/sdk/system-images/android-36/google_apis_playstore/arm64-v8a/
+WARNING      | Please update the emulator to one that supports the feature(s): VulkanVirtualQueue
+INFO         | Guest GLES Driver: Auto (ext controls)
+library_mode host gpu mode host
+INFO         | Checking system compatibility:
+INFO         |   Checking: hasSufficientDiskSpace
+INFO         |      Ok: Disk space requirements to run avd: `Medium_Phone_API_36.0` are met
+INFO         |   Checking: hasSufficientHwGpu
+INFO         |      Ok: Hardware GPU requirements to run avd: `Medium_Phone_API_36.0` are passed
+INFO         |   Checking: hasSufficientSystem
+INFO         |      Ok: System requirements to run avd: `Medium_Phone_API_36.0` are met
+INFO         | Warning: QMetaObject::connectSlotsByName: No matching signal for on_btn_xr_environment_living_room_day_clicked() (:0, )
+INFO         | Warning: QMetaObject::connectSlotsByName: No matching signal for on_btn_xr_environment_living_room_night_clicked() (:0, )
+INFO         | Warning: QMetaObject::connectSlotsByName: No matching signal for on_new_posture_requested(int) (:0, )
+INFO         | Warning: QMetaObject::connectSlotsByName: No matching signal for on_dismiss_posture_selection_dialog() (:0, )
+INFO         | Warning: QMetaObject::connectSlotsByName: No matching signal for on_new_resizable_requested(PresetEmulatorSizeType) (:0, )
+INFO         | Warning: QMetaObject::connectSlotsByName: No matching signal for on_dismiss_resizable_dialog() (:0, )
+INFO         | Warning: QMetaObject::connectSlotsByName: No matching signal for on_xr_environment_mode_changed(int) (:0, )
+INFO         | Warning: QMetaObject::connectSlotsByName: No matching signal for on_dismiss_xr_environment_mode_dialog() (:0, )
+INFO         | Warning: QMetaObject::connectSlotsByName: No matching signal for on_xr_input_mode_changed(int) (:0, )
+INFO         | Warning: QMetaObject::connectSlotsByName: No matching signal for on_dismiss_xr_input_mode_dialog() (:0, )
+INFO         | Warning: QMetaObject::connectSlotsByName: No matching signal for on_sleep_timer_done() (:0, )
+INFO         | Warning: QMetaObject::connectSlotsByName: No matching signal for on_unfold_timer_done() (:0, )
+INFO         | Storing crashdata in: /tmp/android-dmitry/emu-crash-36.1.9.db, detection is enabled for process: 14114
+INFO         | Initializing hardware OpenGLES emulation support
+I0923 21:29:40.372112 d714800 opengles.cpp:291] android_startOpenglesRenderer: gpu info
+I0923 21:29:40.372143 d714800 opengles.cpp:292] 
+INFO         | HealthMonitor disabled.
+INFO         | initIcdPaths: ICD set to 'swiftshader', using Swiftshader ICD
+INFO         | Setting ICD filenames for the loader = /Users/dmitry/Library/Android/sdk/emulator/lib64/vulkan/vk_swiftshader_icd.json
+INFO         | SharedLibrary::open for [/Users/dmitry/Library/Android/sdk/emulator/qemu/darwin-aarch64/lib64/vulkan/libvulkan.dylib]
+INFO         | SharedLibrary::open for [/Users/dmitry/Library/Android/sdk/emulator/qemu/darwin-aarch64/lib64/vulkan/libvulkan.dylib]: not found in map, open for the first time
+INFO         | SharedLibrary::open for [/Users/dmitry/Library/Android/sdk/emulator/qemu/darwin-aarch64/lib64/vulkan/libvulkan.dylib] (posix): begin
+INFO         | SharedLibrary::open for [/Users/dmitry/Library/Android/sdk/emulator/qemu/darwin-aarch64/lib64/vulkan/libvulkan.dylib] (posix,darwin): call dlopen
+INFO         | SharedLibrary::open succeeded for [/Users/dmitry/Library/Android/sdk/emulator/qemu/darwin-aarch64/lib64/vulkan/libvulkan.dylib].
+INFO         | Added library: /Users/dmitry/Library/Android/sdk/emulator/qemu/darwin-aarch64/lib64/vulkan/libvulkan.dylib
+INFO         | Selecting Vulkan device: SwiftShader Device (LLVM 10.0.0), Version: 1.3.0
+INFO         | Disabling sparse binding feature support
+INFO         | SharedLibrary::open for [/System/Library/Frameworks/OpenGL.framework/OpenGL]: not found in map, open for the first time
+INFO         | SharedLibrary::open for [/System/Library/Frameworks/OpenGL.framework/OpenGL] (posix): begin
+INFO         | SharedLibrary::open for [/System/Library/Frameworks/OpenGL.framework/OpenGL] (posix,darwin): call dlopen
+INFO         | SharedLibrary::open succeeded for [/System/Library/Frameworks/OpenGL.framework/OpenGL].
+INFO         | SharedLibrary::open for [libshadertranslator.dylib]: not found in map, open for the first time
+INFO         | SharedLibrary::open for [libshadertranslator.dylib] (posix): begin
+INFO         | SharedLibrary::open for [libshadertranslator.dylib] (posix,darwin): call dlopen
+INFO         | SharedLibrary::open succeeded for [libshadertranslator.dylib].
+INFO         | Initializing VkEmulation features:
+INFO         |     glInteropSupported: false
+INFO         |     useDeferredCommands: true
+INFO         |     createResourceWithRequirements: true
+INFO         |     useVulkanComposition: false
+INFO         |     useVulkanNativeSwapchain: false
+INFO         |     enable guestRenderDoc: false
+INFO         |     ASTC LDR emulation mode: Gpu
+INFO         |     enable ETC2 emulation: true
+INFO         |     enable Ycbcr emulation: false
+INFO         |     guestVulkanOnly: false
+INFO         |     useDedicatedAllocations: false
+INFO         | Graphics Adapter Vendor Google (Apple)
+INFO         | Graphics Adapter Android Emulator OpenGL ES Translator (Apple M4)
+INFO         | Graphics API Version OpenGL ES 3.0 (4.1 Metal - 90.5)
+INFO         | Graphics API Extensions GL_OES_EGL_sync GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_depth24 GL_OES_depth32 GL_OES_element_index_uint GL_OES_texture_float GL_OES_texture_float_linear GL_OES_compressed_paletted_texture GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth_texture GL_OES_texture_npot GL_OES_rgb8_rgba8 GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_texture_format_BGRA8888 GL_APPLE_texture_format_BGRA8888 
+INFO         | Graphics Device Extensions N/A
+INFO         | Sending adb public key [QAAAAAOs4TFVoUwm5L5jVw/hA/OgTJvcz7Xi9NaK0xduNRb32ZbNJniEZhAAhmOi+hjPOM1usHUkDZ9yJeJVJF0ROmPEt0r63qrSvPN6gpPfmnyRne9becUMWUV35KNpD4DXwnRGealeicZ24hgmHf/b1Fhac8pozUPbbC9mqWcHvp98keK0iIzZy6F9bWpMQRafWUlK5is3L+PjoCQ+52ntGjZkU+WM1bt1lxk7hDCnEFr+cFO1CUsf6udPdnUq3hdDp4p6GYXEF7U62AkqpjHNZl4Sine0t+DnFCE6iVmDZpBTolfFn7wUjtUocmcH8WDjjN9i9xei9oVSmd8S4zSOc+mfcYvBdPLSlncXd/EcBj+LMQpKu5phjZPyUFXHxpUXQ1Po7rJex9pcbYBo+3TM78y2pIoNE9eIvqoO4lKSQZ7K/kbZuCrUS1PyrC4o41gNRQSZzQbuklRKTOwtn8SI4PfSthpz7IoiT10lwcrc/uH3OEjCVfnaknSDO0cZtFlEsKNannTwIrsb8+cVOGMtaHYCQu7zV6auB+JFXXDVGTRO7afkrsGp8y/yovnDUdjcLtAchcd/HKjH82KZNHB06BLEJnRhmsb2w4MHNFy00eICxMR2cMDGzt1fffu0fRwaVvyrc0rvAfictewmDAMJ4Nte+bQcrRndaLboOKnglffopK+kswEAAQA= dmitry@unknown]
+I0923 21:29:40.492831 d714800 userspace-boot-properties.cpp:766] Userspace boot properties:
+I0923 21:29:40.492838 d714800 userspace-boot-properties.cpp:770]   androidboot.boot_devices=a003600.virtio_mmio
+I0923 21:29:40.492843 d714800 userspace-boot-properties.cpp:770]   androidboot.dalvik.vm.heapsize=512m
+I0923 21:29:40.492845 d714800 userspace-boot-properties.cpp:770]   androidboot.debug.hwui.renderer=skiagl
+I0923 21:29:40.492847 d714800 userspace-boot-properties.cpp:770]   androidboot.debug.sf.nobootanimation=1
+I0923 21:29:40.492848 d714800 userspace-boot-properties.cpp:770]   androidboot.hardware=ranchu
+I0923 21:29:40.492850 d714800 userspace-boot-properties.cpp:770]   androidboot.hardware.gltransport=pipe
+I0923 21:29:40.492851 d714800 userspace-boot-properties.cpp:770]   androidboot.hardware.vulkan=ranchu
+I0923 21:29:40.492853 d714800 userspace-boot-properties.cpp:770]   androidboot.logcat=*:V
+I0923 21:29:40.492854 d714800 userspace-boot-properties.cpp:770]   androidboot.opengles.version=196608
+I0923 21:29:40.492859 d714800 userspace-boot-properties.cpp:770]   androidboot.qemu=1
+I0923 21:29:40.492860 d714800 userspace-boot-properties.cpp:770]   androidboot.qemu.adb.pubkey=QAAAAAOs4TFVoUwm5L5jVw/hA/OgTJvcz7Xi9NaK0xduNRb32ZbNJniEZhAAhmOi+hjPOM1usHUkDZ9yJeJVJF0ROmPEt0r63qrSvPN6gpPfmnyRne9becUMWUV35KNpD4DXwnRGealeicZ24hgmHf/b1Fhac8pozUPbbC9mqWcHvp98keK0iIzZy6F9bWpMQRafWUlK5is3L+PjoCQ+52ntGjZkU+WM1bt1lxk7hDCnEFr+cFO1CUsf6udPdnUq3hdDp4p6GYXEF7U62AkqpjHNZl4Sine0t+DnFCE6iVmDZpBTolfFn7wUjtUocmcH8WDjjN9i9xei9oVSmd8S4zSOc+mfcYvBdPLSlncXd/EcBj+LMQpKu5phjZPyUFXHxpUXQ1Po7rJex9pcbYBo+3TM78y2pIoNE9eIvqoO4lKSQZ7K/kbZuCrUS1PyrC4o41gNRQSZzQbuklRKTOwtn8SI4PfSthpz7IoiT10lwcrc/uH3OEjCVfnaknSDO0cZtFlEsKNannTwIrsb8+cVOGMtaHYCQu7zV6auB+JFXXDVGTRO7afkrsGp8y/yovnDUdjcLtAchcd/HKjH82KZNHB06BLEJnRhmsb2w4MHNFy00eICxMR2cMDGzt1fffu0fRwaVvyrc0rvAfictewmDAMJ4Nte+bQcrRndaLboOKnglffopK+kswEAAQA= dmitry@unknown
+I0923 21:29:40.492868 d714800 userspace-boot-properties.cpp:770]   androidboot.qemu.avd_name=Medium_Phone_API_36.0
+I0923 21:29:40.492870 d714800 userspace-boot-properties.cpp:770]   androidboot.qemu.camera_hq_edge_processing=0
+I0923 21:29:40.492871 d714800 userspace-boot-properties.cpp:770]   androidboot.qemu.camera_protocol_ver=1
+I0923 21:29:40.492873 d714800 userspace-boot-properties.cpp:770]   androidboot.qemu.cpuvulkan.version=4202496
+I0923 21:29:40.492874 d714800 userspace-boot-properties.cpp:770]   androidboot.qemu.gltransport.drawFlushInterval=800
+I0923 21:29:40.492876 d714800 userspace-boot-properties.cpp:770]   androidboot.qemu.gltransport.name=pipe
+I0923 21:29:40.492877 d714800 userspace-boot-properties.cpp:770]   androidboot.qemu.hwcodec.avcdec=2
+I0923 21:29:40.492878 d714800 userspace-boot-properties.cpp:770]   androidboot.qemu.hwcodec.hevcdec=2
+I0923 21:29:40.492880 d714800 userspace-boot-properties.cpp:770]   androidboot.qemu.hwcodec.vpxdec=2
+I0923 21:29:40.492881 d714800 userspace-boot-properties.cpp:770]   androidboot.qemu.settings.system.screen_off_timeout=2147483647
+I0923 21:29:40.492883 d714800 userspace-boot-properties.cpp:770]   androidboot.qemu.virtiowifi=1
+I0923 21:29:40.492884 d714800 userspace-boot-properties.cpp:770]   androidboot.qemu.vsync=60
+I0923 21:29:40.492885 d714800 userspace-boot-properties.cpp:770]   androidboot.serialno=EMULATOR36X1X9X0
+I0923 21:29:40.492888 d714800 userspace-boot-properties.cpp:770]   androidboot.vbmeta.digest=6b98218b46c523e17f8b4a810c5a51b4af28f327c436ce0d286bf937f545cfd7
+I0923 21:29:40.492890 d714800 userspace-boot-properties.cpp:770]   androidboot.vbmeta.hash_alg=sha256
+I0923 21:29:40.492892 d714800 userspace-boot-properties.cpp:770]   androidboot.vbmeta.size=6720
+I0923 21:29:40.492893 d714800 userspace-boot-properties.cpp:770]   androidboot.veritymode=enforcing
+INFO         | Monitoring duration of emulator setup.
+WARNING      | The emulator now requires a signed jwt token for gRPC access! Use the -grpc flag if you really want an open unprotected grpc port
+INFO         | Using security allow list from: /Users/dmitry/Library/Android/sdk/emulator/lib/emulator_access.json
+WARNING      | *** Basic token auth should only be used by android-studio ***
+INFO         | The active JSON Web Key Sets can be found here: /Users/dmitry/Library/Caches/TemporaryItems/avd/running/14114/jwks/86e7c42b-4d9e-45cf-a496-862988028a19/active.jwk
+INFO         | Scanning /Users/dmitry/Library/Caches/TemporaryItems/avd/running/14114/jwks/86e7c42b-4d9e-45cf-a496-862988028a19 for jwk keys.
+INFO         | Started GRPC server at 127.0.0.1:8554, security: Local, auth: +token
+INFO         | Advertising in: /Users/dmitry/Library/Caches/TemporaryItems/avd/running/pid_14114.ini
+INFO         | Setting display: 0 configuration to: 1080x2400, dpi: 420x420 
+INFO         | setDisplayActiveConfig 0
+INFO         | Checking system compatibility:
+INFO         |   Checking: hasSufficientDiskSpace
+INFO         |      Ok: Disk space requirements to run avd: `Medium_Phone_API_36.0` are met
+INFO         |   Checking: hasSufficientHwGpu
+INFO         |      Ok: Hardware GPU requirements to run avd: `Medium_Phone_API_36.0` are passed
+INFO         |   Checking: hasSufficientSystem
+INFO         |      Ok: System requirements to run avd: `Medium_Phone_API_36.0` are met
+INFO         | Loading snapshot 'default_boot'...
+INFO         | OpenGL Vendor=[Google (Apple)]
+INFO         | OpenGL Renderer=[Android Emulator OpenGL ES Translator (Apple M4)]
+INFO         | OpenGL Version=[OpenGL ES 3.0 (4.1 Metal - 90.5)]
+WARNING      | Client not connected yet. Ignoring message!
+WARNING      | Client not connected yet. Ignoring message!
+WARNING      | Client not connected yet. Ignoring message!
+WARNING      | Unknown XR viewport mode requested: 0, ignored.
+
+WARNING      | Client not connected yet. Ignoring message!
+WARNING      | Client not connected yet. Ignoring message!
+WARNING      | Client not connected yet. Ignoring message!
+WARNING      | Client not connected yet. Ignoring message!
+WARNING      | Client not connected yet. Ignoring message!
+INFO         | Successfully loaded snapshot 'default_boot' using 1409 ms
+INFO         | OpenGL Vendor=[Google (Apple)]
+INFO         | OpenGL Renderer=[Android Emulator OpenGL ES Translator (Apple M4)]
+INFO         | OpenGL Version=[OpenGL ES 3.0 (4.1 Metal - 90.5)]
+INFO         | Activated packet streamer for uwb emulation
+INFO         | Activated packet streamer for bluetooth emulation
+INFO         | Warning: QMetaObject::connectSlotsByName: No matching signal for on_rgbcSensorValueWidget_valueChanged() (:0, )
+INFO         | Warning: QMetaObject::connectSlotsByName: No matching signal for on_posture_valueChanged(int) (:0, )
+INFO         | AVD supportsNativeGLES=1, supportsGuestAngle=1
+INFO         | Guest Angle is still unstable for API > 35.
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=541.726,752.952 gbl=541.726,752.952 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-541.726,-752.952 last=-541.726,-752.952 Δ 541.726,752.952) : no target window (:0, )
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=337.504,285.114 gbl=337.504,285.114 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-337.504,-285.114 last=-337.504,-285.114 Δ 337.504,285.114) : no target window (:0, )
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=375.095,680.086 gbl=375.095,680.086 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-375.095,-680.086 last=-375.095,-680.086 Δ 375.095,680.086) : no target window (:0, )
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=424.43,479.108 gbl=424.43,479.108 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-424.43,-479.108 last=-424.43,-479.108 Δ 424.43,479.108) : no target window (:0, )
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=349.197,381.026 gbl=349.197,381.026 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-349.197,-381.026 last=-349.197,-381.026 Δ 349.197,381.026) : no target window (:0, )
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=265.401,639.108 gbl=265.401,639.108 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-265.401,-639.108 last=-265.401,-639.108 Δ 265.401,639.108) : no target window (:0, )
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=464.287,819.483 gbl=464.287,819.483 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-464.287,-819.483 last=-464.287,-819.483 Δ 464.287,819.483) : no target window (:0, )
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=371.744,340.592 gbl=371.744,340.592 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-371.744,-340.592 last=-371.744,-340.592 Δ 371.744,340.592) : no target window (:0, )
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=309.354,734.223 gbl=309.354,734.223 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-309.354,-734.223 last=-309.354,-734.223 Δ 309.354,734.223) : no target window (:0, )
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=413.449,523.233 gbl=413.449,523.233 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-413.449,-523.233 last=-413.449,-523.233 Δ 413.449,523.233) : no target window (:0, )
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=443.8,521.728 gbl=443.8,521.728 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-443.8,-521.728 last=-443.8,-521.728 Δ 443.8,521.728) : no target window (:0, )
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=273.075,313.158 gbl=273.075,313.158 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-273.075,-313.158 last=-273.075,-313.158 Δ 273.075,313.158) : no target window (:0, )
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=403.974,571.628 gbl=403.974,571.628 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-403.974,-571.628 last=-403.974,-571.628 Δ 403.974,571.628) : no target window (:0, )
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=355.846,776.995 gbl=355.846,776.995 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-355.846,-776.995 last=-355.846,-776.995 Δ 355.846,776.995) : no target window (:0, )
+INFO         | Warning: skipping QEventPoint(id=1 ts=0 pos=0,0 scn=317.277,593.042 gbl=317.277,593.042 Released ellipse=(1x1 ∡ 0) vel=0,0 press=-317.277,-593.042 last=-317.277,-593.042 Δ 317.277,593.042) : no target window (:0, )
+ERROR        | adb protocol fault (couldn't read status length)
