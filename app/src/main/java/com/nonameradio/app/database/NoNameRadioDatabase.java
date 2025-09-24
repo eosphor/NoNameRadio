@@ -30,8 +30,8 @@ public abstract class NoNameRadioDatabase extends RoomDatabase {
         if (INSTANCE == null) {
             synchronized (NoNameRadioDatabase.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                            NoNameRadioDatabase.class, "radio_droid_database")
+                      INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
+                             NoNameRadioDatabase.class, "nonameradio_database")
                             .addCallback(CALLBACK)
                             .fallbackToDestructiveMigration()
                             .build();

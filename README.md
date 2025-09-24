@@ -232,6 +232,18 @@ We welcome contributions! This project follows Clean Architecture principles and
 - **Build Time**: Optimized Gradle configuration
 - **APK Size**: ~8MB (optimized)
 
+## ⚖️ Legal Notice
+
+This project is a fork of [RadioDroid](https://github.com/segler-alex/RadioDroid),
+originally developed by [Alexander Segler](https://github.com/segler-alex).
+
+All rights to the original RadioDroid project belong to its original author.
+This fork (NoNameRadio) is an independent project with significant modifications
+including complete rebranding, architectural refactoring, and feature enhancements.
+
+**Original License**: GPL v3.0
+**This Project License**: GPL v3.0
+
 ## 📄 License
 
 This project is free software licensed under the [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html).
