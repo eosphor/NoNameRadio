@@ -30,7 +30,7 @@ public class MediaSessionCallback extends MediaSessionCompat.Callback {
 
     @Override
     public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
-        final KeyEvent event = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+        final KeyEvent event = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT, KeyEvent.class);
 
         if (event.getKeyCode() == KeyEvent.KEYCODE_HEADSETHOOK) {
             if (event.getAction() == KeyEvent.ACTION_UP && !event.isLongPress()) {

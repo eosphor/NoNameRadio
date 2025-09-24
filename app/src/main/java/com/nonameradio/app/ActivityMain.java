@@ -1117,7 +1117,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
                         meteredConnectionAlertDialog = null;
                     }
 
-                    PlayerType playerType = intent.getParcelableExtra(PlayerService.PLAYER_SERVICE_METERED_CONNECTION_PLAYER_TYPE);
+                    PlayerType playerType = intent.getParcelableExtra(PlayerService.PLAYER_SERVICE_METERED_CONNECTION_PLAYER_TYPE, PlayerType.class);
 
                     switch (playerType) {
                         case INTERNAL:

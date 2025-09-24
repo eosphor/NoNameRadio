@@ -540,7 +540,7 @@ public class PlayerService extends JobIntentService implements RadioPlayer.Playe
                         resume();
                         break;
                     case ACTION_MEDIA_BUTTON:
-                        KeyEvent key = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+                        KeyEvent key = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT, KeyEvent.class);
                         if (key.getAction() == KeyEvent.ACTION_UP) {
                             int keycode = key.getKeyCode();
                             switch (keycode) {
