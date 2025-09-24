@@ -67,4 +67,10 @@
         android:title="@string/action_delete"
         android:icon="@drawable/ic_delete_white_24dp"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_legal_notice"
+        android:title="@string/legal_notice_title"
+        android:icon="@drawable/ic_more_vert_black_24dp"
+        app:showAsAction="never" />
 </menu>

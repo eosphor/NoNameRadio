@@ -961,6 +961,13 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
                 newFragment.setCallback(this);
                 newFragment.show(getSupportFragmentManager(), "timePicker");
                 return true;
+            case R.id.action_legal_notice:
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.legal_notice_title)
+                        .setMessage(R.string.legal_notice_content)
+                        .setPositiveButton(R.string.action_ok, null)
+                        .show();
+                return true;
         }
         return super.onOptionsItemSelected(menuItem);
     }

@@ -13,6 +13,10 @@
     <string name="detail_share">Share</string>
     <string name="detail_play_in_radiodroid">Play in NoNameRadio</string>
 
+    <!-- Legal Notice -->
+    <string name="legal_notice_title">Legal Notice</string>
+    <string name="legal_notice_content">This application is a fork of RadioDroid, originally developed by Alexander Segler.\n\nAll rights to the original RadioDroid project belong to its original author. This fork (NoNameRadio) is an independent project with significant modifications including complete rebranding, architectural refactoring, and feature enhancements.\n\nLicense: GPL v3.0</string>
+
     <string name="action_links">Links</string>
     <string name="action_homepage">Homepage</string>
     <string name="action_favorite">Favorite</string>
