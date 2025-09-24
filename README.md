@@ -1,8 +1,8 @@
 # NoNameRadio 📻
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Android](https://img.shields.io/badge/Android-5.0%2B-green.svg)](https://developer.android.com)
-[![API](https://img.shields.io/badge/API-21%2B-brightgreen.svg)](https://developer.android.com)
+[![Android](https://img.shields.io/badge/Android-7.0%2B-green.svg)](https://developer.android.com)
+[![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg)](https://developer.android.com)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean%20Architecture-blue)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 
 A modern Android radio streaming application based on the [Radio Browser](http://www.radio-browser.info) API. This is a fork of RadioDroid with enhanced features, modernized architecture, and comprehensive codebase refactoring.
@@ -77,7 +77,7 @@ This fork has undergone comprehensive architectural refactoring to improve maint
 ### Build from Source
 ```bash
 git clone https://github.com/eosphor/NoNameRadio.git
-cd NoNameRadio/RadioDroid
+cd NoNameRadio
 
 # Build debug APK
 ./gradlew assembleFreeDebug
@@ -93,8 +93,8 @@ cd NoNameRadio/RadioDroid
 
 ### **Project Structure**
 ```
-RadioDroid/
-├── 📁 app/src/main/java/net/programmierecke/radiodroid2/
+NoNameRadio/
+├── 📁 app/src/main/java/com/nonameradio/app/
 │   ├── 📁 core/          # Core business logic
 │   │   ├── 📁 di/        # Dependency injection
 │   │   ├── 📁 domain/    # Domain entities & interfaces
@@ -155,7 +155,7 @@ A: The app supports recording live streams with automatic 60-minute limit enforc
 A: Yes! NoNameRadio is completely free and open source under GPLv3 license, with a focus on modern Android development practices.
 
 **Q: Which Android versions are supported?**
-A: Android 5.0 (API level 21) and higher, with optimized support for modern Android versions.
+A: Android 7.0 (API level 24) and higher, with optimized support for modern Android versions.
 
 **Q: Can I contribute to the project?**
 A: Absolutely! The project welcomes contributions. See our [Contributing Guide](.github/CONTRIBUTING.md) for details on the Clean Architecture approach and coding standards.
