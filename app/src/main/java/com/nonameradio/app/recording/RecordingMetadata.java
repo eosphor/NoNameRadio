@@ -28,20 +28,20 @@ public class RecordingMetadata {
     public String stationUrl;
     public long startTime; // timestamp when recording started
     public long endTime; // timestamp when recording ended
-    public long durationMs; // recording duration in milliseconds
+    public Long durationMs; // recording duration in milliseconds
 
     // Audio metadata
     public String title;
     public String artist;
     public String album;
     public String genre;
-    public int bitrate; // kbps
-    public int sampleRate; // Hz
-    public int channels; // 1 for mono, 2 for stereo
+    public Integer bitrate; // kbps
+    public Integer sampleRate; // Hz
+    public Integer channels; // 1 for mono, 2 for stereo
     public String format; // mp3, aac, etc.
 
     // File size and status
-    public long fileSizeBytes;
+    public Long fileSizeBytes;
     public boolean completed;
 
     // Constructor
@@ -56,7 +56,7 @@ public class RecordingMetadata {
     }
 
     public String getDurationString() {
-        if (durationMs <= 0) return "00:00";
+        if (durationMs == null || durationMs <= 0) return "00:00";
 
         long totalSeconds = durationMs / 1000;
         long minutes = totalSeconds / 60;
@@ -66,7 +66,7 @@ public class RecordingMetadata {
     }
 
     public String getFileSizeString() {
-        if (fileSizeBytes <= 0) return "0 B";
+        if (fileSizeBytes == null || fileSizeBytes <= 0) return "0 B";
 
         final String[] units = {"B", "KB", "MB", "GB"};
         int unitIndex = 0;

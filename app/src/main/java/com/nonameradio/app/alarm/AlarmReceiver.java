@@ -15,6 +15,8 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -42,6 +44,8 @@ public class AlarmReceiver extends BroadcastReceiver {
     PowerManager powerManager;
     PowerManager.WakeLock wakeLock;
     private WifiManager.WifiLock wifiLock;
+    private Handler lockReleaseHandler;
+    private final Runnable lockReleaseRunnable = this::releaseLocks;
     private final String TAG = "RECV";
     static int BACKUP_NOTIFICATION_ID = 2;
     static String BACKUP_NOTIFICATION_NAME = "backup-alarm";
@@ -103,17 +107,31 @@ public class AlarmReceiver extends BroadcastReceiver {
         }else{
             Log.e(TAG,"could not acquire wifi lock");
         }
+
+        // Schedule automatic lock release after 2 minutes as safety measure
+        if (lockReleaseHandler == null) {
+            HandlerThread handlerThread = new HandlerThread("AlarmLockRelease");
+            handlerThread.start();
+            lockReleaseHandler = new Handler(handlerThread.getLooper());
+        }
+        lockReleaseHandler.removeCallbacks(lockReleaseRunnable);
+        lockReleaseHandler.postDelayed(lockReleaseRunnable, 2 * 60 * 1000); // 2 minutes
+        if(BuildConfig.DEBUG) { Log.d(TAG,"scheduled automatic lock release in 2 minutes"); }
     }
 
     private void releaseLocks() {
-        if (wakeLock != null) {
+        // Cancel automatic lock release timer
+        if (lockReleaseHandler != null) {
+            lockReleaseHandler.removeCallbacks(lockReleaseRunnable);
+            if(BuildConfig.DEBUG) { Log.d(TAG,"cancelled automatic lock release timer"); }
+        }
+
+        if (wakeLock != null && wakeLock.isHeld()) {
             wakeLock.release();
-            wakeLock = null;
             if(BuildConfig.DEBUG) { Log.d(TAG,"release wakelock"); }
         }
-        if (wifiLock != null) {
+        if (wifiLock != null && wifiLock.isHeld()) {
             wifiLock.release();
-            wifiLock = null;
             if(BuildConfig.DEBUG) { Log.d(TAG,"release wifilock"); }
         }
     }
@@ -187,14 +205,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                             share.setClassName(packageName,activityName);
                             share.setDataAndType(Uri.parse(url), "audio/*");
                             context.startActivity(share);
-                            if (wakeLock != null) {
-                                wakeLock.release();
-                                wakeLock = null;
-                            }
-                            if (wifiLock != null) {
-                                wifiLock.release();
-                                wifiLock = null;
-                            }
+                            releaseLocks();
                         } else {
                             Intent anIntent = new Intent(context, PlayerService.class);
                             context.getApplicationContext().bindService(anIntent, svcConn, Context.BIND_AUTO_CREATE);
@@ -209,14 +220,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                     Toast toast = Toast.makeText(context, context.getResources().getText(R.string.error_station_load), Toast.LENGTH_SHORT);
                     toast.show();
                     PlaySystemAlarm(context);
-                    if (wakeLock != null) {
-                        wakeLock.release();
-                        wakeLock = null;
-                    }
-                    if (wifiLock != null) {
-                        wifiLock.release();
-                        wifiLock = null;
-                    }
+                    // Locks will be released by PlaySystemAlarm -> releaseLocks()
                 }
                 super.onPostExecute(result);
             }
@@ -260,5 +264,8 @@ public class AlarmReceiver extends BroadcastReceiver {
                 .setAutoCancel(true);
 
         notificationManager.notify(BACKUP_NOTIFICATION_ID, mBuilder.build());
+
+        // Release locks after playing system alarm
+        releaseLocks();
     }
 }

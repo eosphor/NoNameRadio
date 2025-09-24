@@ -8,6 +8,9 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.provider.Settings;
 
 import com.nonameradio.app.BuildConfig;
 import com.nonameradio.app.station.DataRadioStation;
@@ -55,6 +58,27 @@ public class RadioAlarmManager {
 
     public Observable getSavedAlarmsObservable() {
         return savedAlarmsObservable;
+    }
+
+    public boolean canScheduleExactAlarms() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            return alarmMgr.canScheduleExactAlarms();
+        }
+        return true; // No restriction on older versions
+    }
+
+    public void requestExactAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+            intent.setData(Uri.parse("package:" + context.getPackageName()));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            try {
+                context.startActivity(intent);
+            } catch (Exception e) {
+                Log.e("ALARM", "Failed to open exact alarm settings", e);
+            }
+        }
     }
 
     public void add(DataRadioStation station, int hour, int minute){
@@ -190,6 +214,16 @@ public class RadioAlarmManager {
         if (alarm != null) {
             stop(alarmId);
 
+            // Check for SCHEDULE_EXACT_ALARM permission on Android 12+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                if (!alarmMgr.canScheduleExactAlarms()) {
+                    Log.w("ALARM", "SCHEDULE_EXACT_ALARM permission not granted - alarms may not work reliably");
+                    // Could show a dialog here to guide user to settings
+                    return;
+                }
+            }
+
             Intent intent = new Intent(context, AlarmReceiver.class);
             intent.putExtra("id",alarmId);
             PendingIntent alarmIntent = PendingIntent.getBroadcast(context, alarmId, intent, PendingIntent.FLAG_UPDATE_CURRENT | pendingIntentFlag);
@@ -226,8 +260,14 @@ public class RadioAlarmManager {
                     + " " + calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE)
             );
 
-            if(BuildConfig.DEBUG) { Log.d("ALARM","START setAlarmClock"); }
-            alarmMgr.setAlarmClock(new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis(),alarmIntent),alarmIntent);
+            if(BuildConfig.DEBUG) { Log.d("ALARM","START setExactAndAllowWhileIdle"); }
+            
+            // Use setExactAndAllowWhileIdle for better background reliability on Android 6+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmMgr.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmIntent);
+            } else {
+                alarmMgr.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmIntent);
+            }
         }
     }
 

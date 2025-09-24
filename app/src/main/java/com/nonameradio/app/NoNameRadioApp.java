@@ -3,6 +3,7 @@ package com.nonameradio.app;
 import android.app.UiModeManager;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -87,31 +88,23 @@ public class NoNameRadioApp extends MultiDexApplication {
     public void onCreate() {
         super.onCreate();
 
-        // Initialize AppMetrica
-        YandexMetricaConfig config = YandexMetricaConfig.newConfigBuilder("620825a5-2d14-47ce-af59-acb3618c547e")
-                .withLogs()
-                .withCrashReporting(true)
-                .withNativeCrashReporting(true)
-                .withLocationTracking(false)
-                .withStatisticsSending(true)
-                .build();
-        YandexMetrica.activate(this, config);
-        YandexMetrica.enableActivityAutoTracking(this);
-        
-        // Report app start event
-        YandexMetrica.reportEvent("app_started");
-
-        GoogleProviderHelper.use(getBaseContext());
+        // TODO: Move GoogleProviderHelper initialization to later
 
         connectionPool = new ConnectionPool();
 
+        // Initialize HTTP client for network operations
         rebuildHttpClient();
 
         // Configure Glide with custom OkHttp client
         Glide.get(this).getRegistry().replace(GlideUrl.class, java.io.InputStream.class, new OkHttpUrlLoader.Factory(newHttpClientForGlide()));
 
-        CountryCodeDictionary.getInstance().load(this);
-        CountryFlagsLoader.getInstance();
+        // Country code loading
+        try {
+            CountryCodeDictionary.getInstance().load(this);
+            CountryFlagsLoader.getInstance();
+        } catch (Exception countryInitError) {
+            Log.e("NoNameRadioApp", "Failed to init country dictionaries", countryInitError);
+        }
 
         historyManager = new HistoryManager(this);
         favouriteManager = new FavouriteManager(this);
@@ -141,6 +134,38 @@ public class NoNameRadioApp extends MultiDexApplication {
 
         // Initialize dependency injection
         com.nonameradio.app.core.di.DependencyInjector.initialize(this);
+
+        // Initialize Google Provider Helper (TLS provider for Play flavor; no-op in Free)
+        GoogleProviderHelper.use(getBaseContext());
+
+        // TODO: Yandex Metrica temporarily disabled due to ClassCastException
+        // YandexMetricaConfig config = YandexMetricaConfig.newConfigBuilder("620825a5-2d14-47ce-af59-acb3618c547e")
+        //         .withLogs()
+        //         .withCrashReporting(true)
+        //         .withNativeCrashReporting(true)
+        //         .withLocationTracking(false)
+        //         .withStatisticsSending(true)
+        //         .build();
+        // YandexMetrica.activate(this, config);
+        // YandexMetrica.enableActivityAutoTracking(this);
+
+        // Initialize Yandex Metrica after all other components
+        try {
+            YandexMetricaConfig config = YandexMetricaConfig.newConfigBuilder("620825a5-2d14-47ce-af59-acb3618c547e")
+                    .withLogs()
+                    .withCrashReporting(true)
+                    .withNativeCrashReporting(true)
+                    .withLocationTracking(false)
+                    .withStatisticsSending(true)
+                    .build();
+            YandexMetrica.activate(this, config);
+            YandexMetrica.enableActivityAutoTracking(this);
+
+            // Report app start event
+            YandexMetrica.reportEvent("app_started");
+        } catch (Exception e) {
+            Log.e("NoNameRadioApp", "Failed to initialize YandexMetrica", e);
+        }
     }
 
     public void setTestsInterceptor(Interceptor testsInterceptor) {

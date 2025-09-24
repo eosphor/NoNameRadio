@@ -19,7 +19,7 @@ import java.util.concurrent.Executors;
 
 import static com.nonameradio.app.history.TrackHistoryEntry.MAX_UNKNOWN_TRACK_DURATION;
 
-@Database(entities = {TrackHistoryEntry.class, RecordingMetadata.class}, version = 2)
+@Database(entities = {TrackHistoryEntry.class, RecordingMetadata.class}, version = 3)
 @TypeConverters({Converters.class})
 public abstract class NoNameRadioDatabase extends RoomDatabase {
     public abstract TrackHistoryDao songHistoryDao();
@@ -37,6 +37,7 @@ public abstract class NoNameRadioDatabase extends RoomDatabase {
                              NoNameRadioDatabase.class, "nonameradio_database")
                             .addCallback(CALLBACK)
                             .fallbackToDestructiveMigration()
+                            .allowMainThreadQueries() // Temporary fix for main thread database access
                             .build();
                 }
             }

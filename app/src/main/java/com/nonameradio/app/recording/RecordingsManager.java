@@ -741,9 +741,18 @@ public class RecordingsManager {
      */
     public List<RecordingMetadata> getAllRecordingMetadata() {
         try {
-            return database.recordingMetadataDao().getAll();
+            List<RecordingMetadata> result = database.recordingMetadataDao().getAll();
+            Log.d(TAG, "Successfully loaded " + result.size() + " recording metadata entries");
+            return result;
         } catch (Exception e) {
-            Log.e(TAG, "Failed to get all recording metadata", e);
+            Log.e(TAG, "Failed to get all recording metadata, clearing database", e);
+            try {
+                // Clear the corrupted data
+                database.recordingMetadataDao().deleteAll();
+                Log.i(TAG, "Cleared corrupted recording metadata database");
+            } catch (Exception clearException) {
+                Log.e(TAG, "Failed to clear recording metadata database", clearException);
+            }
             return new ArrayList<>();
         }
     }

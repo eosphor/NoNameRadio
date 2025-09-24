@@ -21,6 +21,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -74,6 +75,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".TestAlarmActivity"
+            android:exported="true"
+            android:theme="@style/MyMaterialTheme">
+        </activity>
+
         <service
             android:name="com.nonameradio.app.service.PlayerService"
             android:exported="true"
@@ -109,6 +116,16 @@
             android:enabled="true">
             <intent-filter>
                 <action android:name=".AlarmReceiver" />
+                <action android:name="com.nonameradio.app.ALARM_TEST" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name="com.nonameradio.app.alarm.AlarmSetupReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.nonameradio.app.CREATE_TEST_ALARM" />
             </intent-filter>
         </receiver>
 

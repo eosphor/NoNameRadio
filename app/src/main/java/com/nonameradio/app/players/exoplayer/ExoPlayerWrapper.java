@@ -151,7 +151,11 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
                 lastPlayStartTime = System.currentTimeMillis();
                 
                 // Report playback start event
-        YandexMetrica.reportEvent("radio_playback_started", "{\"url\":\"" + streamUrl + "\",\"is_hls\":" + isHls + "}");
+                try {
+                    YandexMetrica.reportEvent("radio_playback_started", "{\"url\":\"" + streamUrl + "\",\"is_hls\":" + isHls + "}");
+                } catch (Exception e) {
+                    Log.w("ExoPlayerWrapper", "Failed to report playback start event", e);
+                }
 
         if (connectivityManager == null) {
             connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -209,7 +213,11 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
         Log.i(TAG, "Stopping exoplayer.");
         
         // Report playback stop event
-        YandexMetrica.reportEvent("radio_playback_stopped");
+        try {
+            YandexMetrica.reportEvent("radio_playback_stopped");
+        } catch (Exception e) {
+            Log.w("ExoPlayerWrapper", "Failed to report playback stop event", e);
+        }
 
         cancelStopTask();
         recordingCoordinator.stop(false, false);
