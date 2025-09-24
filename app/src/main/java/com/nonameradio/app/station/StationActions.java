@@ -125,7 +125,8 @@ public class StationActions {
                         Toast.makeText(ctx.getApplicationContext(), toastText, Toast.LENGTH_SHORT).show();
                     } else {
                         Log.e(TAG, "Clipboard is NULL!");
-                        // TODO: toast general error
+                        CharSequence toastText = ctx.getResources().getText(R.string.error_copy_stream_url);
+                        Toast.makeText(ctx.getApplicationContext(), toastText, Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     CharSequence toastText = ctx.getResources().getText(R.string.error_station_load);

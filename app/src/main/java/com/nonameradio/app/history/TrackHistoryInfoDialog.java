@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,6 +38,7 @@ import java.util.Objects;
 public class TrackHistoryInfoDialog extends BottomSheetDialogFragment {
 
     public static final String FRAGMENT_TAG = "tracks_history_info_dialog_fragment";
+    private static final String TAG = "TrackHistoryInfoDialog";
 
     private final TrackHistoryEntry historyEntry;
 
@@ -131,8 +133,9 @@ public class TrackHistoryInfoDialog extends BottomSheetDialogFragment {
                 CharSequence toastText = getContext().getResources().getText(R.string.notify_track_info_copied);
                 Toast.makeText(getContext().getApplicationContext(), toastText, Toast.LENGTH_SHORT).show();
             } else {
-                //Log.e(TAG, "Clipboard is NULL!");
-                // TODO: toast general error
+                Log.e(TAG, "Clipboard is NULL!");
+                CharSequence toastText = getContext().getResources().getText(R.string.error_copy_track_info);
+                Toast.makeText(getContext().getApplicationContext(), toastText, Toast.LENGTH_SHORT).show();
             }
         });
 
