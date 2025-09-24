@@ -60,7 +60,7 @@
                     android:layout_height="30dp"
                     android:layout_gravity="top|end"
                     android:scaleType="fitCenter"
-                    app:srcCompat="@drawable/ic_heart_transparent_with_border_24dp" />
+                    app:srcCompat="@drawable/ic_heart_24dp" />
 
         </FrameLayout>
 
