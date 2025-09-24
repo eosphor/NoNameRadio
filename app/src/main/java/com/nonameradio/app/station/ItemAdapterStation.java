@@ -20,6 +20,7 @@ import android.os.Build;
 import android.util.Log;
 
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
@@ -582,7 +583,7 @@ public class ItemAdapterStation
         if (useCircularIcons) {
             transparentImageView.setVisibility(View.VISIBLE);
             imageView.getLayoutParams().height = imageView.getLayoutParams().height = imageView.getLayoutParams().width;
-            imageView.setBackgroundColor(getContext().getResources().getColor(android.R.color.black));
+            imageView.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.black));
         }
     }
 

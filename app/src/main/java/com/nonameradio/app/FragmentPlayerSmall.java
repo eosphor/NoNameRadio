@@ -12,6 +12,7 @@ import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
 
@@ -225,7 +226,7 @@ public class FragmentPlayerSmall extends Fragment {
     private void setupStationIcon() {
         boolean useCircularIcons = PreferenceManager.getDefaultSharedPreferences(requireContext().getApplicationContext()).getBoolean("circular_icons", false);
         if (useCircularIcons) {
-            imageViewIcon.setBackgroundColor(requireContext().getResources().getColor(android.R.color.black));
+            imageViewIcon.setBackgroundColor(ContextCompat.getColor(requireContext(), android.R.color.black));
         }
 
         ImageView transparentCircle = requireView().findViewById(R.id.transparentCircle);
