@@ -62,10 +62,10 @@ public class FragmentPlayerSmall extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.layout_player_small, container, false);
 
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) requireActivity().getApplication();
-        mpdClient = radioDroidApp.getMpdClient();
+        NoNameRadioApp app = (NoNameRadioApp) requireActivity().getApplication();
+        mpdClient = app.getMpdClient();
 
-        trackHistoryRepository = radioDroidApp.getTrackHistoryRepository();
+        trackHistoryRepository = app.getTrackHistoryRepository();
 
         updateUIReceiver = new BroadcastReceiver() {
             @Override
@@ -125,8 +125,8 @@ public class FragmentPlayerSmall extends Fragment {
                 return;
             }
 
-            NoNameRadioApp radioDroidApp = (NoNameRadioApp) requireActivity().getApplication();
-            FavouriteManager favouriteManager = radioDroidApp.getFavouriteManager();
+            NoNameRadioApp app = (NoNameRadioApp) requireActivity().getApplication();
+            FavouriteManager favouriteManager = app.getFavouriteManager();
             boolean isInFavorites = favouriteManager.has(station.StationUuid);
 
             showPlayerMenu(station, isInFavorites);
@@ -181,16 +181,16 @@ public class FragmentPlayerSmall extends Fragment {
     }
 
     private void playLastFromHistory() {
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) requireActivity().getApplication();
+        NoNameRadioApp app = (NoNameRadioApp) requireActivity().getApplication();
         DataRadioStation station = MediaSessionUtil.getCurrentStation();
 
         if (station == null) {
-            HistoryManager historyManager = radioDroidApp.getHistoryManager();
+            HistoryManager historyManager = app.getHistoryManager();
             station = historyManager.getFirst();
         }
 
         if (station != null && !MediaSessionUtil.isPlaying()) {
-            Utils.showPlaySelection(radioDroidApp, station, getActivity().getSupportFragmentManager());
+            Utils.showPlaySelection(app, station, getActivity().getSupportFragmentManager());
         }
     }
 

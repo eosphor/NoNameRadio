@@ -1,4 +1,6 @@
 package com.nonameradio.app;
+import com.nonameradio.app.core.event.EventBus;
+import com.nonameradio.app.core.event.HideLoadingEvent;
 
 import android.content.Context;
 import android.content.Intent;
@@ -71,17 +73,17 @@ public class FragmentStarred extends Fragment implements IAdapterRefreshable, Ob
 
         ItemAdapterStation adapter = (ItemAdapterStation) rvStations.getAdapter();
 
-        if (BuildConfig.DEBUG) Log.d(TAG, "stations count:" + favouriteManager.listStations.size());
+        if (BuildConfig.DEBUG) Log.d(TAG, "stations count:" + favouriteManager.getListStations().size());
 
-        adapter.updateList(this, favouriteManager.listStations);
+        adapter.updateList(this, favouriteManager.getListStations());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) requireActivity().getApplication();
-        favouriteManager = radioDroidApp.getFavouriteManager();
+        NoNameRadioApp app = (NoNameRadioApp) requireActivity().getApplication();
+        favouriteManager = app.getFavouriteManager();
         favouriteManager.addObserver(this);
 
         // Inflate the layout for this fragment
@@ -148,10 +150,10 @@ public class FragmentStarred extends Fragment implements IAdapterRefreshable, Ob
     }
 
     void RefreshDownloadList(){
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getActivity().getApplication();
-        final OkHttpClient httpClient = radioDroidApp.getHttpClient();
+        NoNameRadioApp app = (NoNameRadioApp) getActivity().getApplication();
+        final OkHttpClient httpClient = app.getHttpClient();
         ArrayList<String> listUUids = new ArrayList<String>();
-        for (DataRadioStation station : favouriteManager.listStations){
+        for (DataRadioStation station : favouriteManager.getListStations()){
             listUUids.add(station.StationUuid);
         }
         Log.d(TAG, "Search for items: "+listUUids.size());
@@ -165,7 +167,7 @@ public class FragmentStarred extends Fragment implements IAdapterRefreshable, Ob
                 isDownloading = false;
                 DownloadFinished();
                 if(getContext() != null)
-                    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(getContext()).sendBroadcast(new Intent(ActivityMain.ACTION_HIDE_LOADING));
+                    EventBus.post(HideLoadingEvent.INSTANCE);
                 if (BuildConfig.DEBUG) {
                     Log.d(TAG, "Download relativeUrl finished");
                 }
@@ -190,7 +192,7 @@ public class FragmentStarred extends Fragment implements IAdapterRefreshable, Ob
                 isDownloading = false;
                 DownloadFinished();
                 if(getContext() != null)
-                    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(getContext()).sendBroadcast(new Intent(ActivityMain.ACTION_HIDE_LOADING));
+                    EventBus.post(HideLoadingEvent.INSTANCE);
                 Log.e(TAG, "Error downloading stations", throwable);
                 try {
                     Toast toast = Toast.makeText(getContext(), getResources().getText(R.string.error_list_update), Toast.LENGTH_SHORT);
@@ -205,7 +207,7 @@ public class FragmentStarred extends Fragment implements IAdapterRefreshable, Ob
 
     private void SyncList(List<DataRadioStation> list_new) {
         ArrayList<String> to_remove = new ArrayList<String>();
-        for (DataRadioStation station_current: favouriteManager.listStations){
+        for (DataRadioStation station_current: favouriteManager.getListStations()){
             boolean found = false;
             for (DataRadioStation station_new: list_new){
                 if (station_new.StationUuid.equals(station_current.StationUuid)) {
@@ -241,8 +243,8 @@ public class FragmentStarred extends Fragment implements IAdapterRefreshable, Ob
 
         rvStations.setAdapter(null);
 
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) requireActivity().getApplication();
-        favouriteManager = radioDroidApp.getFavouriteManager();
+        NoNameRadioApp app = (NoNameRadioApp) requireActivity().getApplication();
+        favouriteManager = app.getFavouriteManager();
         favouriteManager.deleteObserver(this);
     }
 

@@ -23,6 +23,11 @@ import android.webkit.MimeTypeMap;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.nonameradio.app.utils.SystemUtils;
+import com.nonameradio.app.utils.FileUtils;
+import com.nonameradio.app.utils.NetworkUtils;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.PermissionChecker;
@@ -99,8 +104,7 @@ public class Utils {
      * @return true if running on Android TV, false otherwise
      */
     public static boolean isRunningOnTV(Context context) {
-        UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
-        return uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
+        return SystemUtils.isRunningOnTV(context);
     }
 
     /**
@@ -110,15 +114,11 @@ public class Utils {
      * @return true if permission is granted, false otherwise
      */
     public static boolean hasPermission(Context context, String permission) {
-        return ContextCompat.checkSelfPermission(context, permission) == PermissionChecker.PERMISSION_GRANTED;
+        return SystemUtils.hasPermission(context, permission);
     }
 
     public static int parseIntWithDefault(String number, int defaultVal) {
-        try {
-            return Integer.parseInt(number);
-        } catch (NumberFormatException e) {
-            return defaultVal;
-        }
+        return SystemUtils.parseIntWithDefault(number, defaultVal);
     }
 
     public static String getCacheFile(Context ctx, String theURI) {
@@ -228,43 +228,17 @@ public class Utils {
         return null;
     }
 
+
+    /**
+     * Download feed from relative URL with parameters (wrapper for NetworkUtils)
+     */
     public static String downloadFeedRelative(OkHttpClient httpClient, Context ctx, String theRelativeUri, boolean forceUpdate, Map<String, String> dictParams) {
-        // try current server for download
-        String currentServer = RadioBrowserServerManager.getCurrentServer(httpClient, ctx);
-        if (currentServer == null) {
-            return null;
-        }
-
-        String endpoint = RadioBrowserServerManager.constructEndpoint(currentServer, theRelativeUri);
-        String result = downloadFeed(httpClient, ctx, endpoint, forceUpdate, dictParams);
-        if (result != null) {
-            return result;
-        }
-
-        // get a list of all servers
-        String[] serverList = RadioBrowserServerManager.getServerList(false, httpClient, ctx);
-
-        // try all other servers for download
-        for (String newServer : serverList) {
-            if (newServer.equals(currentServer)) {
-                continue;
-            }
-
-            endpoint = RadioBrowserServerManager.constructEndpoint(newServer, theRelativeUri);
-            result = downloadFeed(httpClient, ctx, endpoint, forceUpdate, dictParams);
-            if (result != null) {
-                // set the working server as new current server
-                RadioBrowserServerManager.setCurrentServer(newServer);
-                return result;
-            }
-        }
-
-        return null;
+        return NetworkUtils.downloadFeedRelative(httpClient, ctx, theRelativeUri, forceUpdate, dictParams);
     }
 
     public static String getRealStationLink(OkHttpClient httpClient, Context ctx, String stationId) {
         Log.i("UTIL", "StationUUID:" + stationId);
-        String result = Utils.downloadFeedRelative(httpClient, ctx, "json/url/" + stationId, true, null);
+        String result = NetworkUtils.downloadFeedRelative(httpClient, ctx, "json/url/" + stationId, true, null);
         if (result != null) {
             Log.i("UTIL", result);
             JSONObject jsonObj;
@@ -300,7 +274,7 @@ public class Utils {
 
     public static DataRadioStation getStationByUuid(OkHttpClient httpClient, Context ctx, String stationUuid) {
         Log.w("UTIL", "Search by uuid:" + stationUuid);
-        String result = Utils.downloadFeedRelative(httpClient, ctx, "json/stations/byuuid/" + stationUuid, true, null);
+        String result = NetworkUtils.downloadFeedRelative(httpClient, ctx, "json/stations/byuuid/" + stationUuid, true, null);
         if (result != null) {
             try {
                 List<DataRadioStation> list = DataRadioStation.DecodeJson(result);
@@ -322,7 +296,7 @@ public class Utils {
         Log.d("UTIL", "Search by uuid for items");
         HashMap<String, String> p = new HashMap<String, String>();
         p.put("uuids", uuids);
-        String result = Utils.downloadFeedRelative(httpClient, ctx, "json/stations/byuuid", true, p);
+        String result = NetworkUtils.downloadFeedRelative(httpClient, ctx, "json/stations/byuuid", true, p);
         if (result != null) {
             try {
                 List<DataRadioStation> list = DataRadioStation.DecodeJson(result);
@@ -343,47 +317,47 @@ public class Utils {
         DataRadioStation station = MediaSessionUtil.getCurrentStation();
         
         if (station == null) {
-            NoNameRadioApp radioDroidApp = (NoNameRadioApp) ctx.getApplicationContext();
-            HistoryManager historyManager = radioDroidApp.getHistoryManager();
+            NoNameRadioApp app = (NoNameRadioApp) ctx.getApplicationContext();
+            HistoryManager historyManager = app.getHistoryManager();
             station = historyManager.getFirst();
         }
 
         return station;
     }
 
-    public static void showMpdServersDialog(final NoNameRadioApp radioDroidApp, final FragmentManager fragmentManager, @Nullable final DataRadioStation station) {
+    public static void showMpdServersDialog(final NoNameRadioApp app, final FragmentManager fragmentManager, @Nullable final DataRadioStation station) {
         Fragment oldFragment = fragmentManager.findFragmentByTag(PlayerSelectorDialog.FRAGMENT_TAG);
         if (oldFragment != null && oldFragment.isVisible()) {
             return;
         }
 
-        PlayerSelectorDialog playerSelectorDialogFragment = new PlayerSelectorDialog(radioDroidApp.getMpdClient(), station);
+        PlayerSelectorDialog playerSelectorDialogFragment = new PlayerSelectorDialog(app.getMpdClient(), station);
         playerSelectorDialogFragment.show(fragmentManager, PlayerSelectorDialog.FRAGMENT_TAG);
     }
 
-    public static void showPlaySelection(final NoNameRadioApp radioDroidApp, final DataRadioStation station, final FragmentManager fragmentManager) {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(radioDroidApp);
+    public static void showPlaySelection(final NoNameRadioApp app, final DataRadioStation station, final FragmentManager fragmentManager) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(app);
         final boolean externalAvailable = false;
 
-        CastHandler castHandler = radioDroidApp.getCastHandler();
+        CastHandler castHandler = app.getCastHandler();
         final boolean castAvailable = castHandler.isCastSessionAvailable();
 
-        final boolean mpdAvailable = radioDroidApp.getMpdClient().isMpdEnabled();
+        final boolean mpdAvailable = app.getMpdClient().isMpdEnabled();
 
         if (castAvailable && !externalAvailable && !mpdAvailable) {
-            new PlayStationTask(station, radioDroidApp.getApplicationContext(),
+            new PlayStationTask(station, app.getApplicationContext(),
                     url -> castHandler.playRemote(station.Name, url, station.IconUrl),
                     null)
                     .execute();
         } else if (mpdAvailable) {
-            showMpdServersDialog(radioDroidApp, fragmentManager, station);
+            showMpdServersDialog(app, fragmentManager, station);
         } else {
-            playAndWarnIfMetered(radioDroidApp, station, PlayerType.RADIODROID, () -> play(radioDroidApp, station));
+            playAndWarnIfMetered(app, station, PlayerType.INTERNAL, () -> play(app, station));
         }
     }
 
-    public static void playAndWarnIfMetered(NoNameRadioApp radioDroidApp, DataRadioStation station, PlayerType playerType, Runnable playFunc) {
-        playAndWarnIfMetered(radioDroidApp, station, playerType, playFunc,
+    public static void playAndWarnIfMetered(NoNameRadioApp app, DataRadioStation station, PlayerType playerType, Runnable playFunc) {
+        playAndWarnIfMetered(app, station, playerType, playFunc,
                 (station1, playerType1) -> {
                     // Making sure that resuming from notification or some external event will actually resume
                     // and not issue warning a second time.
@@ -403,19 +377,19 @@ public class Utils {
 
     // TODO: Sort out the indirection when PlayerService won't need aidl and we won't need to have
     //  PlayerServiceUtil as a proxy between common code and the service.
-    public static void playAndWarnIfMetered(NoNameRadioApp radioDroidApp, DataRadioStation station, PlayerType playerType,
+    public static void playAndWarnIfMetered(NoNameRadioApp app, DataRadioStation station, PlayerType playerType,
                                             Runnable playFunc, MeteredWarningCallback warningCallback) {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(radioDroidApp);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(app);
         final boolean warnOnMetered = sharedPref.getBoolean("warn_no_wifi", false);
 
-        if (warnOnMetered && ConnectivityChecker.getCurrentConnectionType(radioDroidApp) == ConnectivityChecker.ConnectionType.METERED) {
+        if (warnOnMetered && ConnectivityChecker.getCurrentConnectionType(app) == ConnectivityChecker.ConnectionType.METERED) {
             warningCallback.warn(station, playerType);
         } else {
             playFunc.run();
         }
     }
 
-    public static void play(final NoNameRadioApp radioDroidApp, final DataRadioStation station) {
+    public static void play(final NoNameRadioApp app, final DataRadioStation station) {
         MediaSessionUtil.play(station);
     }
 

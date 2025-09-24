@@ -28,7 +28,7 @@ public class AsyncExecutor {
     // IO-bound operations (network, disk)
     private static final ExecutorService IO_EXECUTOR =
         Executors.newFixedThreadPool(MAX_IO_THREADS, r -> {
-            Thread t = new Thread(r, "RadioDroid-IO");
+            Thread t = new Thread(r, "NoNameRadio-IO");
             t.setPriority(Thread.NORM_PRIORITY);
             return t;
         });
@@ -36,7 +36,7 @@ public class AsyncExecutor {
     // CPU-bound operations (parsing, computation)
     private static final ExecutorService COMPUTATION_EXECUTOR =
         Executors.newFixedThreadPool(CPU_COUNT, r -> {
-            Thread t = new Thread(r, "RadioDroid-Computation");
+            Thread t = new Thread(r, "NoNameRadio-Computation");
             t.setPriority(Thread.NORM_PRIORITY);
             return t;
         });
@@ -44,7 +44,7 @@ public class AsyncExecutor {
     // Scheduled operations
     private static final ScheduledExecutorService SCHEDULED_EXECUTOR =
         Executors.newScheduledThreadPool(2, r -> {
-            Thread t = new Thread(r, "RadioDroid-Scheduled");
+            Thread t = new Thread(r, "NoNameRadio-Scheduled");
             t.setPriority(Thread.NORM_PRIORITY);
             return t;
         });

@@ -12,7 +12,7 @@
     <string name="detail_pause">Pausatu</string>
     <string name="detail_stop">Gelditu</string>
     <string name="detail_share">Partekatu</string>
-    <string name="detail_play_in_radiodroid">Erreproduzitu RadioDroiden</string>
+    <string name="detail_play_in_nonameradio">Erreproduzitu RadioDroiden</string>
 
     <string name="action_links">Estekak</string>
     <string name="action_homepage">Hasierako orria</string>
@@ -325,7 +325,7 @@
     <string name="alarm_back_desc">Sistemaren alarmaren alternatiba aukeratutako irrati-etxearen erreprodukzioak huts egiten duenerako</string>
     <string name="context_menu_share">@string/detail_share</string>
     <string name="context_menu_visit_homepage">@string/action_station_visit_website</string>
-    <string name="context_menu_play_in_radiodroid">@string/detail_play_in_radiodroid</string>
+    <string name="context_menu_play_in_nonameradio">@string/detail_play_in_nonameradio</string>
     <string name="context_menu_play_in_external_player">@string/action_play_in_external</string>
     <string name="context_menu_add_alarm">@string/action_alarm</string>
     <string name="context_menu_create_shortcut">@string/detail_create_shortcut</string>

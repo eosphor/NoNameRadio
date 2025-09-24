@@ -1,4 +1,6 @@
 package com.nonameradio.app;
+import com.nonameradio.app.core.event.HideLoadingEvent;
+import com.nonameradio.app.core.event.EventBus;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -63,17 +65,17 @@ public class FragmentHistory extends Fragment implements IAdapterRefreshable {
 
         ItemAdapterStation adapter = (ItemAdapterStation) rvStations.getAdapter();
 
-        if (BuildConfig.DEBUG) Log.d(TAG, "stations count:" + historyManager.listStations.size());
+        if (BuildConfig.DEBUG) Log.d(TAG, "stations count:" + historyManager.getListStations().size());
 
         if( adapter != null )
-            adapter.updateList(null, historyManager.listStations);
+            adapter.updateList(null, historyManager.getListStations());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getActivity().getApplication();
-        historyManager = radioDroidApp.getHistoryManager();
+        NoNameRadioApp app = (NoNameRadioApp) getActivity().getApplication();
+        historyManager = app.getHistoryManager();
 
         ItemAdapterStation adapter = new ItemAdapterStation(getActivity(), R.layout.list_item_station, StationsFilter.FilterType.LOCAL);
         adapter.setStationActionsListener(new ItemAdapterStation.StationActionsListener() {
@@ -146,10 +148,10 @@ public class FragmentHistory extends Fragment implements IAdapterRefreshable {
     }
 
     void RefreshDownloadList(){
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getActivity().getApplication();
-        final OkHttpClient httpClient = radioDroidApp.getHttpClient();
+        NoNameRadioApp app = (NoNameRadioApp) getActivity().getApplication();
+        final OkHttpClient httpClient = app.getHttpClient();
         ArrayList<String> listUUids = new ArrayList<String>();
-        for (DataRadioStation station : historyManager.listStations){
+        for (DataRadioStation station : historyManager.getListStations()){
             listUUids.add(station.StationUuid);
         }
         Log.d(TAG, "Search for items: "+listUUids.size());
@@ -191,7 +193,7 @@ public class FragmentHistory extends Fragment implements IAdapterRefreshable {
 
     private void SyncList(List<DataRadioStation> list_new) {
         ArrayList<String> to_remove = new ArrayList<String>();
-        for (DataRadioStation station_current: historyManager.listStations){
+        for (DataRadioStation station_current: historyManager.getListStations()){
             boolean found = false;
             for (DataRadioStation station_new: list_new){
                 if (station_new.StationUuid.equals(station_current.StationUuid)) {

@@ -1,4 +1,7 @@
 package com.nonameradio.app;
+import androidx.lifecycle.Observer;
+import java.util.List;
+import com.nonameradio.app.recording.DataRecording;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -31,7 +34,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.Group;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.paging.PagedList;
@@ -68,7 +70,6 @@ import com.nonameradio.app.views.TagsView;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Observable;
@@ -102,7 +103,7 @@ public class FragmentPlayerFull extends Fragment {
     private StreamLiveInfo lastLiveInfoForTrackMetadata = null;
 
     private RecordingsManager recordingsManager;
-    private java.util.Observer recordingsObserver;
+    private androidx.lifecycle.Observer<List<com.nonameradio.app.recording.DataRecording>> recordingsObserver;
 
     private com.nonameradio.app.presentation.ui.PlayerUIController playerUIController;
 
@@ -149,12 +150,12 @@ public class FragmentPlayerFull extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) requireActivity().getApplication();
+        NoNameRadioApp app = (NoNameRadioApp) requireActivity().getApplication();
 
-        recordingsManager = radioDroidApp.getRecordingsManager();
-        recordingsObserver = (observable, o) -> updateRecordings();
+        recordingsManager = app.getRecordingsManager();
+        recordingsObserver = recordings -> updateRecordings();
 
-        favouriteManager = radioDroidApp.getFavouriteManager();
+        favouriteManager = app.getFavouriteManager();
 
         // Initialize PlayerUIController
         playerUIController = new com.nonameradio.app.presentation.ui.PlayerUIController(
@@ -170,7 +171,7 @@ public class FragmentPlayerFull extends Fragment {
             }
         });
 
-        trackHistoryRepository = radioDroidApp.getTrackHistoryRepository();
+        trackHistoryRepository = app.getTrackHistoryRepository();
 
         updateUIReceiver = new BroadcastReceiver() {
             @Override
@@ -489,7 +490,7 @@ public class FragmentPlayerFull extends Fragment {
 
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(updateUIReceiver, filter);
 
-        recordingsManager.getSavedRecordingsObservable().addObserver(recordingsObserver);
+        recordingsManager.getSavedRecordingsLiveData().observe(getViewLifecycleOwner(), recordingsObserver);
 
         favouriteManager.addObserver(favouritesObserver);
     }
@@ -507,7 +508,7 @@ public class FragmentPlayerFull extends Fragment {
 
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(updateUIReceiver);
 
-        recordingsManager.getSavedRecordingsObservable().deleteObserver(recordingsObserver);
+        // LiveData automatically manages lifecycle
 
         favouriteManager.deleteObserver(favouritesObserver);
     }
@@ -523,16 +524,16 @@ public class FragmentPlayerFull extends Fragment {
     }
 
     private void playLastFromHistory() {
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) requireActivity().getApplication();
+        NoNameRadioApp app = (NoNameRadioApp) requireActivity().getApplication();
         DataRadioStation station = MediaSessionUtil.getCurrentStation();
 
         if (station == null) {
-            HistoryManager historyManager = radioDroidApp.getHistoryManager();
+            HistoryManager historyManager = app.getHistoryManager();
             station = historyManager.getFirst();
         }
 
         if (station != null) {
-            Utils.showPlaySelection(radioDroidApp, station, getActivity().getSupportFragmentManager());
+            Utils.showPlaySelection(app, station, getActivity().getSupportFragmentManager());
         }
     }
 
@@ -675,8 +676,8 @@ public class FragmentPlayerFull extends Fragment {
             return;
         }
 
-        final NoNameRadioApp radioDroidApp = (NoNameRadioApp) requireActivity().getApplication();
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(radioDroidApp);
+        final NoNameRadioApp app = (NoNameRadioApp) requireActivity().getApplication();
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(app);
         String LastFMApiKey = sharedPref.getString("last_fm_api_key", "");
 
         if (TextUtils.isEmpty(liveInfo.getArtist()) || TextUtils.isEmpty(liveInfo.getTrack()) ||
@@ -702,7 +703,7 @@ public class FragmentPlayerFull extends Fragment {
             trackMetadataCallback.cancel();
         }
 
-        TrackMetadataSearcher trackMetadataSearcher = radioDroidApp.getTrackMetadataSearcher();
+        TrackMetadataSearcher trackMetadataSearcher = app.getTrackMetadataSearcher();
 
         final WeakReference<FragmentPlayerFull> fragmentWeakReference = new WeakReference<>(this);
         trackHistoryRepository.getLastInsertedHistoryItem((trackHistoryEntry, dao) -> {

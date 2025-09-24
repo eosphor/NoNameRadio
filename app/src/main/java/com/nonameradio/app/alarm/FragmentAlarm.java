@@ -27,8 +27,8 @@ public class FragmentAlarm extends Fragment implements TimePickerDialog.OnTimeSe
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp)getActivity().getApplication();
-        ram = radioDroidApp.getAlarmManager();
+        NoNameRadioApp app = (NoNameRadioApp)getActivity().getApplication();
+        ram = app.getAlarmManager();
 
         View view = inflater.inflate(R.layout.layout_alarms, container, false);
 

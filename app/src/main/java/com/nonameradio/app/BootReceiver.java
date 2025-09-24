@@ -9,7 +9,7 @@ import com.nonameradio.app.alarm.RadioAlarmManager;
 public class BootReceiver extends BroadcastReceiver{
     @Override
     public void onReceive(Context context, Intent intent) {
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp)context.getApplicationContext();
-        radioDroidApp.getAlarmManager().resetAllAlarms();
+        NoNameRadioApp app = (NoNameRadioApp)context.getApplicationContext();
+        app.getAlarmManager().resetAllAlarms();
     }
 }

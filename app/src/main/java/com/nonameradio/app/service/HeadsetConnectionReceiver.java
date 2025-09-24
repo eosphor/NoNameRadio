@@ -60,13 +60,13 @@ public class HeadsetConnectionReceiver extends BroadcastReceiver {
         }
 
         if (play) {
-            NoNameRadioApp radioDroidApp = (NoNameRadioApp) context.getApplicationContext();
-            HistoryManager historyManager = radioDroidApp.getHistoryManager();
+            NoNameRadioApp app = (NoNameRadioApp) context.getApplicationContext();
+            HistoryManager historyManager = app.getHistoryManager();
             DataRadioStation lastStation = historyManager.getFirst();
 
             if (lastStation != null) {
-                if (!MediaSessionUtil.isPlaying() && !radioDroidApp.getMpdClient().isMpdEnabled()) {
-                    Utils.playAndWarnIfMetered(radioDroidApp, lastStation, PlayerType.RADIODROID, () -> Utils.play(radioDroidApp, lastStation));
+                if (!MediaSessionUtil.isPlaying() && !app.getMpdClient().isMpdEnabled()) {
+                    Utils.playAndWarnIfMetered(app, lastStation, PlayerType.INTERNAL, () -> Utils.play(app, lastStation));
                 }
             }
         }

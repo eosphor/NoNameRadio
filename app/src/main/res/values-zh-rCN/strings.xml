@@ -12,7 +12,7 @@
     <string name="detail_pause">暂停</string>
     <string name="detail_stop">停止</string>
     <string name="detail_share">分享</string>
-    <string name="detail_play_in_radiodroid">使用睿卓播放</string>
+    <string name="detail_play_in_nonameradio">使用睿卓播放</string>
 
     <string name="action_links">链接</string>
     <string name="action_homepage">主页</string>
@@ -340,7 +340,7 @@
 
     <string name="context_menu_share">@string/detail_share</string>
     <string name="context_menu_visit_homepage">@string/action_station_visit_website</string>
-    <string name="context_menu_play_in_radiodroid">@string/detail_play_in_radiodroid</string>
+    <string name="context_menu_play_in_nonameradio">@string/detail_play_in_nonameradio</string>
     <string name="context_menu_play_in_external_player">@string/action_play_in_external</string>
     <string name="context_menu_add_alarm">@string/action_alarm</string>
     <string name="context_menu_create_shortcut">@string/detail_create_shortcut</string>

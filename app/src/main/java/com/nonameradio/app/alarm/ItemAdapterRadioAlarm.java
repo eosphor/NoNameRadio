@@ -31,8 +31,8 @@ public class ItemAdapterRadioAlarm extends ArrayAdapter<DataRadioStationAlarm> {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		NoNameRadioApp radioDroidApp = (NoNameRadioApp)context.getApplicationContext();
-		ram = radioDroidApp.getAlarmManager();
+		NoNameRadioApp app = (NoNameRadioApp)context.getApplicationContext();
+		ram = app.getAlarmManager();
 
 		final DataRadioStationAlarm aData = getItem(position);
 

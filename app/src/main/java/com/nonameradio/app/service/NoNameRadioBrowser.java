@@ -57,7 +57,7 @@ public class NoNameRadioBrowser {
 
     private static final int IMAGE_LOAD_TIMEOUT_MS = 2000;
 
-    private final NoNameRadioApp radioDroidApp;
+    private final NoNameRadioApp app;
 
     private final Map<String, DataRadioStation> stationIdToStation = new HashMap<>();
 
@@ -177,13 +177,13 @@ public class NoNameRadioBrowser {
         }
     }
 
-    public NoNameRadioBrowser(NoNameRadioApp radioDroidApp) {
-        this.radioDroidApp = radioDroidApp;
+    public NoNameRadioBrowser(NoNameRadioApp app) {
+        this.app = app;
     }
 
    @Nullable
     public MediaBrowserServiceCompat.BrowserRoot onGetRoot(@NonNull String clientPackageName, int clientUid, @Nullable Bundle rootHints) {
-       SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(radioDroidApp.getApplicationContext().getApplicationContext());
+       SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(app.getApplicationContext().getApplicationContext());
        Bundle extras = new Bundle();
        extras.putInt(DESCRIPTION_EXTRAS_KEY_CONTENT_STYLE_BROWSABLE, DESCRIPTION_EXTRAS_VALUE_CONTENT_STYLE_LIST_ITEM);
        if (sharedPref.getBoolean("load_icons", false) && sharedPref.getBoolean("icons_only_favorites_style", false)) {
@@ -202,7 +202,7 @@ public class NoNameRadioBrowser {
     }
 
     public void onLoadChildren(@NonNull String parentId, @NonNull MediaBrowserServiceCompat.Result<List<MediaBrowserCompat.MediaItem>> result) {
-        Resources resources = radioDroidApp.getResources();
+        Resources resources = app.getResources();
         if (MEDIA_ID_ROOT.equals(parentId)) {
             result.sendResult(createBrowsableMediaItemsForRoot(resources));
             return;
@@ -214,11 +214,11 @@ public class NoNameRadioBrowser {
 
         switch (parentId) {
             case MEDIA_ID_MUSICS_FAVORITE: {
-                stations = radioDroidApp.getFavouriteManager().getList();
+                stations = app.getFavouriteManager().getList();
                 break;
             }
             case MEDIA_ID_MUSICS_HISTORY: {
-                stations = radioDroidApp.getHistoryManager().getList();
+                stations = app.getHistoryManager().getList();
                 break;
             }
             case MEDIA_ID_MUSICS_TOP: {
@@ -233,7 +233,7 @@ public class NoNameRadioBrowser {
                 stationIdToStation.put(station.StationUuid, station);
             }
             result.detach();
-            new RetrieveStationsIconAndSendResult(result, stations, radioDroidApp).execute();
+            new RetrieveStationsIconAndSendResult(result, stations, app).execute();
         } else {
             result.sendResult(mediaItems);
         }

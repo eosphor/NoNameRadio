@@ -12,7 +12,7 @@
     <string name="detail_pause">Pausa</string>
     <string name="detail_stop">Deter</string>
     <string name="detail_share">Compartir</string>
-    <string name="detail_play_in_radiodroid">Reproducir en NoNameRadio</string>
+    <string name="detail_play_in_nonameradio">Reproducir en NoNameRadio</string>
 
     <string name="action_links">Ligazóns</string>
     <string name="action_homepage">Inicio</string>
@@ -336,7 +336,7 @@
 
     <string name="context_menu_share">@string/detail_share</string>
     <string name="context_menu_visit_homepage">@string/action_station_visit_website</string>
-    <string name="context_menu_play_in_radiodroid">@string/detail_play_in_radiodroid</string>
+    <string name="context_menu_play_in_nonameradio">@string/detail_play_in_nonameradio</string>
     <string name="context_menu_play_in_external_player">@string/action_play_in_external</string>
     <string name="context_menu_add_alarm">@string/action_alarm</string>
     <string name="context_menu_create_shortcut">@string/detail_create_shortcut</string>

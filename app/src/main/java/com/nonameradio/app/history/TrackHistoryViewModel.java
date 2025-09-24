@@ -14,8 +14,8 @@ public class TrackHistoryViewModel extends AndroidViewModel {
     public TrackHistoryViewModel(Application application) {
         super(application);
 
-        NoNameRadioApp radioDroidApp = getApplication();
-        repository = radioDroidApp.getTrackHistoryRepository();
+        NoNameRadioApp app = getApplication();
+        repository = app.getTrackHistoryRepository();
     }
 
     public LiveData<PagedList<TrackHistoryEntry>> getAllHistoryPaged() {

@@ -1,4 +1,8 @@
 package com.nonameradio.app;
+import com.nonameradio.app.core.event.EventBus;
+import com.nonameradio.app.core.event.ShowLoadingEvent;
+import com.nonameradio.app.core.event.HideLoadingEvent;
+import com.nonameradio.app.core.event.EventBus;
 
 import android.content.Context;
 import android.content.Intent;
@@ -100,11 +104,11 @@ public class FragmentBase extends Fragment {
             String cache = Utils.getCacheFile(getActivity(), relativeUrl);
             if (cache == null || forceUpdate) {
                 if (getContext() != null && displayProgress) {
-                    LocalBroadcastManager.getInstance(getContext()).sendBroadcast(new Intent(ActivityMain.ACTION_SHOW_LOADING));
+                    EventBus.post(ShowLoadingEvent.INSTANCE);
                 }
 
-                NoNameRadioApp radioDroidApp = (NoNameRadioApp) getActivity().getApplication();
-                final OkHttpClient httpClient = radioDroidApp.getHttpClient();
+                NoNameRadioApp app = (NoNameRadioApp) getActivity().getApplication();
+                final OkHttpClient httpClient = app.getHttpClient();
 
                 task = new AsyncTask<Void, Void, String>() {
                     @Override

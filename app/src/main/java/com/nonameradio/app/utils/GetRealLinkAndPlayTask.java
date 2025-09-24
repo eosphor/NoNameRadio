@@ -25,8 +25,8 @@ public class GetRealLinkAndPlayTask extends AsyncTask<Void, Void, String> {
         this.station = station;
         this.playerServiceRef = new WeakReference<>(playerService);
 
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) context.getApplicationContext();
-        httpClient = radioDroidApp.getHttpClient();
+        NoNameRadioApp app = (NoNameRadioApp) context.getApplicationContext();
+        httpClient = app.getHttpClient();
     }
 
     @Override

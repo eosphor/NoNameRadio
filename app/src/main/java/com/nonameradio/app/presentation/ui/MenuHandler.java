@@ -126,8 +126,8 @@ public class MenuHandler {
         // Show MPD item if available
         if (menuItemMpd != null) {
             boolean mpd_is_visible = false;
-            NoNameRadioApp radioDroidApp = (NoNameRadioApp) activity.getApplication();
-            if (radioDroidApp != null) {
+            NoNameRadioApp app = (NoNameRadioApp) activity.getApplication();
+            if (app != null) {
                 mpd_is_visible = sharedPref.getBoolean("mpd_visible", false);
             }
             menuItemMpd.setVisible(mpd_is_visible);
@@ -166,7 +166,7 @@ public class MenuHandler {
     }
 
     private void setupSearchView() {
-        // Configure SearchView to always be expanded (like original RadioDroid)
+        // Configure SearchView to always be expanded (like original NoNameRadio)
         mSearchView.setIconifiedByDefault(false);
 
         // Ensure SearchView gets focus when it's shown
@@ -263,8 +263,8 @@ public class MenuHandler {
                     .setMessage(activity.getString(R.string.alert_delete_history))
                     .setCancelable(true)
                     .setPositiveButton(activity.getString(R.string.yes), (dialog, id) -> {
-                        NoNameRadioApp radioDroidApp = (NoNameRadioApp) activity.getApplication();
-                        HistoryManager historyManager = radioDroidApp.getHistoryManager();
+                        NoNameRadioApp app = (NoNameRadioApp) activity.getApplication();
+                        HistoryManager historyManager = app.getHistoryManager();
                         historyManager.clear();
                         Toast.makeText(activity.getApplicationContext(),
                                 activity.getString(R.string.notify_deleted_history),
@@ -278,8 +278,8 @@ public class MenuHandler {
                     .setMessage(activity.getString(R.string.alert_delete_favorites))
                     .setCancelable(true)
                     .setPositiveButton(activity.getString(R.string.yes), (dialog, id) -> {
-                        NoNameRadioApp radioDroidApp = (NoNameRadioApp) activity.getApplication();
-                        FavouriteManager favouriteManager = radioDroidApp.getFavouriteManager();
+                        NoNameRadioApp app = (NoNameRadioApp) activity.getApplication();
+                        FavouriteManager favouriteManager = app.getFavouriteManager();
                         favouriteManager.clear();
                         Toast.makeText(activity.getApplicationContext(),
                                 activity.getString(R.string.notify_deleted_favorites),

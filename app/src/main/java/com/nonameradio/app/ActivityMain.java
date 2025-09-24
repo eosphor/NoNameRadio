@@ -1,4 +1,5 @@
 package com.nonameradio.app;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import static com.nonameradio.app.service.MediaSessionCallback.EXTRA_STATION_UUID;
 
@@ -46,7 +47,9 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import com.nonameradio.app.core.event.EventBus;
+import com.nonameradio.app.core.event.ShowLoadingEvent;
+import com.nonameradio.app.core.event.HideLoadingEvent;
 import androidx.preference.PreferenceManager;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -111,7 +114,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
     public static final String ACTION_PLAYER_STATE_CHANGED = "com.nonameradio.app.player_state_changed";
     public static final int PERM_REQ_STORAGE_FAV_SAVE = 1;
     public static final int PERM_REQ_STORAGE_FAV_LOAD = 2;
-    private static final String TAG = "RadioDroid";
+    private static final String TAG = "NoNameRadio";
     // Request code for creating a PDF document.
     private static final int ACTION_SAVE_FILE = 1;
     private static final int ACTION_LOAD_FILE = 2;
@@ -412,7 +415,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
             fragmentTransaction.replace(R.id.containerView, f).addToBackStack(backStackTag).commit();
 
         // User selected a menuItem. Update menu state and hide progressBar
-        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ActivityMain.ACTION_HIDE_LOADING));
+        EventBus.post(HideLoadingEvent.INSTANCE);
         invalidateOptionsMenu();
         checkMenuItems();
 
@@ -590,8 +593,8 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
             if (TextUtils.isEmpty(stationUUID))
                 return;
             intent.removeExtra(EXTRA_STATION_UUID); // mark intent as consumed
-            NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-            final OkHttpClient httpClient = radioDroidApp.getHttpClient();
+            NoNameRadioApp app = (NoNameRadioApp) getApplication();
+            final OkHttpClient httpClient = app.getHttpClient();
 
             new AsyncTask<Void, Void, DataRadioStation>() {
                 @Override
@@ -603,7 +606,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
                 protected void onPostExecute(DataRadioStation station) {
                     if (!isFinishing()) {
                         if (station != null) {
-                            Utils.showPlaySelection(radioDroidApp, station, getSupportFragmentManager());
+                            Utils.showPlaySelection(app, station, getSupportFragmentManager());
 
                             Fragment currentFragment = mFragmentManager.getFragments().get(mFragmentManager.getFragments().size() - 1);
                             if (currentFragment instanceof FragmentHistory) {
@@ -631,7 +634,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
             Log.d(TAG, "RESUMED");
         }
 
-        setupBroadcastReceiver();
+        setupEventListeners();
 
         MediaSessionUtil.startService(getApplicationContext());
         CastHandler castHandler = ((NoNameRadioApp) getApplication()).getCastHandler();
@@ -696,8 +699,8 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
         menuItemAddAlarm.setVisible(false);
 
         boolean mpd_is_visible = false;
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-        if (radioDroidApp != null) {
+        NoNameRadioApp app = (NoNameRadioApp) getApplication();
+        if (app != null) {
             mpd_is_visible = sharedPref.getBoolean("mpd_visible", false);
         }
         menuItemMpd.setVisible(mpd_is_visible);
@@ -722,7 +725,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
                 // } else if (sharedPref.getBoolean("load_icons", false)) {
                 //     menuItemIconsView.setVisible(true);
                 // }
-                if (radioDroidApp.getFavouriteManager().isEmpty()) {
+                if (app.getFavouriteManager().isEmpty()) {
                     menuItemDelete.setVisible(false);
                 } else {
                     menuItemDelete.setVisible(true).setTitle(R.string.action_delete_favorites);
@@ -736,7 +739,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
                 menuItemSave.setVisible(true);
                 menuItemSave.setTitle(R.string.nav_item_save_history_playlist);
 
-                if (!radioDroidApp.getHistoryManager().isEmpty()) {
+                if (!app.getHistoryManager().isEmpty()) {
                     menuItemDelete.setVisible(true).setTitle(R.string.action_delete_history);
                 }
                 myToolbar.setTitle(R.string.nav_item_history);
@@ -769,9 +772,9 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
     public void onFileSelected(FileDialog dialog, File file) {
         try {
             Log.i("MAIN", "save to " + file.getParent() + "/" + file.getName());
-            NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-            FavouriteManager favouriteManager = radioDroidApp.getFavouriteManager();
-            HistoryManager historyManager = radioDroidApp.getHistoryManager();
+            NoNameRadioApp app = (NoNameRadioApp) getApplication();
+            FavouriteManager favouriteManager = app.getFavouriteManager();
+            HistoryManager historyManager = app.getHistoryManager();
 
             if (dialog instanceof SaveFileDialog) {
                 if (selectedMenuItem == R.id.nav_item_starred) {
@@ -857,8 +860,8 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
                             .setCancelable(true)
                             .setPositiveButton(this.getString(R.string.yes), new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-                                    HistoryManager historyManager = radioDroidApp.getHistoryManager();
+                                    NoNameRadioApp app = (NoNameRadioApp) getApplication();
+                                    HistoryManager historyManager = app.getHistoryManager();
 
                                     historyManager.clear();
 
@@ -876,8 +879,8 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
                             .setCancelable(true)
                             .setPositiveButton(this.getString(R.string.yes), new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-                                    FavouriteManager favouriteManager = radioDroidApp.getFavouriteManager();
+                                    NoNameRadioApp app = (NoNameRadioApp) getApplication();
+                                    FavouriteManager favouriteManager = app.getFavouriteManager();
 
                                     favouriteManager.clear();
 
@@ -924,7 +927,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
+        NoNameRadioApp app = (NoNameRadioApp) getApplication();
 
         // Prefer current or last played station; fallback to recent history
         DataRadioStation station = Utils.getCurrentOrLastStation(this);
@@ -960,9 +963,9 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
             return;
         }
 
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-        HistoryManager hm = radioDroidApp.getHistoryManager();
-        FavouriteManager fm = radioDroidApp.getFavouriteManager();
+        NoNameRadioApp app = (NoNameRadioApp) getApplication();
+        HistoryManager hm = app.getHistoryManager();
+        FavouriteManager fm = app.getFavouriteManager();
 
         final String startupAction = sharedPref.getString("startup_action", getResources().getString(R.string.startup_show_history));
 
@@ -1092,20 +1095,23 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
         meteredConnectionAlertDialog.show();
     }
 
+    private void setupEventListeners() {
+        // Register EventBus listeners for loading events
+        EventBus.getInstance().register(ShowLoadingEvent.class, event -> showLoadingIcon());
+        EventBus.getInstance().register(HideLoadingEvent.class, event -> hideLoadingIcon());
+
+        // Keep broadcast receiver for other events that still use broadcasts
+        setupBroadcastReceiver();
+    }
+
     private void setupBroadcastReceiver() {
         IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_HIDE_LOADING);
-        filter.addAction(ACTION_SHOW_LOADING);
         filter.addAction(PlayerService.PLAYER_SERVICE_STATE_CHANGE);
         filter.addAction(PlayerService.PLAYER_SERVICE_METERED_CONNECTION);
         broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(ACTION_HIDE_LOADING)) {
-                    hideLoadingIcon();
-                } else if (intent.getAction().equals(ACTION_SHOW_LOADING)) {
-                    showLoadingIcon();
-                } else if (intent.getAction().equals(PlayerService.PLAYER_SERVICE_METERED_CONNECTION)) {
+                if (intent.getAction().equals(PlayerService.PLAYER_SERVICE_METERED_CONNECTION)) {
                     if (meteredConnectionAlertDialog != null) {
                         meteredConnectionAlertDialog.cancel();
                         meteredConnectionAlertDialog = null;
@@ -1114,7 +1120,7 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
                     PlayerType playerType = intent.getParcelableExtra(PlayerService.PLAYER_SERVICE_METERED_CONNECTION_PLAYER_TYPE);
 
                     switch (playerType) {
-                        case RADIODROID:
+                        case INTERNAL:
                             showMeteredConnectionDialog(() -> Utils.play((NoNameRadioApp) getApplication(), MediaSessionUtil.getCurrentStation()));
                             break;
                         default:
@@ -1252,8 +1258,8 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
     }
 
     public void selectMPDServer() {
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-        Utils.showMpdServersDialog(radioDroidApp, getSupportFragmentManager(), null);
+        NoNameRadioApp app = (NoNameRadioApp) getApplication();
+        Utils.showMpdServersDialog(app, getSupportFragmentManager(), null);
     }
 
     public final Toolbar getToolbar() {
@@ -1646,9 +1652,9 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
                     Uri uri = result.getData().getData();
                     if (uri != null) {
                         Log.d(TAG, "Choosen save path: " + uri);
-                        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-                        FavouriteManager favouriteManager = radioDroidApp.getFavouriteManager();
-                        HistoryManager historyManager = radioDroidApp.getHistoryManager();
+                        NoNameRadioApp app = (NoNameRadioApp) getApplication();
+                        FavouriteManager favouriteManager = app.getFavouriteManager();
+                        HistoryManager historyManager = app.getHistoryManager();
                         try {
                             OutputStream os = getContentResolver().openOutputStream(uri);
                             OutputStreamWriter writer = new OutputStreamWriter(os);
@@ -1684,8 +1690,8 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
      */
     private void handleFileLoad(Uri uri) {
         Log.d(TAG, "Choosen load path: " + uri);
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-        FavouriteManager favouriteManager = radioDroidApp.getFavouriteManager();
+        NoNameRadioApp app = (NoNameRadioApp) getApplication();
+        FavouriteManager favouriteManager = app.getFavouriteManager();
         try {
             InputStream is = getContentResolver().openInputStream(uri);
             InputStreamReader reader = new InputStreamReader(is);

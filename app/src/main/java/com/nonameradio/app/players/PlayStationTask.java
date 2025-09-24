@@ -1,4 +1,8 @@
 package com.nonameradio.app.players;
+import com.nonameradio.app.core.event.EventBus;
+import com.nonameradio.app.core.event.ShowLoadingEvent;
+import com.nonameradio.app.core.event.HideLoadingEvent;
+import com.nonameradio.app.core.event.EventBus;
 
 import android.content.Context;
 import android.content.Intent;
@@ -66,8 +70,8 @@ public class PlayStationTask extends AsyncTask<Void, Void, String> {
     }
 
     public static PlayStationTask playCAST(DataRadioStation stationToPlay, Context ctx) {
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) ctx.getApplicationContext();
-        CastHandler castHandler = radioDroidApp.getCastHandler();
+        NoNameRadioApp app = (NoNameRadioApp) ctx.getApplicationContext();
+        CastHandler castHandler = app.getCastHandler();
         return new PlayStationTask(stationToPlay, ctx, url -> castHandler.playRemote(stationToPlay.Name, url, stationToPlay.IconUrl), null);
     }
 
@@ -80,11 +84,11 @@ public class PlayStationTask extends AsyncTask<Void, Void, String> {
             return;
         }
 
-        LocalBroadcastManager.getInstance(ctx).sendBroadcast(new Intent(ActivityMain.ACTION_SHOW_LOADING));
+        EventBus.post(ShowLoadingEvent.INSTANCE);
 
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) ctx.getApplicationContext();
+        NoNameRadioApp app = (NoNameRadioApp) ctx.getApplicationContext();
 
-        HistoryManager historyManager = radioDroidApp.getHistoryManager();
+        HistoryManager historyManager = app.getHistoryManager();
         historyManager.add(stationToPlay);
 
         // Do not auto-add to favourites on play. Favourite should change only on explicit heart click.
@@ -94,10 +98,10 @@ public class PlayStationTask extends AsyncTask<Void, Void, String> {
     protected String doInBackground(Void... params) {
         Context ctx = contextWeakReference.get();
         if (ctx != null) {
-            NoNameRadioApp radioDroidApp = (NoNameRadioApp) ctx.getApplicationContext();
+            NoNameRadioApp app = (NoNameRadioApp) ctx.getApplicationContext();
 
             if (!stationToPlay.hasValidUuid()) {
-                if (!stationToPlay.refresh(radioDroidApp.getHttpClient(), ctx)) {
+                if (!stationToPlay.refresh(app.getHttpClient(), ctx)) {
                     return null;
                 }
             }
@@ -106,7 +110,7 @@ public class PlayStationTask extends AsyncTask<Void, Void, String> {
                 return null;
             }
 
-            return Utils.getRealStationLink(radioDroidApp.getHttpClient(), ctx.getApplicationContext(), stationToPlay.StationUuid);
+            return Utils.getRealStationLink(app.getHttpClient(), ctx.getApplicationContext(), stationToPlay.StationUuid);
         } else {
             return null;
         }
@@ -119,7 +123,7 @@ public class PlayStationTask extends AsyncTask<Void, Void, String> {
             return;
         }
 
-        LocalBroadcastManager.getInstance(ctx).sendBroadcast(new Intent(ActivityMain.ACTION_HIDE_LOADING));
+        EventBus.post(HideLoadingEvent.INSTANCE);
 
         if (result != null) {
             stationToPlay.playableUrl = result;

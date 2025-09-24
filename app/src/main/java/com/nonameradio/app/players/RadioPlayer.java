@@ -92,11 +92,11 @@ public class RadioPlayer implements PlayerWrapper.PlayListener, Recordable {
         final int connectTimeout = prefs.getInt("stream_connect_timeout", 4);
         final int readTimeout = prefs.getInt("stream_read_timeout", 10);
 
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) mainContext.getApplicationContext();
+        NoNameRadioApp app = (NoNameRadioApp) mainContext.getApplicationContext();
 
         // External player режим удалён; используем кастомный HTTP‑клиент всегда
 
-        final OkHttpClient customizedHttpClient = radioDroidApp.newHttpClient()
+        final OkHttpClient customizedHttpClient = app.newHttpClient()
                 .connectTimeout(connectTimeout, TimeUnit.SECONDS)
                 .readTimeout(readTimeout, TimeUnit.SECONDS)
                 .build();

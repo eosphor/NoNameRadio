@@ -152,7 +152,7 @@ public class NoNameRadioApp extends MultiDexApplication {
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(10, TimeUnit.SECONDS)
-                .addInterceptor(new UserAgentInterceptor("RadioDroid2/" + BuildConfig.VERSION_NAME));
+                .addInterceptor(new UserAgentInterceptor("NoNameRadio2/" + BuildConfig.VERSION_NAME));
 
         httpClient = builder.build();
     }
@@ -237,7 +237,7 @@ public class NoNameRadioApp extends MultiDexApplication {
 
     private OkHttpClient newHttpClientForGlide() {
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .addInterceptor(new UserAgentInterceptor("RadioDroid2/" + BuildConfig.VERSION_NAME));
+                .addInterceptor(new UserAgentInterceptor("NoNameRadio2/" + BuildConfig.VERSION_NAME));
 
         if (testsInterceptor != null) {
             builder.addInterceptor(testsInterceptor);

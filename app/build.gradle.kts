@@ -261,6 +261,10 @@ dependencies {
     androidTestImplementation(libs.mockwebserver)
     androidTestImplementation(libs.lingver)
     androidTestUtil(libs.androidx.test.orchestrator)
+
+    // Mockito for unit tests
+    testImplementation(libs.mockito.core)
+    androidTestImplementation(libs.mockito.android)
 }
 
 tasks.withType<JavaCompile>().configureEach {

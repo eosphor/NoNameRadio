@@ -93,8 +93,8 @@ public class ProxySettingsDialog extends DialogFragment {
                         proxySettings.toPreferences(editor);
                         editor.apply();
 
-                        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getActivity().getApplication();
-                        radioDroidApp.rebuildHttpClient();
+                        NoNameRadioApp app = (NoNameRadioApp) getActivity().getApplication();
+                        app.rebuildHttpClient();
                     }
                 })
                 .setNegativeButton(R.string.action_cancel, new DialogInterface.OnClickListener() {
@@ -156,17 +156,17 @@ public class ProxySettingsDialog extends DialogFragment {
         private boolean requestSucceeded = false;
         private String errorStr;
 
-        private ConnectionTesterTask(@NonNull NoNameRadioApp radioDroidApp, @NonNull TextView textProxyTestResult,
+        private ConnectionTesterTask(@NonNull NoNameRadioApp app, @NonNull TextView textProxyTestResult,
                                      @NonNull ProxySettings proxySettings) {
             this.textProxyTestResult = new WeakReference<>(textProxyTestResult);
 
             textProxyTestResult.setText("");
 
-            connectionSuccessStr = radioDroidApp.getString(R.string.settings_proxy_working, TEST_ADDRESS);
-            connectionFailedStr = radioDroidApp.getString(R.string.settings_proxy_not_working);
-            connectionInvalidInputStr = radioDroidApp.getString(R.string.settings_proxy_invalid);
+            connectionSuccessStr = app.getString(R.string.settings_proxy_working, TEST_ADDRESS);
+            connectionFailedStr = app.getString(R.string.settings_proxy_not_working);
+            connectionInvalidInputStr = app.getString(R.string.settings_proxy_invalid);
 
-            OkHttpClient.Builder builder = radioDroidApp.newHttpClientWithoutProxy()
+            OkHttpClient.Builder builder = app.newHttpClientWithoutProxy()
                     .connectTimeout(10, TimeUnit.SECONDS)
                     .writeTimeout(10, TimeUnit.SECONDS)
                     .readTimeout(10, TimeUnit.SECONDS);
@@ -233,8 +233,8 @@ public class ProxySettingsDialog extends DialogFragment {
             proxyTestTask.cancel(true);
         }
 
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getActivity().getApplication();
-        proxyTestTask = new ConnectionTesterTask(radioDroidApp, textProxyTestResult, proxySettings);
+        NoNameRadioApp app = (NoNameRadioApp) getActivity().getApplication();
+        proxyTestTask = new ConnectionTesterTask(app, textProxyTestResult, proxySettings);
         proxyTestTask.execute();
     }
 }

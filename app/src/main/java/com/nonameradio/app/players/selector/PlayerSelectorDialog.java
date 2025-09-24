@@ -68,8 +68,8 @@ public class PlayerSelectorDialog extends BottomSheetDialogFragment {
 
         View view = inflater.inflate(R.layout.dialog_mpd_servers, container, false);
 
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) requireActivity().getApplication();
-        serversRepository = radioDroidApp.getMpdClient().getMpdServersRepository();
+        NoNameRadioApp app = (NoNameRadioApp) requireActivity().getApplication();
+        serversRepository = app.getMpdClient().getMpdServersRepository();
 
         recyclerViewServers = view.findViewById(R.id.recyclerViewMPDServers);
         GridLayoutManager llm = new GridLayoutManager(getContext(), 2, RecyclerView.VERTICAL, false);
@@ -116,7 +116,7 @@ public class PlayerSelectorDialog extends BottomSheetDialogFragment {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (PlayerService.PLAYER_SERVICE_STATE_CHANGE.equals(intent.getAction())) {
-                    playerSelectorAdapter.notifyRadioDroidPlaybackStateChanged();
+                    playerSelectorAdapter.notifyNoNameRadioPlaybackStateChanged();
                 }
             }
         };

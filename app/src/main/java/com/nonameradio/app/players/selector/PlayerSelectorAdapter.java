@@ -72,7 +72,7 @@ public class PlayerSelectorAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         }
     }
 
-    /* Represents either "Play in RadioDroid" or "Play in external player" */
+    /* Represents either "Play in NoNameRadio" or "Play in external player" */
     private class PlayerItemViewHolder extends RecyclerView.ViewHolder {
         final TextView textViewDescription;
         final ImageButton btnPlay;
@@ -106,12 +106,12 @@ public class PlayerSelectorAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     protected PlayerSelectorAdapter(@NonNull Context context, @Nullable DataRadioStation stationToPlay) {
         //super(DIFF_CALLBACK);
 
-        NoNameRadioApp radioDroidApp =  (NoNameRadioApp) context.getApplicationContext();
+        NoNameRadioApp app =  (NoNameRadioApp) context.getApplicationContext();
 
         this.context = context;
         this.inflater = LayoutInflater.from(context);
 
-        this.mpdClient = radioDroidApp.getMpdClient();
+        this.mpdClient = app.getMpdClient();
         this.stationToPlay = stationToPlay;
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
@@ -121,12 +121,12 @@ public class PlayerSelectorAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         fixedViewsCount = 0;
         if (stationToPlay != null) {
             fixedViewsCount++;
-            viewTypes.add(PlayerType.RADIODROID.getValue());
+            viewTypes.add(PlayerType.INTERNAL.getValue());
         }
 
         // External playback removed: do not add EXTERNAL to view types
 
-        if (radioDroidApp.getCastHandler().isCastSessionAvailable()) {
+        if (app.getCastHandler().isCastSessionAvailable()) {
             fixedViewsCount++;
             viewTypes.add(PlayerType.CAST.getValue());
         }
@@ -136,9 +136,9 @@ public class PlayerSelectorAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         this.actionListener = actionListener;
     }
 
-    public void notifyRadioDroidPlaybackStateChanged() {
+    public void notifyNoNameRadioPlaybackStateChanged() {
         if (stationToPlay != null) {
-            int pos = viewTypes.indexOf(PlayerType.RADIODROID.getValue());
+            int pos = viewTypes.indexOf(PlayerType.INTERNAL.getValue());
             if (pos != -1) {
                 notifyItemChanged(pos);
             }
@@ -167,7 +167,7 @@ public class PlayerSelectorAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     }
 
     private void bindViewHolder(@NonNull final PlayerItemViewHolder holder, int position) {
-        if (holder.getItemViewType() == PlayerType.RADIODROID.getValue()) {
+        if (holder.getItemViewType() == PlayerType.INTERNAL.getValue()) {
             holder.textViewDescription.setText(R.string.app_name);
 
             if (MediaSessionUtil.isPlaying()) {
@@ -186,7 +186,7 @@ public class PlayerSelectorAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
                     MediaSessionUtil.pause(PauseReason.USER);
                 } else {
-                    Utils.playAndWarnIfMetered((NoNameRadioApp) context.getApplicationContext(), stationToPlay, PlayerType.RADIODROID,
+                    Utils.playAndWarnIfMetered((NoNameRadioApp) context.getApplicationContext(), stationToPlay, PlayerType.INTERNAL,
                             () -> Utils.play((NoNameRadioApp) context.getApplicationContext(), stationToPlay));
                 }
             });

@@ -1,4 +1,7 @@
 package com.nonameradio.app.station;
+import com.nonameradio.app.core.event.EventBus;
+import com.nonameradio.app.core.event.HideLoadingEvent;
+import com.nonameradio.app.core.event.EventBus;
 
 import android.app.TimePickerDialog;
 import android.content.ClipData;
@@ -42,12 +45,12 @@ public class StationActions {
     private static final String TAG = "StationActions";
 
     public static void setAsAlarm(final @NonNull FragmentActivity activity, final @NonNull DataRadioStation station) {
-        final NoNameRadioApp radioDroidApp = (NoNameRadioApp) activity.getApplicationContext();
+        final NoNameRadioApp app = (NoNameRadioApp) activity.getApplicationContext();
 
         final TimePickerFragment newFragment = new TimePickerFragment();
         newFragment.setCallback((timePicker, hourOfDay, minute) -> {
             Log.i(TAG, String.format("Alarm time picked %d:%d", hourOfDay, minute));
-            radioDroidApp.getAlarmManager().add(station, hourOfDay, minute);
+            app.getAlarmManager().add(station, hourOfDay, minute);
         });
         newFragment.show(activity.getSupportFragmentManager(), "timePicker");
     }
@@ -96,10 +99,10 @@ public class StationActions {
                     return null;
                 }
 
-                final NoNameRadioApp radioDroidApp = (NoNameRadioApp) ctx.getApplicationContext();
-                final OkHttpClient httpClient = radioDroidApp.getHttpClient();
+                final NoNameRadioApp app = (NoNameRadioApp) ctx.getApplicationContext();
+                final OkHttpClient httpClient = app.getHttpClient();
 
-                return Utils.getRealStationLink(httpClient, radioDroidApp, station.StationUuid);
+                return Utils.getRealStationLink(httpClient, app, station.StationUuid);
             }
 
             @Override
@@ -110,7 +113,7 @@ public class StationActions {
                     return;
                 }
 
-                LocalBroadcastManager.getInstance(ctx).sendBroadcast(new Intent(ActivityMain.ACTION_HIDE_LOADING));
+                EventBus.post(HideLoadingEvent.INSTANCE);
 
                 if (result != null) {
                     ClipboardManager clipboard = (ClipboardManager) ctx.getSystemService(Context.CLIPBOARD_SERVICE);
@@ -134,8 +137,8 @@ public class StationActions {
     }
 
     public static void markAsFavourite(final @NonNull Context context, final @NonNull DataRadioStation station) {
-        final NoNameRadioApp radioDroidApp = (NoNameRadioApp) context.getApplicationContext();
-        radioDroidApp.getFavouriteManager().add(station);
+        final NoNameRadioApp app = (NoNameRadioApp) context.getApplicationContext();
+        app.getFavouriteManager().add(station);
 
         Toast toast = Toast.makeText(context, context.getString(R.string.notify_starred), Toast.LENGTH_SHORT);
         toast.show();
@@ -144,8 +147,8 @@ public class StationActions {
     }
 
     public static void removeFromFavourites(final @NonNull Context context, final @Nullable View view, final @NonNull DataRadioStation station) {
-        final NoNameRadioApp radioDroidApp = (NoNameRadioApp) context.getApplicationContext();
-        final FavouriteManager favouriteManager = radioDroidApp.getFavouriteManager();
+        final NoNameRadioApp app = (NoNameRadioApp) context.getApplicationContext();
+        final FavouriteManager favouriteManager = app.getFavouriteManager();
         final int removedIdx = favouriteManager.remove(station.StationUuid);
 
         if (view != null) {
@@ -172,10 +175,10 @@ public class StationActions {
                     return null;
                 }
 
-                final NoNameRadioApp radioDroidApp = (NoNameRadioApp) ctx.getApplicationContext();
-                final OkHttpClient httpClient = radioDroidApp.getHttpClient();
+                final NoNameRadioApp app = (NoNameRadioApp) ctx.getApplicationContext();
+                final OkHttpClient httpClient = app.getHttpClient();
 
-                return Utils.getRealStationLink(httpClient, radioDroidApp, station.StationUuid);
+                return Utils.getRealStationLink(httpClient, app, station.StationUuid);
             }
 
             @Override
@@ -185,7 +188,7 @@ public class StationActions {
                     return;
                 }
 
-                LocalBroadcastManager.getInstance(ctx).sendBroadcast(new Intent(ActivityMain.ACTION_HIDE_LOADING));
+                EventBus.post(HideLoadingEvent.INSTANCE);
 
                 if (result != null) {
                     Intent share = new Intent(Intent.ACTION_SEND);
@@ -205,11 +208,11 @@ public class StationActions {
         }.execute();
     }
 
-    public static void playInRadioDroid(final @NonNull Context context, final @NonNull DataRadioStation station) {
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) context.getApplicationContext();
+    public static void playInNoNameRadio(final @NonNull Context context, final @NonNull DataRadioStation station) {
+        NoNameRadioApp app = (NoNameRadioApp) context.getApplicationContext();
 
-        Utils.playAndWarnIfMetered(radioDroidApp, station,
-                PlayerType.RADIODROID, () -> Utils.play(radioDroidApp, station));
+        Utils.playAndWarnIfMetered(app, station,
+                PlayerType.INTERNAL, () -> Utils.play(app, station));
     }
 
     private static void vote(final @NonNull Context context, final @NonNull DataRadioStation station) {
@@ -223,8 +226,8 @@ public class StationActions {
                     return null;
                 }
 
-                final NoNameRadioApp radioDroidApp = (NoNameRadioApp) ctx.getApplicationContext();
-                final OkHttpClient httpClient = radioDroidApp.getHttpClient();
+                final NoNameRadioApp app = (NoNameRadioApp) ctx.getApplicationContext();
+                final OkHttpClient httpClient = app.getHttpClient();
 
                 return Utils.downloadFeedRelative(httpClient, ctx, "json/vote/" + station.StationUuid, true, null);
             }

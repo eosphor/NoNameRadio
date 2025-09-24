@@ -39,7 +39,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Observable;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 /* TODO: Actually have info about recording by storing them in the database and matching with files on disk.
  */
@@ -53,14 +54,7 @@ public class RecordingsManager {
     // Minimum disk space required for recording (100 MB)
     private static final long MIN_DISK_SPACE_MB = 100;
 
-    private class RecordingsObservable extends Observable {
-        @Override
-        public synchronized boolean hasChanged() {
-            return true;
-        }
-    }
-
-    private final Observable savedRecordingsObservable = new RecordingsObservable();
+    private final MutableLiveData<List<DataRecording>> savedRecordingsLiveData = new MutableLiveData<>();
 
     private class RunningRecordableListener implements RecordableListener {
         private final RunningRecordingInfo runningRecordingInfo;
@@ -249,8 +243,8 @@ public class RecordingsManager {
         updateRecordingsList();
     }
 
-    public Observable getSavedRecordingsObservable() {
-        return savedRecordingsObservable;
+    public LiveData<List<DataRecording>> getSavedRecordingsLiveData() {
+        return savedRecordingsLiveData;
     }
 
     /**
@@ -304,7 +298,7 @@ public class RecordingsManager {
                 DataRecording finishedRecording = toDataRecording(info);
                 finishedRecording.InProgress = false; // Ensure it's marked as finished
                 savedRecordings.add(0, finishedRecording);
-                savedRecordingsObservable.notifyObservers();
+                savedRecordingsLiveData.setValue(getSavedRecordings());
 
                 // Update recording metadata with final information
                 updateRecordingMetadataOnCompletion(info);
@@ -376,7 +370,7 @@ public class RecordingsManager {
         synchronizeWithDatabaseMetadata(foundFiles);
 
         Collections.sort(savedRecordings, (o1, o2) -> Long.compare(o2.Time.getTime(), o1.Time.getTime()));
-        savedRecordingsObservable.notifyObservers();
+        savedRecordingsLiveData.setValue(getSavedRecordings());
     }
     
     @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.Q)

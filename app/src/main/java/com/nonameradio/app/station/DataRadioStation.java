@@ -18,6 +18,8 @@ import android.util.Log;
 
 import androidx.media3.common.MediaMetadata;
 
+import com.nonameradio.app.core.architecture.IStationManager;
+
 import com.nonameradio.app.utils.ImageLoader;
 
 import com.nonameradio.app.ActivityMain;
@@ -67,7 +69,7 @@ public class DataRadioStation implements Parcelable {
 
 	public String playableUrl;
 
-	public StationSaveManager queue;
+	public IStationManager queue;
 
 	@Deprecated
 	public String StationId = "";

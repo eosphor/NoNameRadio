@@ -250,8 +250,8 @@ public class PlayerService extends JobIntentService implements RadioPlayer.Playe
         @Override
         public void startRecording() throws RemoteException {
             if (radioPlayer != null) {
-                NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-                RecordingsManager recordingsManager = radioDroidApp.getRecordingsManager();
+                NoNameRadioApp app = (NoNameRadioApp) getApplication();
+                RecordingsManager recordingsManager = app.getRecordingsManager();
 
                 recordingsManager.record(PlayerService.this, radioPlayer);
 
@@ -262,8 +262,8 @@ public class PlayerService extends JobIntentService implements RadioPlayer.Playe
         @Override
         public void stopRecording() throws RemoteException {
             if (radioPlayer != null) {
-                NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-                RecordingsManager recordingsManager = radioDroidApp.getRecordingsManager();
+                NoNameRadioApp app = (NoNameRadioApp) getApplication();
+                RecordingsManager recordingsManager = app.getRecordingsManager();
 
                 recordingsManager.stopRecording(radioPlayer);
 
@@ -279,8 +279,8 @@ public class PlayerService extends JobIntentService implements RadioPlayer.Playe
         @Override
         public String getCurrentRecordFileName() throws RemoteException {
             if (radioPlayer != null) {
-                NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-                RecordingsManager recordingsManager = radioDroidApp.getRecordingsManager();
+                NoNameRadioApp app = (NoNameRadioApp) getApplication();
+                RecordingsManager recordingsManager = app.getRecordingsManager();
 
                 RunningRecordingInfo info = recordingsManager.getRecordingInfo(radioPlayer);
                 if (info != null) {
@@ -391,7 +391,7 @@ public class PlayerService extends JobIntentService implements RadioPlayer.Playe
         @Override
         public void onConnectivityChanged(boolean connected, ConnectivityChecker.ConnectionType connectionType) {
             if (connectionType == ConnectivityChecker.ConnectionType.METERED && sharedPref.getBoolean(METERED_CONNECTION_WARNING_KEY, false)) {
-                warnAboutMeteredConnection(PlayerType.RADIODROID);
+                warnAboutMeteredConnection(PlayerType.INTERNAL);
             }
         }
     };
@@ -465,8 +465,8 @@ public class PlayerService extends JobIntentService implements RadioPlayer.Playe
         mediaSession.setSessionActivity(PendingIntent.getActivity(itsContext.getApplicationContext(), 0, startActivityIntent, PendingIntent.FLAG_UPDATE_CURRENT | pendingIntentFlag));
 
         setMediaPlaybackState(PlaybackStateCompat.STATE_NONE);
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-        trackHistoryRepository = radioDroidApp.getTrackHistoryRepository();
+        NoNameRadioApp app = (NoNameRadioApp) getApplication();
+        trackHistoryRepository = app.getTrackHistoryRepository();
 
         final IntentFilter headsetConnectionFilter = new IntentFilter();
         headsetConnectionFilter.addAction(Intent.ACTION_HEADSET_PLUG);
@@ -477,7 +477,7 @@ public class PlayerService extends JobIntentService implements RadioPlayer.Playe
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "RadioDroid2 Player", NotificationManager.IMPORTANCE_LOW);
+            NotificationChannel notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "NoNameRadio2 Player", NotificationManager.IMPORTANCE_LOW);
 
             // Configure the notification channel.
             notificationChannel.setDescription("Channel description");
@@ -507,14 +507,14 @@ public class PlayerService extends JobIntentService implements RadioPlayer.Playe
         MediaSessionUtil.bindService(itsContext.getApplicationContext());
 
         if (currentStation == null) {
-            NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-            HistoryManager historyManager = radioDroidApp.getHistoryManager();
+            NoNameRadioApp app = (NoNameRadioApp) getApplication();
+            HistoryManager historyManager = app.getHistoryManager();
             currentStation = historyManager.getFirst();
         }
 
         if (currentStation == null) {
-            NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-            FavouriteManager favouriteManager = radioDroidApp.getFavouriteManager();
+            NoNameRadioApp app = (NoNameRadioApp) getApplication();
+            FavouriteManager favouriteManager = app.getFavouriteManager();
             currentStation = favouriteManager.getFirst();
         }
 
@@ -598,8 +598,8 @@ public class PlayerService extends JobIntentService implements RadioPlayer.Playe
     }
 
     private void playAndWarnIfMetered(DataRadioStation station) {
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
-        Utils.playAndWarnIfMetered(radioDroidApp, station, PlayerType.RADIODROID,
+        NoNameRadioApp app = (NoNameRadioApp) getApplication();
+        Utils.playAndWarnIfMetered(app, station, PlayerType.INTERNAL,
                 () -> playWithoutWarnings(station),
                 (station1, playerType) -> {
                     setStation(station1);
@@ -659,7 +659,18 @@ public class PlayerService extends JobIntentService implements RadioPlayer.Playe
         }
 
         setMediaPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT);
-        DataRadioStation station = currentStation.queue.getNextById(currentStation.StationUuid);
+
+        // Find the manager that contains currentStation
+        NoNameRadioApp app = (NoNameRadioApp) getApplication();
+        FavouriteManager favouriteManager = app.getFavouriteManager();
+        HistoryManager historyManager = app.getHistoryManager();
+
+        DataRadioStation station = null;
+        if (favouriteManager.has(currentStation.StationUuid)) {
+            station = favouriteManager.getNextById(currentStation.StationUuid);
+        } else if (historyManager.has(currentStation.StationUuid)) {
+            station = historyManager.getNextById(currentStation.StationUuid);
+        }
 
         if (station != null) {
             if (radioPlayer.isPlaying()) {
@@ -677,7 +688,18 @@ public class PlayerService extends JobIntentService implements RadioPlayer.Playe
             return;
         }
 
-        DataRadioStation station = currentStation.queue.getPreviousById(currentStation.StationUuid);
+        // Find the manager that contains currentStation
+        NoNameRadioApp app = (NoNameRadioApp) getApplication();
+        FavouriteManager favouriteManager = app.getFavouriteManager();
+        HistoryManager historyManager = app.getHistoryManager();
+
+        DataRadioStation station = null;
+        if (favouriteManager.has(currentStation.StationUuid)) {
+            station = favouriteManager.getPreviousById(currentStation.StationUuid);
+        } else if (historyManager.has(currentStation.StationUuid)) {
+            station = historyManager.getPreviousById(currentStation.StationUuid);
+        }
+
         if (station != null) {
             if (radioPlayer.isPlaying()) {
                 playWithoutWarnings(station);
@@ -705,11 +727,11 @@ public class PlayerService extends JobIntentService implements RadioPlayer.Playe
         this.lastMeteredConnectionWarningTime = 0;
 
         if (!radioPlayer.isPlaying()) {
-            NoNameRadioApp radioDroidApp = (NoNameRadioApp) getApplication();
+            NoNameRadioApp app = (NoNameRadioApp) getApplication();
             DataRadioStation station = currentStation;
 
             if (currentStation == null) {
-                HistoryManager historyManager = radioDroidApp.getHistoryManager();
+                HistoryManager historyManager = app.getHistoryManager();
                 station = historyManager.getFirst();
             }
 

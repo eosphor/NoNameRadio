@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 public enum PlayerType implements Parcelable {
     MPD_SERVER(0),
-    RADIODROID(1),
+    INTERNAL(1),
     EXTERNAL(2),
     CAST(3);
 

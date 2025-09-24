@@ -57,17 +57,17 @@ public class AlarmReceiver extends BroadcastReceiver {
         alarmId = intent.getIntExtra("id",-1);
         if(BuildConfig.DEBUG) { Log.d(TAG,"alarm id:"+alarmId); }
 
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp)context.getApplicationContext();
-        RadioAlarmManager ram = radioDroidApp.getAlarmManager();
+        NoNameRadioApp app = (NoNameRadioApp)context.getApplicationContext();
+        RadioAlarmManager ram = app.getAlarmManager();
         station = ram.getStation(alarmId);
         ram.resetAllAlarms();
 
         if (station != null && alarmId >= 0) {
             if(BuildConfig.DEBUG) { Log.d(TAG,"radio id:"+alarmId); }
 
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(radioDroidApp);
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(app);
             final boolean warnOnMetered = sharedPref.getBoolean("warn_no_wifi", false);
-            if (warnOnMetered && ConnectivityChecker.getCurrentConnectionType(radioDroidApp) == ConnectivityChecker.ConnectionType.METERED) {
+            if (warnOnMetered && ConnectivityChecker.getCurrentConnectionType(app) == ConnectivityChecker.ConnectionType.METERED) {
                 PlaySystemAlarm(context);
             } else {
                 Play(context, station.StationUuid);
@@ -145,8 +145,8 @@ public class AlarmReceiver extends BroadcastReceiver {
     int timeout = 10;
 
     private void Play(final Context context, final String stationId) {
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) context.getApplicationContext();
-        final OkHttpClient httpClient = radioDroidApp.getHttpClient();
+        NoNameRadioApp app = (NoNameRadioApp) context.getApplicationContext();
+        final OkHttpClient httpClient = app.getHttpClient();
 
         new AsyncTask<Void, Void, String>() {
             @Override

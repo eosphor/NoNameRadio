@@ -93,10 +93,10 @@ public class StationsFilter extends CustomFilter {
     private @NonNull
     List<DataRadioStation> searchGlobal(final @NotNull String query) {
         Log.d("FILTER", "searchGlobal 1:" + query);
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) context.getApplicationContext();
+        NoNameRadioApp app = (NoNameRadioApp) context.getApplicationContext();
 
         // Create HTTP client with extended timeouts for station search
-        OkHttpClient httpClient = radioDroidApp.newHttpClient()
+        OkHttpClient httpClient = app.newHttpClient()
                 .connectTimeout(15, TimeUnit.SECONDS)  // Extended from 10s
                 .writeTimeout(15, TimeUnit.SECONDS)    // Extended from 10s
                 .readTimeout(30, TimeUnit.SECONDS)     // Extended from 10s for large responses
@@ -146,7 +146,7 @@ public class StationsFilter extends CustomFilter {
 
         Log.d("FILTER", "searchGlobal 2:" + query);
 
-        String resultString = Utils.downloadFeedRelative(httpClient, radioDroidApp, searchUrl, false, p);
+        String resultString = Utils.downloadFeedRelative(httpClient, app, searchUrl, false, p);
         if (resultString != null) {
             Log.d("FILTER", "searchGlobal 3a:" + query);
             List<DataRadioStation> result = DataRadioStation.DecodeJson(resultString);

@@ -7,7 +7,7 @@ import com.nonameradio.app.StationSaveManager;
 import com.nonameradio.app.core.domain.interfaces.INavigationManager;
 import com.nonameradio.app.core.domain.interfaces.IPlayerService;
 import com.nonameradio.app.core.domain.interfaces.IRecordingRepository;
-import com.nonameradio.app.core.domain.interfaces.IStationRepository;
+import com.nonameradio.app.core.architecture.IStationRepository;
 import com.nonameradio.app.data.repository.impl.RecordingRepository;
 import com.nonameradio.app.data.repository.impl.StationRepository;
 import com.nonameradio.app.presentation.navigation.NavigationManager;
@@ -26,8 +26,7 @@ public class DependencyInjector {
         NoNameRadioApp app = (NoNameRadioApp) context;
 
         // Initialize repositories
-        StationSaveManager stationSaveManager = new StationSaveManager(context);
-        stationRepository = new StationRepository(stationSaveManager);
+        stationRepository = new StationRepository(context, "default");
         recordingRepository = new RecordingRepository(app.getRecordingsManager());
 
         // Initialize services

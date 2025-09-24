@@ -161,8 +161,8 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Shared
             findPreference("mpd_servers_viewer").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    NoNameRadioApp radioDroidApp = (NoNameRadioApp) requireActivity().getApplication();
-                    Utils.showMpdServersDialog(radioDroidApp, requireActivity().getSupportFragmentManager(), null);
+                    NoNameRadioApp app = (NoNameRadioApp) requireActivity().getApplication();
+                    Utils.showMpdServersDialog(app, requireActivity().getSupportFragmentManager(), null);
                     return false;
                 }
             });

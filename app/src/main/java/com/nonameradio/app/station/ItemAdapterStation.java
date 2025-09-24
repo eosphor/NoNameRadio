@@ -194,8 +194,8 @@ public class ItemAdapterStation
 
         stationImagePlaceholder = AppCompatResources.getDrawable(fragmentActivity, R.drawable.ic_photo_24dp);
 
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) fragmentActivity.getApplication();
-        favouriteManager = radioDroidApp.getFavouriteManager();
+        NoNameRadioApp app = (NoNameRadioApp) fragmentActivity.getApplication();
+        favouriteManager = app.getFavouriteManager();
         IntentFilter filter = new IntentFilter();
         filter.addAction(PlayerService.PLAYER_SERVICE_META_UPDATE);
         filter.addAction(DataRadioStation.RADIO_STATION_LOCAL_INFO_CHAGED);
@@ -442,7 +442,7 @@ public class ItemAdapterStation
             holder.buttonBookmark = holder.viewDetails.findViewById(R.id.buttonBookmark);
             holder.buttonAddAlarm = holder.viewDetails.findViewById(R.id.buttonAddAlarm);
             holder.buttonCreateShortcut = holder.viewDetails.findViewById(R.id.buttonCreateShortcut);
-            holder.buttonPlayInternalOrExternal = holder.viewDetails.findViewById(R.id.buttonPlayInRadioDroid);
+            holder.buttonPlayInternalOrExternal = holder.viewDetails.findViewById(R.id.buttonPlayInNoNameRadio);
 
             holder.buttonVisitWebsite.setOnClickListener(new View.OnClickListener() {
                 @Override

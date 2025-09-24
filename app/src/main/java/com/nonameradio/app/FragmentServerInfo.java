@@ -1,4 +1,6 @@
 package com.nonameradio.app;
+import com.nonameradio.app.core.event.HideLoadingEvent;
+import com.nonameradio.app.core.event.EventBus;
 
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -43,8 +45,8 @@ public class FragmentServerInfo extends Fragment implements IFragmentRefreshable
     void Download(final boolean forceUpdate){
         LocalBroadcastManager.getInstance(getContext()).sendBroadcast(new Intent(ActivityMain.ACTION_SHOW_LOADING));
 
-        NoNameRadioApp radioDroidApp = (NoNameRadioApp) getActivity().getApplication();
-        final OkHttpClient httpClient = radioDroidApp.getHttpClient();
+        NoNameRadioApp app = (NoNameRadioApp) getActivity().getApplication();
+        final OkHttpClient httpClient = app.getHttpClient();
 
         new AsyncTask<Void, Void, String>() {
             @Override
