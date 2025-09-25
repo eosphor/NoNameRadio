@@ -615,7 +615,7 @@ public class PlayerService extends JobIntentService implements RadioPlayer.Playe
         if (Utils.shouldLoadIcons(itsContext))
             downloadRadioIcon();
 
-        int result = acquireAudioFocus();
+        int result = acquireAudioFocus(isAlarm);
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             // Start playback.
             enableMediaSession();
@@ -738,7 +738,7 @@ public class PlayerService extends JobIntentService implements RadioPlayer.Playe
             if (station != null) {
                 if (bypassMeteredConnectionWarning) {
                     startMeteredConnectionListener();
-                    acquireAudioFocus();
+                    acquireAudioFocus(false); // Regular playback, not alarm
 
                     playWithoutWarnings(station);
                 } else {
@@ -841,16 +841,18 @@ public class PlayerService extends JobIntentService implements RadioPlayer.Playe
         }
     }
 
-    private int acquireAudioFocus() {
-        if (BuildConfig.DEBUG) Log.d(TAG, "acquiring audio focus.");
+    private int acquireAudioFocus(boolean isAlarm) {
+        if (BuildConfig.DEBUG) Log.d(TAG, "acquiring audio focus, isAlarm: " + isAlarm);
+
+        int streamType = isAlarm ? AudioManager.STREAM_ALARM : AudioManager.STREAM_MUSIC;
 
         int result = audioManager.requestAudioFocus(afChangeListener,
-                // Use the music stream.
-                AudioManager.STREAM_MUSIC,
+                // Use the alarm stream for alarms, music stream otherwise.
+                streamType,
                 // Request permanent focus.
                 AudioManager.AUDIOFOCUS_GAIN);
         if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            Log.e(TAG, "acquiring audio focus failed!");
+            Log.e(TAG, "acquiring audio focus failed for stream " + streamType + "!");
             toastOnUi(R.string.error_grant_audiofocus);
         }
 
