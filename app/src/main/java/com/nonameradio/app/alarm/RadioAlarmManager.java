@@ -260,10 +260,17 @@ public class RadioAlarmManager {
                     + " " + calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE)
             );
 
-            if(BuildConfig.DEBUG) { Log.d("ALARM","START setExactAndAllowWhileIdle"); }
-            
-            // Use setExactAndAllowWhileIdle for better background reliability on Android 6+
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if(BuildConfig.DEBUG) { Log.d("ALARM","START setAlarmClock"); }
+
+            // Use setAlarmClock for highest priority alarm delivery (Android 5.0+)
+            // This ensures alarms fire even in deep Doze mode
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(
+                    calendar.getTimeInMillis(),
+                    alarmIntent
+                );
+                alarmMgr.setAlarmClock(alarmClockInfo, alarmIntent);
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmMgr.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmIntent);
             } else {
                 alarmMgr.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmIntent);
