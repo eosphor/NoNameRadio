@@ -103,8 +103,8 @@ public class MediaSessionManager implements RadioPlayer.PlayerListener {
     
     @Override
     public void onStateChanged(PlayState status, int audioSessionId) {
-        Log.d(TAG, "RadioPlayer state changed: " + status);
-        
+        Log.d(TAG, "RadioPlayer state changed: " + status + ", sending broadcast ACTION_PLAYER_STATE_CHANGED");
+
         if (mediaSessionService != null) {
             // Convert RadioPlayer state to MediaSession state
             int mediaSessionState = convertPlayState(status);

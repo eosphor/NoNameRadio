@@ -85,6 +85,7 @@ public class FragmentPlayerSmall extends Fragment {
                         tryPlayAtStart();
                     }
                     case ActivityMain.ACTION_PLAYER_STATE_CHANGED: {
+                        Log.d("FragmentPlayerSmall", "Received ACTION_PLAYER_STATE_CHANGED broadcast");
                         fullUpdate();
                     }
                 }
@@ -116,7 +117,10 @@ public class FragmentPlayerSmall extends Fragment {
 
                 MediaSessionUtil.pause(PauseReason.USER);
             } else {
-                playLastFromHistory();
+                // Only play if not already playing (avoid double playback)
+                if (!MediaSessionUtil.isPlaying()) {
+                    playLastFromHistory();
+                }
             }
         });
 
@@ -236,6 +240,7 @@ public class FragmentPlayerSmall extends Fragment {
     private void fullUpdate() {
         DataRadioStation station = Utils.getCurrentOrLastStation(requireContext());
         boolean isCurrentlyPlaying = MediaSessionUtil.isPlaying();
+        Log.d("FragmentPlayerSmall", "fullUpdate: isPlaying=" + isCurrentlyPlaying + ", station=" + (station != null ? station.Name : "null"));
         
         // Show play button if not playing, pause button if playing
         if (isCurrentlyPlaying) {
