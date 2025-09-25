@@ -844,7 +844,7 @@ public class PlayerService extends JobIntentService implements RadioPlayer.Playe
     private int acquireAudioFocus(boolean isAlarm) {
         if (BuildConfig.DEBUG) Log.d(TAG, "acquiring audio focus, isAlarm: " + isAlarm);
 
-        int streamType = isAlarm ? AudioManager.STREAM_ALARM : AudioManager.STREAM_MUSIC;
+        int streamType = isAlarm ? AudioManager.STREAM_RING : AudioManager.STREAM_MUSIC;
 
         int result = audioManager.requestAudioFocus(afChangeListener,
                 // Use the alarm stream for alarms, music stream otherwise.

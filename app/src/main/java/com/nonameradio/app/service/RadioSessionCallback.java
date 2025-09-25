@@ -38,7 +38,8 @@ public class RadioSessionCallback extends MediaSessionCompat.Callback {
         if (radioPlayer != null) {
             // Resume playback if paused, or play current station if stopped
             if (radioPlayer.getPlayState() == PlayState.Paused) {
-                radioPlayer.pause(); // This will resume if paused
+                // Resume playback using PlayerService
+                PlayerServiceUtil.resume();
             } else {
                 // Try to play current station if available
                 DataRadioStation currentStation = radioPlayer.getCurrentStation();
@@ -54,9 +55,8 @@ public class RadioSessionCallback extends MediaSessionCompat.Callback {
     @Override
     public void onPause() {
         Log.d(TAG, "onPause called");
-        if (radioPlayer != null) {
-            radioPlayer.pause();
-        }
+        // Use PlayerServiceUtil for consistent pause handling
+        PlayerServiceUtil.pause(null);
     }
     
     @Override
