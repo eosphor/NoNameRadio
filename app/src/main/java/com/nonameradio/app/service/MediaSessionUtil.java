@@ -38,8 +38,15 @@ public class MediaSessionUtil {
      * Play a station
      */
     public static void play(DataRadioStation station) {
+        play(station, false);
+    }
+
+    /**
+     * Play a station with alarm flag
+     */
+    public static void play(DataRadioStation station, boolean isAlarm) {
         if (mediaControllerHelper != null) {
-            mediaControllerHelper.play(station);
+            mediaControllerHelper.playStation(station, isAlarm);
         } else {
             Log.e(TAG, "MediaSessionUtil not initialized");
         }

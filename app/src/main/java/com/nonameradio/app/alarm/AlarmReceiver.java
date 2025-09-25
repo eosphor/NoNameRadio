@@ -190,27 +190,15 @@ public class AlarmReceiver extends BroadcastReceiver {
                     url = result;
 
                     SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-                    boolean play_external = false;
-                    String packageName = sharedPref.getString("shareapp_package",null);
-                    String activityName = sharedPref.getString("shareapp_activity",null);
                     try {
                         timeout = Integer.parseInt(sharedPref.getString("alarm_timeout", "10"));
-                    }catch(Exception e){
+                    } catch(Exception e){
                         timeout = 10;
                     }
                     try {
-                        if (false && packageName != null && activityName != null){
-                            Intent share = new Intent(Intent.ACTION_VIEW);
-                            share.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            share.setClassName(packageName,activityName);
-                            share.setDataAndType(Uri.parse(url), "audio/*");
-                            context.startActivity(share);
-                            releaseLocks();
-                        } else {
-                            Intent anIntent = new Intent(context, PlayerService.class);
-                            context.getApplicationContext().bindService(anIntent, svcConn, Context.BIND_AUTO_CREATE);
-                            context.getApplicationContext().startService(anIntent);
-                        }
+                        Intent anIntent = new Intent(context, PlayerService.class);
+                        context.getApplicationContext().bindService(anIntent, svcConn, Context.BIND_AUTO_CREATE);
+                        context.getApplicationContext().startService(anIntent);
                     } catch (Exception e) {
                         Log.e(TAG, "Error starting alarm intent "+e);
                         PlaySystemAlarm(context);

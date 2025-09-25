@@ -617,11 +617,41 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
                 }
             }.execute();
         } else {
-            final String searchTag = extras.getString(EXTRA_SEARCH_TAG);
-            Log.d("MAIN", "received search request for tag 1: " + searchTag);
-            if (searchTag != null) {
-                Log.d("MAIN", "received search request for tag 2: " + searchTag);
-                Search(StationsFilter.SearchStyle.ByTagExact, searchTag);
+            // Handle stationid from notification (e.g., from alarm)
+            final String stationId = extras.getString("stationid");
+            if (!TextUtils.isEmpty(stationId)) {
+                Log.d(TAG, "received stationid from notification: " + stationId);
+                final Context context = getApplicationContext();
+                NoNameRadioApp app = (NoNameRadioApp) getApplication();
+                final OkHttpClient httpClient = app.getHttpClient();
+
+                new AsyncTask<Void, Void, DataRadioStation>() {
+                    @Override
+                    protected DataRadioStation doInBackground(Void... params) {
+                        return Utils.getStationByUuid(httpClient, context, stationId);
+                    }
+
+                    @Override
+                    protected void onPostExecute(DataRadioStation station) {
+                        if (!isFinishing() && station != null) {
+                            Log.d(TAG, "Auto-playing station from notification: " + station.Name);
+                            // Auto-play the station without showing selection dialog (isAlarm=true for notifications)
+                            Utils.playAndWarnIfMetered(app, station, PlayerType.INTERNAL,
+                                    () -> Utils.play(app, station, true),
+                                    (station1, playerType) -> {
+                                        MediaSessionUtil.setStation(station1);
+                                        MediaSessionUtil.warnAboutMeteredConnection(playerType);
+                                    });
+                        }
+                    }
+                }.execute();
+            } else {
+                final String searchTag = extras.getString(EXTRA_SEARCH_TAG);
+                Log.d("MAIN", "received search request for tag 1: " + searchTag);
+                if (searchTag != null) {
+                    Log.d("MAIN", "received search request for tag 2: " + searchTag);
+                    Search(StationsFilter.SearchStyle.ByTagExact, searchTag);
+                }
             }
         }
     }
@@ -719,12 +749,12 @@ public class ActivityMain extends AppCompatActivity implements SearchView.OnQuer
                 menuItemLoad.setVisible(true);
                 menuItemSave.setTitle(R.string.nav_item_save_playlist);
 
-                // Toggle view buttons removed for favorites page
-                // if (sharedPref.getBoolean("icons_only_favorites_style", false)) {
-                //     menuItemListView.setVisible(true);
-                // } else if (sharedPref.getBoolean("load_icons", false)) {
-                //     menuItemIconsView.setVisible(true);
-                // }
+                // Toggle view buttons for favorites page
+                if (sharedPref.getBoolean("icons_only_favorites_style", false)) {
+                    menuItemListView.setVisible(true);
+                } else if (sharedPref.getBoolean("load_icons", false)) {
+                    menuItemIconsView.setVisible(true);
+                }
                 if (app.getFavouriteManager().isEmpty()) {
                     menuItemDelete.setVisible(false);
                 } else {

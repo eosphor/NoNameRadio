@@ -389,7 +389,11 @@ public class Utils {
     }
 
     public static void play(final NoNameRadioApp app, final DataRadioStation station) {
-        MediaSessionUtil.play(station);
+        play(app, station, false);
+    }
+
+    public static void play(final NoNameRadioApp app, final DataRadioStation station, boolean isAlarm) {
+        MediaSessionUtil.play(station, isAlarm);
     }
 
     public static boolean shouldLoadIcons(final Context context) {

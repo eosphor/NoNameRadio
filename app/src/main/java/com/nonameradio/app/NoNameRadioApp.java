@@ -138,17 +138,6 @@ public class NoNameRadioApp extends MultiDexApplication {
         // Initialize Google Provider Helper (TLS provider for Play flavor; no-op in Free)
         GoogleProviderHelper.use(getBaseContext());
 
-        // TODO: Yandex Metrica temporarily disabled due to ClassCastException
-        // YandexMetricaConfig config = YandexMetricaConfig.newConfigBuilder("620825a5-2d14-47ce-af59-acb3618c547e")
-        //         .withLogs()
-        //         .withCrashReporting(true)
-        //         .withNativeCrashReporting(true)
-        //         .withLocationTracking(false)
-        //         .withStatisticsSending(true)
-        //         .build();
-        // YandexMetrica.activate(this, config);
-        // YandexMetrica.enableActivityAutoTracking(this);
-
         // Initialize Yandex Metrica after all other components
         try {
             YandexMetricaConfig config = YandexMetricaConfig.newConfigBuilder("620825a5-2d14-47ce-af59-acb3618c547e")

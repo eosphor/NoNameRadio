@@ -45,11 +45,18 @@ public class MediaControllerHelper {
      * Play a station
      */
     public void playStation(DataRadioStation station) {
-        Log.d(TAG, "Playing station via MediaController: " + station.Name);
-        
-        // Use RadioPlayer directly for now
-        radioPlayer.play(station, false);
-        
+        playStation(station, false);
+    }
+
+    /**
+     * Play a station with alarm flag
+     */
+    public void playStation(DataRadioStation station, boolean isAlarm) {
+        Log.d(TAG, "Playing station via MediaController: " + station.Name + ", isAlarm: " + isAlarm);
+
+        // Use RadioPlayer directly with alarm flag
+        radioPlayer.play(station, isAlarm);
+
         // Also send command via MediaController for system integration
         mediaController.play();
     }
@@ -58,7 +65,7 @@ public class MediaControllerHelper {
      * Play a station (alias for playStation)
      */
     public void play(DataRadioStation station) {
-        playStation(station);
+        playStation(station, false);
     }
     
     /**

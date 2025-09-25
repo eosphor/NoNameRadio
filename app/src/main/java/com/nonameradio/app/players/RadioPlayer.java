@@ -110,7 +110,11 @@ public class RadioPlayer implements PlayerWrapper.PlayListener, Recordable {
         this.currentStation = station;
 
         playStationTask = new PlayStationTask(station, mainContext,
-                (url) -> RadioPlayer.this.play(station.playableUrl, station.Name, isAlarm),
+                (url) -> {
+                    // Update station's playableUrl and play
+                    station.playableUrl = url;
+                    RadioPlayer.this.play(url, station.Name, isAlarm);
+                },
                 (executionResult) -> {
                     RadioPlayer.this.playStationTask = null;
 
