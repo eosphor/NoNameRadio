@@ -1,0 +1,58 @@
+Configuration on demand is an incubating feature.
+> Task :NoNameRadio:app:preBuild UP-TO-DATE
+> Task :NoNameRadio:app:preFreeDebugBuild UP-TO-DATE
+> Task :NoNameRadio:app:mergeFreeDebugNativeDebugMetadata NO-SOURCE
+> Task :NoNameRadio:app:compileFreeDebugAidl UP-TO-DATE
+> Task :NoNameRadio:app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :NoNameRadio:app:dataBindingMergeDependencyArtifactsFreeDebug UP-TO-DATE
+> Task :NoNameRadio:app:generateFreeDebugResValues
+> Task :NoNameRadio:app:generateFreeDebugResources UP-TO-DATE
+> Task :NoNameRadio:app:generateFreeDebugBuildConfig UP-TO-DATE
+> Task :NoNameRadio:app:checkFreeDebugAarMetadata UP-TO-DATE
+> Task :NoNameRadio:app:mapFreeDebugSourceSetPaths UP-TO-DATE
+> Task :NoNameRadio:app:createFreeDebugCompatibleScreenManifests UP-TO-DATE
+> Task :NoNameRadio:app:extractDeepLinksFreeDebug UP-TO-DATE
+> Task :NoNameRadio:app:processFreeDebugMainManifest UP-TO-DATE
+> Task :NoNameRadio:app:processFreeDebugManifest UP-TO-DATE
+> Task :NoNameRadio:app:processFreeDebugManifestForPackage UP-TO-DATE
+> Task :NoNameRadio:app:javaPreCompileFreeDebug UP-TO-DATE
+> Task :NoNameRadio:app:mergeFreeDebugShaders UP-TO-DATE
+> Task :NoNameRadio:app:compileFreeDebugShaders NO-SOURCE
+> Task :NoNameRadio:app:generateFreeDebugAssets UP-TO-DATE
+> Task :NoNameRadio:app:mergeFreeDebugAssets UP-TO-DATE
+> Task :NoNameRadio:app:compressFreeDebugAssets UP-TO-DATE
+> Task :NoNameRadio:app:checkFreeDebugDuplicateClasses UP-TO-DATE
+> Task :NoNameRadio:app:desugarFreeDebugFileDependencies UP-TO-DATE
+> Task :NoNameRadio:app:mergeExtDexFreeDebug UP-TO-DATE
+> Task :NoNameRadio:app:mergeLibDexFreeDebug UP-TO-DATE
+> Task :NoNameRadio:app:mergeFreeDebugJniLibFolders UP-TO-DATE
+> Task :NoNameRadio:app:mergeFreeDebugNativeLibs NO-SOURCE
+> Task :NoNameRadio:app:stripFreeDebugDebugSymbols NO-SOURCE
+> Task :NoNameRadio:app:validateSigningFreeDebug UP-TO-DATE
+> Task :NoNameRadio:app:writeFreeDebugAppMetadata UP-TO-DATE
+> Task :NoNameRadio:app:writeFreeDebugSigningConfigVersions UP-TO-DATE
+> Task :NoNameRadio:app:mergeFreeDebugResources
+> Task :NoNameRadio:app:dataBindingGenBaseClassesFreeDebug UP-TO-DATE
+> Task :NoNameRadio:app:processFreeDebugResources
+> Task :NoNameRadio:app:kaptGenerateStubsFreeDebugKotlin UP-TO-DATE
+> Task :NoNameRadio:app:kaptFreeDebugKotlin UP-TO-DATE
+> Task :NoNameRadio:app:compileFreeDebugKotlin UP-TO-DATE
+> Task :NoNameRadio:app:compileFreeDebugJavaWithJavac UP-TO-DATE
+> Task :NoNameRadio:app:dexBuilderFreeDebug UP-TO-DATE
+> Task :NoNameRadio:app:mergeFreeDebugGlobalSynthetics UP-TO-DATE
+> Task :NoNameRadio:app:processFreeDebugJavaRes UP-TO-DATE
+> Task :NoNameRadio:app:mergeFreeDebugJavaResource UP-TO-DATE
+> Task :NoNameRadio:app:mergeProjectDexFreeDebug UP-TO-DATE
+> Task :NoNameRadio:app:packageFreeDebug
+> Task :NoNameRadio:app:createFreeDebugApkListingFileRedirect UP-TO-DATE
+> Task :NoNameRadio:app:assembleFreeDebug
+Kotlin build report is written to file:///Users/dmitry/Downloads/NoNameRadio/build/reports/kotlin-build/NoNameRadio-build-2025-10-12-20-49-48-0.txt
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.10/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 2s
+38 actionable tasks: 4 executed, 34 up-to-date
