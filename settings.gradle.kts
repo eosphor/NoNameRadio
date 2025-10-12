@@ -16,4 +16,4 @@ dependencyResolutionManagement {
     }
 }
 
-include(":RadioDroid:app")
+include(":NoNameRadio:app")
