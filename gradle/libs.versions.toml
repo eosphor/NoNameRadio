@@ -5,6 +5,7 @@ downloadTask = "5.6.0"
 androidxAppcompat = "1.7.1"
 androidxRecyclerView = "1.4.0"
 androidxSwipeRefresh = "1.1.0"
+androidxViewPager2 = "1.1.0"
 material = "1.13.0"
 androidxPreference = "1.2.1"
 androidxMediaRouter = "1.8.1"
@@ -49,6 +50,7 @@ download-task = { module = "de.undercouch:gradle-download-task", version.ref = "
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidxAppcompat" }
 androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "androidxRecyclerView" }
 androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "androidxSwipeRefresh" }
+androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "androidxViewPager2" }
 androidx-preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "androidxPreference" }
 androidx-mediarouter = { module = "androidx.mediarouter:mediarouter", version.ref = "androidxMediaRouter" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintLayout" }
