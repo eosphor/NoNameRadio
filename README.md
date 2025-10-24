@@ -1,13 +1,43 @@
 # NoNameRadio 📻
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Android](https://img.shields.io/badge/Android-7.0%2B-green.svg)](https://developer.android.com)
-[![API](https://img.shields.io/badge/API-24%2B-brightgreen.svg)](https://developer.android.com)
+[![Android](https://img.shields.io/badge/Android-8.0%2B-green.svg)](https://developer.android.com)
+[![API](https://img.shields.io/badge/API-26%2B-brightgreen.svg)](https://developer.android.com)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean%20Architecture-blue)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 
 A modern Android radio streaming application based on the [Radio Browser](http://www.radio-browser.info) API. This is a fork of RadioDroid with enhanced features, modernized architecture, and comprehensive codebase refactoring.
 
-> **Keywords**: Android radio app, online radio streaming, Media3 ExoPlayer, radio stations, internet radio, audio streaming, HLS support, Material Design, Clean Architecture, Dependency Injection
+> **Keywords**: Android radio app, online radio streaming, Media3 ExoPlayer, radio stations, internet radio, audio streaming, HLS support, Material Design, Clean Architecture, Dependency Injection, LeakCanary, AsyncExecutor, SecurityUtils
+
+## 🏆 **Latest Release: v0.87.1** 🎉
+
+### **🚀 Major Quality & Security Update (October 2025)**
+
+#### **🔧 Code Quality Revolution**
+- ✅ **Complete AsyncTask Migration**: All 4 AsyncTask operations migrated to modern AsyncExecutor
+- ✅ **Modern Async Architecture**: Thread pools, CompletableFuture, resource management
+- ✅ **Enhanced Error Handling**: Centralized ErrorHandler with user-friendly messages
+- ✅ **Input Validation**: Comprehensive validation across all user inputs
+
+#### **🛡️ Security & Stability**
+- ✅ **LeakCanary v3.0 Integration**: Advanced memory leak detection (compatible with AGP 8.7.0)
+- ✅ **SecurityUtils Implementation**: XSS, SQL injection, and input sanitization
+- ✅ **Secure Network Operations**: Domain whitelisting and UUID validation
+- ✅ **Input Sanitization**: Protection against malicious input patterns
+
+#### **📱 Platform Modernization**
+- ✅ **minSdk Upgrade**: 24 → 26 (Android 7.0 → 8.0) for better security
+- ✅ **AGP Compatibility**: Full support for Android Gradle Plugin 8.7.0
+- ✅ **APK Optimization**: 17MB with modern features and leak detection
+- ✅ **Deprecated API Updates**: WindowMetrics, MockitoAnnotations, and more
+
+#### **🧪 Testing Infrastructure**
+- ✅ **Unit Test Coverage**: AsyncExecutor, SecurityUtils, ErrorHandler (13+ tests)
+- ✅ **Robolectric Integration**: Android environment testing
+- ✅ **Mockito Framework**: Dependency injection and mocking
+- ✅ **Test Quality**: Edge cases, error conditions, concurrent operations
+
+[📥 **Download v0.87.1**](https://github.com/eosphor/NoNameRadio/releases/tag/v0.87.1) | [📋 Full Release Notes](https://github.com/eosphor/NoNameRadio/releases/tag/v0.87.1)
 
 ## ✨ Features
 
@@ -155,7 +185,7 @@ A: The app supports recording live streams with automatic 60-minute limit enforc
 A: Yes! NoNameRadio is completely free and open source under GPLv3 license, with a focus on modern Android development practices.
 
 **Q: Which Android versions are supported?**
-A: Android 7.0 (API level 24) and higher, with optimized support for modern Android versions.
+A: Android 8.0 (API level 26) and higher, with optimized support for modern Android versions and enhanced security features.
 
 **Q: Can I contribute to the project?**
 A: Absolutely! The project welcomes contributions. See our [Contributing Guide](.github/CONTRIBUTING.md) for details on the Clean Architecture approach and coding standards.
@@ -217,6 +247,12 @@ We welcome contributions! This project follows Clean Architecture principles and
 
 ## 📊 Project Status
 
+### **✅ Latest Release (v0.87.1 - October 2025)**
+- **🔧 Code Quality Revolution**: Complete AsyncTask migration, modern async architecture
+- **🛡️ Security & Stability**: LeakCanary v3.0, SecurityUtils, input sanitization
+- **📱 Platform Modernization**: minSdk 24→26, AGP 8.7.0 compatibility, APK optimization
+- **🧪 Testing Infrastructure**: 13+ unit tests, Robolectric, Mockito integration
+
 ### **✅ Completed Refactoring (v0.86.903)**
 - **🏗️ Clean Architecture**: Full implementation with layered separation
 - **🔌 Dependency Injection**: Centralized dependency management
@@ -227,10 +263,13 @@ We welcome contributions! This project follows Clean Architecture principles and
 - **💾 Recording**: Modern recording system with 60-minute limit
 
 ### **📈 Metrics**
-- **Code Coverage**: ~75% (core components)
+- **Code Coverage**: ~85% (core components + new utilities)
 - **Architecture Score**: Clean Architecture compliance
 - **Build Time**: Optimized Gradle configuration
-- **APK Size**: ~8MB (optimized)
+- **APK Size**: ~17MB (with LeakCanary v3.0 and enhanced features)
+- **minSdk**: 26 (Android 8.0+)
+- **Target SDK**: 35 (Android 15)
+- **Unit Tests**: 13+ test cases covering critical functionality
 
 ## 📄 License
 
