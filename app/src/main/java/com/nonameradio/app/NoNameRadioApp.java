@@ -1,0 +1,295 @@
+package com.nonameradio.app;
+
+import android.app.UiModeManager;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.util.Log;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.multidex.MultiDexApplication;
+import androidx.preference.PreferenceManager;
+
+import com.yandex.metrica.YandexMetrica;
+import com.yandex.metrica.YandexMetricaConfig;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.integration.okhttp3.OkHttpUrlLoader;
+import com.bumptech.glide.load.model.GlideUrl;
+
+import com.nonameradio.app.alarm.RadioAlarmManager;
+import com.nonameradio.app.history.TrackHistoryRepository;
+import com.nonameradio.app.players.RadioPlayer;
+import com.nonameradio.app.service.MediaSessionUtil;
+import com.nonameradio.app.players.mpd.MPDClient;
+import com.nonameradio.app.station.live.metadata.TrackMetadataSearcher;
+import com.nonameradio.app.proxy.ProxySettings;
+import com.nonameradio.app.recording.RecordingsManager;
+import com.nonameradio.app.utils.TvChannelManager;
+
+// LeakCanary will auto-initialize in debug builds
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.Cache;
+import okhttp3.ConnectionPool;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+public class NoNameRadioApp extends android.app.Application {
+
+    private HistoryManager historyManager;
+    private FavouriteManager favouriteManager;
+    private RecordingsManager recordingsManager;
+    private FallbackStationsManager fallbackStationsManager;
+    private RadioAlarmManager alarmManager;
+    private TvChannelManager tvChannelManager;
+    private androidx.lifecycle.Observer<java.util.List<com.nonameradio.app.station.DataRadioStation>> tvChannelObserver;
+    private RadioPlayer radioPlayer;
+
+    private TrackHistoryRepository trackHistoryRepository;
+
+    private MPDClient mpdClient;
+
+    private CastHandler castHandler;
+
+    private TrackMetadataSearcher trackMetadataSearcher;
+
+    private ConnectionPool connectionPool;
+    private OkHttpClient httpClient;
+
+    private Interceptor testsInterceptor;
+
+    public class UserAgentInterceptor implements Interceptor {
+
+        private final String userAgent;
+
+        public UserAgentInterceptor(String userAgent) {
+            this.userAgent = userAgent;
+        }
+
+        @Override
+        public Response intercept(Chain chain) throws IOException {
+            Request originalRequest = chain.request();
+            Request requestWithUserAgent = originalRequest.newBuilder()
+                    .header("User-Agent", userAgent)
+                    .build();
+            return chain.proceed(requestWithUserAgent);
+        }
+    }
+
+    static {
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        // LeakCanary auto-initializes in debug builds
+
+        // TODO: Move GoogleProviderHelper initialization to later
+
+        connectionPool = new ConnectionPool();
+
+        // Initialize HTTP client for network operations
+        rebuildHttpClient();
+
+        // Configure Glide with custom OkHttp client
+        Glide.get(this).getRegistry().replace(GlideUrl.class, java.io.InputStream.class, new OkHttpUrlLoader.Factory(newHttpClientForGlide()));
+
+        // Country code loading
+        try {
+            CountryCodeDictionary.getInstance().load(this);
+            CountryFlagsLoader.getInstance();
+        } catch (Exception countryInitError) {
+            Log.e("NoNameRadioApp", "Failed to init country dictionaries", countryInitError);
+        }
+
+        historyManager = new HistoryManager(this);
+        favouriteManager = new FavouriteManager(this);
+        fallbackStationsManager = new FallbackStationsManager(this);
+        recordingsManager = new RecordingsManager(this);
+        alarmManager = new RadioAlarmManager(this);
+
+        UiModeManager uiModeManager = (UiModeManager) getSystemService(UI_MODE_SERVICE);
+        if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
+            tvChannelManager = new TvChannelManager(this);
+            // Observe favourite stations changes and update Android TV channels
+            tvChannelObserver = stations -> {
+                if (tvChannelManager != null) {
+                    tvChannelManager.publishStarred();
+                }
+            };
+            favouriteManager.getStationsLiveData().observeForever(tvChannelObserver);
+        }
+
+        trackHistoryRepository = new TrackHistoryRepository(this);
+
+        mpdClient = new MPDClient(this);
+        radioPlayer = new RadioPlayer(this);
+
+        // Initialize MediaSessionUtil
+        MediaSessionUtil.initialize(this);
+
+        castHandler = new CastHandler();
+
+        trackMetadataSearcher = new TrackMetadataSearcher(httpClient);
+
+        recordingsManager.updateRecordingsList();
+
+        // Initialize dependency injection
+        com.nonameradio.app.core.di.DependencyInjector.initialize(this);
+
+        // Initialize Google Provider Helper (TLS provider for Play flavor; no-op in Free)
+        GoogleProviderHelper.use(getBaseContext());
+
+        // Initialize Yandex Metrica after all other components
+        try {
+            YandexMetricaConfig config = YandexMetricaConfig.newConfigBuilder("620825a5-2d14-47ce-af59-acb3618c547e")
+                    .withLogs()
+                    .withCrashReporting(true)
+                    .withNativeCrashReporting(true)
+                    .withLocationTracking(false)
+                    .withStatisticsSending(true)
+                    .build();
+            YandexMetrica.activate(this, config);
+            YandexMetrica.enableActivityAutoTracking(this);
+
+            // Report app start event
+            YandexMetrica.reportEvent("app_started");
+        } catch (Exception e) {
+            Log.e("NoNameRadioApp", "Failed to initialize YandexMetrica", e);
+        }
+    }
+
+    public void setTestsInterceptor(Interceptor testsInterceptor) {
+        this.testsInterceptor = testsInterceptor;
+    }
+
+    public void rebuildHttpClient() {
+        OkHttpClient.Builder builder = newHttpClient()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .addInterceptor(new UserAgentInterceptor("NoNameRadio2/" + BuildConfig.VERSION_NAME));
+
+        httpClient = builder.build();
+    }
+
+    public FallbackStationsManager getFallbackStationsManager() {
+        return fallbackStationsManager;
+    }
+
+    public HistoryManager getHistoryManager() {
+        return historyManager;
+    }
+
+    public FavouriteManager getFavouriteManager() {
+        return favouriteManager;
+    }
+
+    public RecordingsManager getRecordingsManager() {
+        return recordingsManager;
+    }
+
+    public RadioAlarmManager getAlarmManager() {
+        return alarmManager;
+    }
+
+    public RadioPlayer getRadioPlayer() {
+        return radioPlayer;
+    }
+
+    public TrackHistoryRepository getTrackHistoryRepository() {
+        return trackHistoryRepository;
+    }
+
+    public MPDClient getMpdClient() {
+        return mpdClient;
+    }
+
+    public CastHandler getCastHandler() {
+        return castHandler;
+    }
+
+    public TrackMetadataSearcher getTrackMetadataSearcher() {
+        return trackMetadataSearcher;
+    }
+
+    public OkHttpClient getHttpClient() {
+        return httpClient;
+    }
+
+    public OkHttpClient.Builder newHttpClient() {
+        OkHttpClient.Builder builder = new OkHttpClient.Builder().connectionPool(connectionPool);
+
+        if (testsInterceptor != null) {
+            builder.addInterceptor(testsInterceptor);
+        }
+
+        if (!setCurrentOkHttpProxy(builder)) {
+            Toast toast = Toast.makeText(this, getResources().getString(R.string.ignore_proxy_settings_invalid), Toast.LENGTH_SHORT);
+            toast.show();
+        }
+        return Utils.enableTls12OnPreLollipop(builder);
+    }
+
+    public OkHttpClient.Builder newHttpClientWithoutProxy() {
+        OkHttpClient.Builder builder = new OkHttpClient.Builder().connectionPool(connectionPool);
+
+        if (testsInterceptor != null) {
+            builder.addInterceptor(testsInterceptor);
+        }
+
+        return Utils.enableTls12OnPreLollipop(builder);
+    }
+
+    public boolean setCurrentOkHttpProxy(@NonNull OkHttpClient.Builder builder) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        ProxySettings proxySettings = ProxySettings.fromPreferences(sharedPref);
+        if (proxySettings != null) {
+            // proxy settings are not valid
+            return Utils.setOkHttpProxy(builder, proxySettings);
+        }
+        return true;
+    }
+
+    private OkHttpClient newHttpClientForGlide() {
+        OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                .connectionPool(connectionPool)
+                .connectTimeout(5, TimeUnit.SECONDS)  // Быстрый таймаут для изображений
+                .readTimeout(10, TimeUnit.SECONDS)    // Умеренный таймаут для чтения
+                .writeTimeout(5, TimeUnit.SECONDS)
+                .addInterceptor(new UserAgentInterceptor("NoNameRadio2/" + BuildConfig.VERSION_NAME));
+
+        if (testsInterceptor != null) {
+            builder.addInterceptor(testsInterceptor);
+        }
+
+        setCurrentOkHttpProxy(builder);
+
+        return builder.build();
+    }
+
+    /**
+     * Получить HTTP клиент для Glide (оптимизирован для изображений).
+     */
+    public OkHttpClient getHttpClientForGlide() {
+        return newHttpClientForGlide();
+    }
+
+    @Override
+    public void onTerminate() {
+        // Cleanup LiveData observer to prevent memory leak
+        if (tvChannelObserver != null && favouriteManager != null) {
+            favouriteManager.getStationsLiveData().removeObserver(tvChannelObserver);
+        }
+        super.onTerminate();
+    }
+}

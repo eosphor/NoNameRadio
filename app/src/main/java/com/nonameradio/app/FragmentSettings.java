@@ -1,0 +1,331 @@
+package com.nonameradio.app;
+
+import android.app.UiModeManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.media.audiofx.AudioEffect;
+import android.os.Build;
+import android.os.Bundle;
+
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.widget.Toolbar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.Preference.OnPreferenceClickListener;
+import androidx.preference.PreferenceScreen;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+
+import android.os.PowerManager;
+import android.provider.Settings;
+import android.util.Log;
+import android.widget.Toast;
+
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial;
+import com.mikepenz.iconics.typeface.library.googlematerial.GoogleMaterial;
+import com.bytehamster.lib.preferencesearch.SearchConfiguration;
+import com.bytehamster.lib.preferencesearch.SearchPreference;
+
+import com.nonameradio.app.interfaces.IApplicationSelected;
+import com.nonameradio.app.proxy.ProxySettingsDialog;
+
+import static com.nonameradio.app.ActivityMain.FRAGMENT_FROM_BACKSTACK;
+
+public class FragmentSettings extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener, IApplicationSelected, PreferenceFragmentCompat.OnPreferenceStartScreenCallback  {
+
+    private ActivityResultLauncher<Intent> equalizerLauncher;
+
+    public static FragmentSettings openNewSettingsSubFragment(ActivityMain activity, String key) {
+        FragmentSettings f = new FragmentSettings();
+        Bundle args = new Bundle();
+        args.putString(PreferenceFragmentCompat.ARG_PREFERENCE_ROOT, key);
+        f.setArguments(args);
+        FragmentTransaction fragmentTransaction = activity.getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.containerView, f).addToBackStack(String.valueOf(FRAGMENT_FROM_BACKSTACK)).commit();
+        return f;
+    }
+
+    @Override
+    public boolean onPreferenceStartScreen(PreferenceFragmentCompat preferenceFragmentCompat,
+                                           PreferenceScreen preferenceScreen) {
+        openNewSettingsSubFragment((ActivityMain) getActivity(), preferenceScreen.getKey());
+        return true;
+    }
+
+    private boolean isToplevel() {
+        return getPreferenceScreen() == null || getPreferenceScreen().getKey().equals("pref_toplevel");
+    }
+
+    private void refreshToplevelIcons() {
+        findPreference("shareapp_package").setSummary(getPreferenceManager().getSharedPreferences().getString("shareapp_package", ""));
+        findPreference("pref_category_ui").setIcon(Utils.IconicsIcon(getContext(), CommunityMaterial.Icon2.cmd_monitor));
+        findPreference("pref_category_startup").setIcon(Utils.IconicsIcon(getContext(), GoogleMaterial.Icon.gmd_flight_takeoff));
+        findPreference("pref_category_interaction").setIcon(Utils.IconicsIcon(getContext(), CommunityMaterial.Icon.cmd_gesture_tap));
+        findPreference("pref_category_player").setIcon(Utils.IconicsIcon(getContext(), CommunityMaterial.Icon2.cmd_play));
+        findPreference("pref_category_alarm").setIcon(Utils.IconicsIcon(getContext(), CommunityMaterial.Icon.cmd_clock_outline));
+        findPreference("pref_category_connectivity").setIcon(Utils.IconicsIcon(getContext(), GoogleMaterial.Icon.gmd_import_export));
+        findPreference("pref_category_recordings").setIcon(Utils.IconicsIcon(getContext(), CommunityMaterial.Icon2.cmd_record_rec));
+        findPreference("pref_category_mpd").setIcon(Utils.IconicsIcon(getContext(), CommunityMaterial.Icon2.cmd_speaker_wireless));
+        findPreference("pref_category_other").setIcon(Utils.IconicsIcon(getContext(), CommunityMaterial.Icon2.cmd_information_outline));
+    }
+
+    private void refreshToolbar() {
+        ActivityMain activity = (ActivityMain) getActivity();
+        final Toolbar myToolbar = activity.getToolbar(); //findViewById(R.id.my_awesome_toolbar);
+
+        if (myToolbar == null || getPreferenceScreen() == null)
+            return;
+
+        myToolbar.setTitle(getPreferenceScreen().getTitle());
+
+        if (Utils.bottomNavigationEnabled(activity)) {
+            // On Android TV, always keep the home button enabled for drawer access
+            boolean isTV = activity.isRunningOnTV();
+            
+            if (isToplevel() && !isTV) {
+                activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                activity.getSupportActionBar().setDisplayShowHomeEnabled(false);
+                myToolbar.setNavigationOnClickListener(v -> activity.onBackPressed());
+            } else {
+                activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                activity.getSupportActionBar().setDisplayShowHomeEnabled(true);
+                
+                // On Android TV, don't override the navigation click listener
+                // Let the default drawer toggle behavior handle it
+                if (!isTV) {
+                    myToolbar.setNavigationOnClickListener(v -> activity.onBackPressed());
+                }
+                // For TV, the ActivityMain's ActionBarDrawerToggle will handle navigation clicks
+            }
+        }
+    }
+
+    @Override
+    public void onCreatePreferences(Bundle bundle, String s) {
+        // Initialize Activity Result Launcher for equalizer
+        equalizerLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                // Handle equalizer result if needed
+                Log.d("FragmentSettings", "Equalizer activity result: " + result.getResultCode());
+            }
+        );
+
+        setPreferencesFromResource(R.xml.preferences, s);
+        refreshToolbar();
+        if (s == null) {
+            refreshToplevelIcons();
+            SearchPreference searchPreference = findPreference("searchPreference");
+            SearchConfiguration config = searchPreference.getSearchConfiguration();
+            config.setActivity((AppCompatActivity) getActivity());
+            config.index(R.xml.preferences);
+        } else if (s.equals("pref_category_player")) {
+            findPreference("equalizer").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent intent = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+
+                    if (getContext().getPackageManager().resolveActivity(intent, 0) == null) {
+                        Toast.makeText(getContext(), R.string.error_no_equalizer_found, Toast.LENGTH_SHORT).show();
+                    } else {
+                        intent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
+                        equalizerLauncher.launch(intent);
+                    }
+
+                    return false;
+                }
+            });
+        } else if (s.equals("pref_category_connectivity")) {
+            //final ListPreference servers = (ListPreference) findPreference("radiobrowser_server");
+            //updateDnsList(servers);
+
+            findPreference("settings_proxy").setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    ProxySettingsDialog proxySettingsDialog = new ProxySettingsDialog();
+                    proxySettingsDialog.setCancelable(true);
+                    proxySettingsDialog.show(getFragmentManager(), "");
+                    return false;
+                }
+            });
+
+            // Hide Radio Browser server check preference on API <= 24
+            // Since minSdk = 24, this preference is always hidden
+            findPreference("settings_check_radio_browser_server").setVisible(false);
+        } else if (s.equals("pref_category_mpd")) {
+            findPreference("mpd_servers_viewer").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    NoNameRadioApp app = (NoNameRadioApp) requireActivity().getApplication();
+                    Utils.showMpdServersDialog(app, requireActivity().getSupportFragmentManager(), null);
+                    return false;
+                }
+            });
+        } else if (s.equals("pref_category_other")) {
+            findPreference("show_statistics").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    ((ActivityMain) getActivity()).getToolbar().setTitle(R.string.settings_statistics);
+                    FragmentServerInfo f = new FragmentServerInfo();
+                    FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                    fragmentTransaction.replace(R.id.containerView, f).addToBackStack(String.valueOf(FRAGMENT_FROM_BACKSTACK)).commit();
+                    return false;
+                }
+            });
+
+            findPreference("show_about").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    ((ActivityMain) getActivity()).getToolbar().setTitle(R.string.settings_about);
+                    FragmentAbout f = new FragmentAbout();
+                    FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                    fragmentTransaction.replace(R.id.containerView, f).addToBackStack(String.valueOf(FRAGMENT_FROM_BACKSTACK)).commit();
+                    return false;
+                }
+            });
+        } else if (s.equals("pref_category_ui")) {
+          if (isRunningOnTV()) {
+              // findPreference("theme_name").setVisible(false);
+              findPreference("bottom_navigation").setVisible(false);
+          }
+        }
+
+        Preference batPref = getPreferenceScreen().findPreference(getString(R.string.key_ignore_battery_optimization));
+        if (batPref != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                updateBatteryPrefDescription(batPref);
+                batPref.setOnPreferenceClickListener(preference -> {
+                    Intent intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                    startActivity(intent);
+                    updateBatteryPrefDescription(batPref);
+                    return true;
+                });
+            } else {
+                batPref.getParent().removePreference(batPref);
+            }
+        }
+    }
+
+    private boolean isRunningOnTV() {
+        UiModeManager uiModeManager = (UiModeManager) getSystemService();
+        return uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
+    }
+
+    private Object getSystemService() {
+        return  getActivity().getSystemService(Context.UI_MODE_SERVICE);
+    }
+
+    /*
+    private void setServersData(String[] list, ListPreference servers) {
+        servers.setEntries(list);
+        if (list.length > 0){
+            servers.setDefaultValue(list[0]);
+        }
+        servers.setEntryValues(list);
+    }
+
+    void updateDnsList(final ListPreference lp){
+        final AsyncTask<Void, Void, String[]> xxx = new AsyncTask<Void, Void, String[]>() {
+            @Override
+            protected String[] doInBackground(Void... params) {
+                return RadioBrowserServerManager.getServerList(false, HttpClient.getInstance(), getContext());
+            }
+
+            @Override
+            protected void onPostExecute(String[] result) {
+                setServersData(result, lp);
+                super.onPostExecute(result);
+            }
+        }.execute();
+    }
+    */
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+
+        refreshToolbar();
+
+        if(isToplevel())
+            refreshToplevelIcons();
+
+        if(findPreference("shareapp_package") != null)
+            findPreference("shareapp_package").setSummary(getPreferenceManager().getSharedPreferences().getString("shareapp_package", ""));
+
+        Preference batPref = getPreferenceScreen().findPreference(getString(R.string.key_ignore_battery_optimization));
+        if (batPref != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // the second condition should already follow from the first
+            updateBatteryPrefDescription(batPref);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        getPreferenceManager().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ActivityMain activity = (ActivityMain) getActivity();
+        if (activity != null) {
+            // Если выходим из настроек, возвращаем заголовок к имени приложения
+            Fragment current = activity.getSupportFragmentManager().findFragmentById(R.id.containerView);
+            if (!(current instanceof FragmentSettings)) {
+                Toolbar toolbar = activity.getToolbar();
+                if (toolbar != null) {
+                    toolbar.setTitle(R.string.app_name);
+                }
+            }
+        }
+    }
+
+    @RequiresApi(23)
+    private void updateBatteryPrefDescription(Preference batPref) {
+        PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
+        if (pm.isIgnoringBatteryOptimizations(getContext().getPackageName())) {
+            batPref.setSummary(R.string.settings_ignore_battery_optimization_summary_on);
+        } else {
+            batPref.setSummary(R.string.settings_ignore_battery_optimization_summary_off);
+        }
+    }
+
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+                                          String key) {
+        if (BuildConfig.DEBUG) {
+            Log.d("AAA", "changed key:" + key);
+        }
+        if (key.equals("alarm_external")) {
+            boolean active = sharedPreferences.getBoolean(key, false);
+            if (active) {
+                ApplicationSelectorDialog newFragment = new ApplicationSelectorDialog();
+                newFragment.setCallback(this);
+                newFragment.show(getActivity().getSupportFragmentManager(), "appPicker");
+            }
+        }
+        if (key.equals("theme_name") || key.equals("circular_icons") || key.equals("bottom_navigation")) {
+            if (key.equals("circular_icons"))
+                ((NoNameRadioApp) getActivity().getApplication()).getFavouriteManager().updateShortcuts();
+            getActivity().recreate();
+        }
+    }
+
+    @Override
+    public void onAppSelected(String packageName, String activityName) {
+        if (BuildConfig.DEBUG) {
+            Log.d("SEL", "selected:" + packageName + "/" + activityName);
+        }
+        SharedPreferences.Editor ed = getPreferenceManager().getSharedPreferences().edit();
+        ed.putString("shareapp_package", packageName);
+        ed.putString("shareapp_activity", activityName);
+        ed.commit();
+
+        findPreference("shareapp_package").setSummary(packageName);
+    }
+}

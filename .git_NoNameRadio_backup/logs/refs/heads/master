@@ -1,0 +1,37 @@
+0000000000000000000000000000000000000000 6ef7e50e6a75ed4bf0edcce4da9b5d65832c6dbc eosphor <eosphor@users.noreply.github.com> 1758579682 +0200	clone: from https://github.com/morckx/RadioDroid.git
+6ef7e50e6a75ed4bf0edcce4da9b5d65832c6dbc 8ce52078a8d8ea53f316e628f767458c0ad76107 eosphor <eosphor@users.noreply.github.com> 1758657220 +0200	commit: Initial NoNameRadio release
+8ce52078a8d8ea53f316e628f767458c0ad76107 04f8673308dcd86fa525611c93d53ac00c5322cd eosphor <eosphor@users.noreply.github.com> 1758657237 +0200	commit: Add GitHub repository description and metadata
+04f8673308dcd86fa525611c93d53ac00c5322cd f7c51363b948885e4811d37b2bc22dac1f51834d eosphor <eosphor@users.noreply.github.com> 1758657243 +0200	commit: Add repository topics for better discoverability
+f7c51363b948885e4811d37b2bc22dac1f51834d cdb5b86e643405c61505a3f30338fc9e1d61ea6b eosphor <eosphor@users.noreply.github.com> 1758657280 +0200	commit (amend): Initial NoNameRadio release
+cdb5b86e643405c61505a3f30338fc9e1d61ea6b 56f42feed63315c10252982f2613f2f406b70559 eosphor <eosphor@users.noreply.github.com> 1758657589 +0200	commit: Update Media3 to 1.8.0 and simplify ExoPlayerWrapper
+56f42feed63315c10252982f2613f2f406b70559 6076a947c54311f5b47e477ea874cdbde835dfa6 eosphor <eosphor@users.noreply.github.com> 1758657808 +0200	commit: Integrate AppMetrica analytics
+6076a947c54311f5b47e477ea874cdbde835dfa6 c534a97d1c132c84c63a95462a35e4445b1d4c70 eosphor <eosphor@users.noreply.github.com> 1758657879 +0200	commit: Rewrite README and cleanup documentation
+c534a97d1c132c84c63a95462a35e4445b1d4c70 5e3029698cfad6d7c16ac28c7f2d3c522fe111e1 eosphor <eosphor@users.noreply.github.com> 1758657981 +0200	commit: Configure .gitignore to keep MD files locally but ignore on GitHub
+5e3029698cfad6d7c16ac28c7f2d3c522fe111e1 92813b527be9b7443758f3c413fc6e80872f575c eosphor <eosphor@users.noreply.github.com> 1758658170 +0200	commit: Add comprehensive SEO optimization and GitHub discoverability features
+92813b527be9b7443758f3c413fc6e80872f575c 12c886b1e69785c9f5a6b3f0b78809695d8da069 eosphor <eosphor@users.noreply.github.com> 1758658332 +0200	commit: Fix CI/CD workflows for NoNameRadio
+12c886b1e69785c9f5a6b3f0b78809695d8da069 4cf81ccc94af918cc923c0ec8541c809da7109b9 eosphor <eosphor@users.noreply.github.com> 1758658468 +0200	commit: Force update GitHub workflows
+4cf81ccc94af918cc923c0ec8541c809da7109b9 b78d180a3cebb77e42275843ebf557ca8560ad49 eosphor <eosphor@users.noreply.github.com> 1758658492 +0200	commit: Add workflows README to document CI cleanup
+b78d180a3cebb77e42275843ebf557ca8560ad49 570d8b3368cc093e0f237a834fcbe7ac2f7afac5 eosphor <eosphor@users.noreply.github.com> 1758658829 +0200	commit: Integrate Media3 Session for modern media control
+570d8b3368cc093e0f237a834fcbe7ac2f7afac5 770b135d7bcacab641c2fea79e81cc422c947862 eosphor <eosphor@users.noreply.github.com> 1758659208 +0200	commit: Complete MediaSession integration with RadioPlayer
+770b135d7bcacab641c2fea79e81cc422c947862 2fe8236a80a19fcaadd7b15bf6d02fa64f45465c eosphor <eosphor@users.noreply.github.com> 1758659304 +0200	commit: Add MediaSessionUtil for UI integration
+2fe8236a80a19fcaadd7b15bf6d02fa64f45465c 07b518a9dd7c8bd95cd528d3f0736a517aabc2ba eosphor <eosphor@users.noreply.github.com> 1758662958 +0200	commit: Complete Media3 modernization and UI fixes
+07b518a9dd7c8bd95cd528d3f0736a517aabc2ba 2c5345d301ec166de0cc15fcf7b5afb3c3cc7c1d eosphor <eosphor@users.noreply.github.com> 1758663654 +0200	commit: Update FUNDING.yml with Liberapay and PayPal links
+2c5345d301ec166de0cc15fcf7b5afb3c3cc7c1d cd128f28d932adf13444692477c52448da79a09c eosphor <eosphor@users.noreply.github.com> 1758663708 +0200	commit: Remove PayPal from FUNDING.yml
+cd128f28d932adf13444692477c52448da79a09c f95ed373290489b215c903dde2a176a75cba39af eosphor <eosphor@users.noreply.github.com> 1758664016 +0200	commit: Add CHANGELOG.md with detailed version history
+f95ed373290489b215c903dde2a176a75cba39af c6e23d5c8930d965f32de2c48911569fc0d15a26 eosphor <eosphor@users.noreply.github.com> 1758664021 +0200	commit: Add comprehensive topics for better discoverability
+c6e23d5c8930d965f32de2c48911569fc0d15a26 881acf2a03069b913dbe981a19b5cb73429cec70 eosphor <eosphor@users.noreply.github.com> 1758665924 +0200	commit: Document infrastructure modernization tasks
+881acf2a03069b913dbe981a19b5cb73429cec70 3c907e81dce7df7d7eb879d11ea627c716b06f4a eosphor <eosphor@users.noreply.github.com> 1758666670 +0200	commit: Refactor Glide image loading and caching system
+3c907e81dce7df7d7eb879d11ea627c716b06f4a bdfba7fddeb499ac7b6f33c1b5bae47e8b1e223b eosphor <eosphor@users.noreply.github.com> 1758667970 +0200	commit: Migrate build system to Kotlin DSL
+bdfba7fddeb499ac7b6f33c1b5bae47e8b1e223b 07690afd87c8783021101064ee4f87d478d2fd08 eosphor <eosphor@users.noreply.github.com> 1758668003 +0200	commit: Document Kotlin DSL migration in infrastructure updates
+07690afd87c8783021101064ee4f87d478d2fd08 1227d0469938d37d46eebc7ca64b6da20d3be14c eosphor <eosphor@users.noreply.github.com> 1758674082 +0200	commit: fix: restore radio station recording functionality
+1227d0469938d37d46eebc7ca64b6da20d3be14c 11a6273b0606d0857bad340446e176188a007424 eosphor <eosphor@users.noreply.github.com> 1758698439 +0200	commit: refactor: Complete Java modernization without Kotlin migration or UI changes
+11a6273b0606d0857bad340446e176188a007424 18cef8e862a4624e1f54fb3d4a801702be5684a8 eosphor <eosphor@users.noreply.github.com> 1758698451 +0200	pull origin master --rebase (finish): refs/heads/master onto 512488644e580464260f21b04e8721f9ec9eb395
+18cef8e862a4624e1f54fb3d4a801702be5684a8 2474aa26b34d17f1763e88750cb03b1d8203c3ca eosphor <eosphor@users.noreply.github.com> 1758701459 +0200	commit: Complete rebranding from RadioDroid to NoNameRadio
+2474aa26b34d17f1763e88750cb03b1d8203c3ca a4a86f06b8f469586aa168a01900174d330ea075 eosphor <eosphor@users.noreply.github.com> 1758701712 +0200	commit: Security improvements: Rename database and add legal notice
+a4a86f06b8f469586aa168a01900174d330ea075 6879b5765ccea6eeee7e807e2c53cf14af5ae7bf eosphor <eosphor@users.noreply.github.com> 1758701866 +0200	commit: Add legal notice dialog accessible from app menu
+6879b5765ccea6eeee7e807e2c53cf14af5ae7bf 7a63d27754199e05fa025d94eeab7ea3eceb4030 eosphor <eosphor@users.noreply.github.com> 1758702545 +0200	commit: Refactoring: Replace deprecated APIs and clean up project
+7a63d27754199e05fa025d94eeab7ea3eceb4030 a2854ecfba9591b33d086c5e1544571b5daa815f eosphor <eosphor@users.noreply.github.com> 1758702778 +0200	commit: Complete README overhaul with modern documentation
+a2854ecfba9591b33d086c5e1544571b5daa815f a3b022b5744216d454c0ceff949f27cf983a1f2e eosphor <eosphor@users.noreply.github.com> 1758703077 +0200	commit: Replace star icons with heart icons for favorites
+a3b022b5744216d454c0ceff949f27cf983a1f2e 91019bbbab7eea80e465a5af833dd56c0624cb33 eosphor <eosphor@users.noreply.github.com> 1758703175 +0200	commit: Change heart icon color to red on player cover
+91019bbbab7eea80e465a5af833dd56c0624cb33 132be2ad3fb688622af04647fe90f39989fb304c eosphor <eosphor@users.noreply.github.com> 1758703237 +0200	commit: Change station cards heart icons to red and filled
+132be2ad3fb688622af04647fe90f39989fb304c f4badccb38a596f18259be482e7b31930c0e2f5e eosphor <eosphor@users.noreply.github.com> 1758703321 +0200	commit: Change full-screen player heart outline to red

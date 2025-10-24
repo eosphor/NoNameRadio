@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!--
+        Radio Streaming Application Network Security Configuration
+        
+        Radio streams often use HTTP (not HTTPS) for streaming audio.
+        This is industry standard for internet radio broadcasting.
+        
+        Security considerations:
+        - API calls use HTTPS (enforced in code)
+        - Radio-Browser API uses HTTPS
+        - Stream URLs come from trusted Radio-Browser database
+        - Audio streams themselves use HTTP (legacy infrastructure)
+        
+        Future improvements:
+        - Migrate to HTTPS streams when available
+        - Implement certificate pinning for API endpoints
+        - Use domain-specific rules as stream infrastructure modernizes
+    -->
+    
+    <base-config cleartextTrafficPermitted="true">
+        <!-- Trust system certificates -->
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    
+    <!--
+        Note: We allow cleartext for radio streams compatibility.
+        Most internet radio stations still use HTTP for streaming.
+        The Radio-Browser API itself uses HTTPS for station lookup.
+    -->
+</network-security-config>

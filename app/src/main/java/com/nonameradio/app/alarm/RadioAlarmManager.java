@@ -1,0 +1,351 @@
+package com.nonameradio.app.alarm;
+
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Build;
+import android.util.Log;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.provider.Settings;
+
+import androidx.preference.PreferenceManager;
+
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
+import com.nonameradio.app.BuildConfig;
+import com.nonameradio.app.station.DataRadioStation;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+public class RadioAlarmManager {
+
+    private static final int ONE_DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
+    private final Context context;
+    private final List<DataRadioStationAlarm> list = new ArrayList<DataRadioStationAlarm>();
+    final int pendingIntentFlag =  Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0;
+
+    // Migrated from Observable to LiveData for better lifecycle awareness
+    private final MutableLiveData<List<DataRadioStationAlarm>> alarmsLiveData = new MutableLiveData<>();
+
+    public RadioAlarmManager(Context context){
+        this.context = context;
+        load();
+
+//        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+//        SharedPreferences.OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+//            public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+//                if (callback != null) {
+//                    callback.onChanged();
+//                }
+//            }
+//        };
+//        sharedPref.registerOnSharedPreferenceChangeListener(listener);
+    }
+
+    /**
+     * Returns LiveData with list of alarms.
+     * Observers will be automatically notified when alarms change.
+     */
+    public LiveData<List<DataRadioStationAlarm>> getAlarmsLiveData() {
+        return alarmsLiveData;
+    }
+
+    public boolean canScheduleExactAlarms() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            return alarmMgr.canScheduleExactAlarms();
+        }
+        return true; // No restriction on older versions
+    }
+
+    public void requestExactAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+            intent.setData(Uri.parse("package:" + context.getPackageName()));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            try {
+                context.startActivity(intent);
+            } catch (Exception e) {
+                Log.e("ALARM", "Failed to open exact alarm settings", e);
+            }
+        }
+    }
+
+    public void add(DataRadioStation station, int hour, int minute){
+        if(BuildConfig.DEBUG) { Log.d("ALARM","added station:"+station.Name); }
+        DataRadioStationAlarm alarm = new DataRadioStationAlarm();
+        alarm.station = station;
+        alarm.hour = hour;
+        alarm.minute = minute;
+        alarm.weekDays = new ArrayList<>();
+        alarm.id = getFreeId();
+        list.add(alarm);
+
+        save();
+
+        setEnabled(alarm.id, true);
+    }
+
+    public DataRadioStationAlarm[] getList(){
+        return list.toArray(new DataRadioStationAlarm[0]);
+    }
+
+    int getFreeId(){
+        int i = 0;
+        while (!checkIdFree(i)){
+            i++;
+        }
+        if(BuildConfig.DEBUG) { Log.d("ALARM","new free id:"+i); }
+        return i;
+    }
+
+    boolean checkIdFree(int id){
+        for(DataRadioStationAlarm alarm: list){
+            if (alarm.id == id){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void save(){
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPref.edit();
+
+        String items = "";
+
+        for (DataRadioStationAlarm alarm: list){
+            if(BuildConfig.DEBUG) { Log.d("ALARM","save item:"+alarm.id+"/"+alarm.station.Name); }
+            editor.putString("alarm."+alarm.id+".station",alarm.station.toJson().toString());
+            editor.putInt("alarm."+alarm.id+".timeHour",alarm.hour);
+            editor.putInt("alarm."+alarm.id+".timeMinutes",alarm.minute);
+            editor.putBoolean("alarm."+alarm.id+".enabled",alarm.enabled);
+            editor.putBoolean("alarm."+alarm.id+".repeating",alarm.repeating);
+
+            Gson gson = new Gson();
+            String weekdaysString = gson.toJson(alarm.weekDays);
+            editor.putString("alarm."+alarm.id+".weekDays",weekdaysString);
+
+            if (items.equals("")) {
+                items = "" + alarm.id;
+            }else{
+                items = items + "," + alarm.id;
+            }
+        }
+
+        editor.putString("alarm.ids",items);
+        editor.apply();
+
+        // Notify observers with a copy of the list to prevent concurrent modification
+        alarmsLiveData.postValue(new ArrayList<>(list));
+    }
+
+    public void load(){
+        list.clear();
+        if(BuildConfig.DEBUG) { Log.d("ALARM","load()"); }
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        String ids = sharedPref.getString("alarm.ids", "");
+        if (!ids.equals("")) {
+            String[] idsArr = ids.split(",");
+            if(BuildConfig.DEBUG) { Log.d("ALARM", "load() - " + idsArr.length); }
+            for (String id : idsArr) {
+                DataRadioStationAlarm alarm = new DataRadioStationAlarm();
+
+                alarm.station = DataRadioStation.DecodeJsonSingle(sharedPref.getString("alarm." + id + ".station", null));
+                String weekDaysString  = sharedPref.getString("alarm." + id + ".weekDays", "[]");
+                Gson gson = new Gson();
+                alarm.weekDays = gson.fromJson(weekDaysString, new TypeToken<List<Integer>>(){}.getType());
+                alarm.hour = sharedPref.getInt("alarm." + id + ".timeHour", 0);
+                alarm.minute = sharedPref.getInt("alarm." + id + ".timeMinutes", 0);
+                alarm.enabled = sharedPref.getBoolean("alarm." + id + ".enabled", false);
+                alarm.repeating  = sharedPref.getBoolean("alarm." + id + ".repeating", false);
+
+                try {
+                    alarm.id = Integer.parseInt(id);
+                    if (alarm.station != null) {
+                        list.add(alarm);
+                    }
+                } catch (Exception e) {
+                    Log.e("ALARM", "could not decode:" + id);
+                }
+            }
+        }else{
+            Log.w("ALARM","empty load() string");
+        }
+    }
+
+    public void setEnabled(int alarmId, boolean enabled) {
+        DataRadioStationAlarm alarm = getById(alarmId);
+        if (alarm != null) {
+            if (enabled != alarm.enabled) {
+                alarm.enabled = enabled;
+                save();
+
+                if (enabled){
+                    start(alarmId);
+                }else{
+                    stop(alarmId);
+                }
+            }
+        }
+    }
+
+    DataRadioStationAlarm getById(int id){
+        for(DataRadioStationAlarm alarm: list){
+            if (id == alarm.id){
+                return alarm;
+            }
+        }
+        return null;
+    }
+
+    void start(int alarmId) {
+        DataRadioStationAlarm alarm = getById(alarmId);
+        if (alarm != null) {
+            stop(alarmId);
+
+            // Check for SCHEDULE_EXACT_ALARM permission on Android 12+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                if (!alarmMgr.canScheduleExactAlarms()) {
+                    Log.w("ALARM", "SCHEDULE_EXACT_ALARM permission not granted - alarms may not work reliably");
+                    // Could show a dialog here to guide user to settings
+                    return;
+                }
+            }
+
+            Intent intent = new Intent(context, AlarmReceiver.class);
+            intent.putExtra("id",alarmId);
+            PendingIntent alarmIntent = PendingIntent.getBroadcast(context, alarmId, intent, PendingIntent.FLAG_UPDATE_CURRENT | pendingIntentFlag);
+            AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            calendar.set(Calendar.HOUR_OF_DAY, alarm.hour);
+            calendar.set(Calendar.MINUTE, alarm.minute);
+            calendar.set(Calendar.SECOND, 0);
+
+            // if new calendar is in the past, move it 1 day ahead
+            // add 1 min, to ignore already fired events
+            if (calendar.getTimeInMillis() < System.currentTimeMillis() + 60){
+                if(BuildConfig.DEBUG) { Log.d("ALARM","moved ahead one day"); }
+                calendar.setTimeInMillis(calendar.getTimeInMillis() + ONE_DAY_IN_MILLIS);
+            }
+
+            if (alarm.repeating) {
+                Integer currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+                Collections.sort(alarm.weekDays);
+                Integer limiter = 6;
+                while (!alarm.weekDays.contains(currentDayOfWeek - 1) && limiter > 0) {
+                    calendar.setTimeInMillis(calendar.getTimeInMillis() + ONE_DAY_IN_MILLIS);
+                    currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+                    limiter--;
+                }
+            }
+            Log.d(
+                    "ALARM","started:" +alarmId + " "
+                    + calendar.get(Calendar.DAY_OF_WEEK) + " "
+                    + calendar.get(Calendar.DAY_OF_MONTH)
+                    + "." + calendar.get(Calendar.MONTH)
+                    + " " + calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE)
+            );
+
+            if(BuildConfig.DEBUG) { Log.d("ALARM","START setExactAndAllowWhileIdle"); }
+            
+            // Use setExactAndAllowWhileIdle for better background reliability on Android 6+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmMgr.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmIntent);
+            } else {
+                alarmMgr.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmIntent);
+            }
+        }
+    }
+
+    void stop(int alarmId) {
+        DataRadioStationAlarm alarm = getById(alarmId);
+        if (alarm != null) {
+            if(BuildConfig.DEBUG) { Log.d("ALARM","stopped:"+alarmId); }
+            Intent intent = new Intent(context, AlarmReceiver.class);
+            PendingIntent alarmIntent = PendingIntent.getBroadcast(context, alarmId, intent, pendingIntentFlag);
+            AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            alarmMgr.cancel(alarmIntent);
+        }
+    }
+
+    public void changeTime(int alarmId, int hourOfDay, int minute) {
+        DataRadioStationAlarm alarm = getById(alarmId);
+        if (alarm != null) {
+            alarm.hour = hourOfDay;
+            alarm.minute = minute;
+            save();
+
+            if (alarm.enabled){
+                stop(alarmId);
+                start(alarmId);
+            }
+        }
+    }
+
+    public void changeWeekDays(int alarmId, int weekday) {
+        DataRadioStationAlarm alarm = getById(alarmId);
+        if (alarm != null) {
+            if (alarm.weekDays == null) {
+                alarm.weekDays = new ArrayList<>();
+            }
+            int position = alarm.weekDays.indexOf(weekday);
+            if (position == -1) {
+                alarm.weekDays.add(weekday);
+            } else {
+                alarm.weekDays.remove(position);
+            }
+            save();
+            start(alarmId);
+        }
+    }
+
+    public void remove(int id) {
+        DataRadioStationAlarm alarm = getById(id);
+        if (alarm != null) {
+            stop(id);
+            list.remove(alarm);
+            save();
+        }
+    }
+
+    public DataRadioStation getStation(int stationId) {
+        DataRadioStationAlarm alarm = getById(stationId);
+        if (alarm != null) {
+            return alarm.station;
+        }
+        return null;
+    }
+
+    public void resetAllAlarms() {
+        for(DataRadioStationAlarm alarm: list){
+            if (alarm.enabled){
+                if(BuildConfig.DEBUG) { Log.d("ALARM","started alarm with id:"+alarm.id); }
+                start(alarm.id);
+            }
+        }
+    }
+
+    public void toggleRepeating(int id) {
+        DataRadioStationAlarm alarm = getById(id);
+        if (alarm != null) {
+            alarm.repeating = !alarm.repeating;
+            save();
+            start(id);
+        }
+    }
+}

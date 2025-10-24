@@ -16,4 +16,4 @@ dependencyResolutionManagement {
     }
 }
 
-include(":NoNameRadio:app")
+include(":app")
