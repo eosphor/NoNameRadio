@@ -48,7 +48,7 @@ public class FragmentServerInfo extends Fragment implements IFragmentRefreshable
         final OkHttpClient httpClient = app.getHttpClient();
 
         com.nonameradio.app.core.utils.AsyncExecutor.executeIOTask(
-            () -> Utils.downloadFeedRelative(httpClient, getActivity(), "json/stats", forceUpdate, null),
+            () -> Utils.downloadFeedRelative(httpClient, app, "json/stats", forceUpdate, null),
             result -> {
                 // Success callback on main thread
                 EventBus.post(HideLoadingEvent.INSTANCE);

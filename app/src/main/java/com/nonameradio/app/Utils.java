@@ -2,18 +2,15 @@ package com.nonameradio.app;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.UiModeManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
@@ -25,18 +22,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.nonameradio.app.utils.SystemUtils;
-import com.nonameradio.app.utils.FileUtils;
-import com.nonameradio.app.utils.NetworkUtils;
-import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.PermissionChecker;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceManager;
 
 import com.google.gson.Gson;
-import com.mikepenz.iconics.IconicsColor;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.iconics.IconicsSize;
 import com.mikepenz.iconics.typeface.IIcon;
@@ -49,7 +41,6 @@ import com.nonameradio.app.service.MediaSessionUtil;
 import com.nonameradio.app.station.DataRadioStation;
 
 import com.nonameradio.app.proxy.ProxySettings;
-import com.nonameradio.app.utils.Tls12SocketFactory;
 
 import org.json.JSONObject;
 
@@ -62,29 +53,15 @@ import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyStore;
-import java.util.ArrayList;
 import java.util.Date;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Authenticator;
-import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
@@ -93,7 +70,6 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.Route;
-import okhttp3.TlsVersion;
 
 public class Utils {
     private static int loadIcons = -1;
@@ -230,10 +206,39 @@ public class Utils {
 
 
     /**
-     * Download feed from relative URL with parameters (wrapper for NetworkUtils)
+     * Download feed from a path relative to the radio-browser API, falling back to the other
+     * known servers if the current one fails.
      */
     public static String downloadFeedRelative(OkHttpClient httpClient, Context ctx, String theRelativeUri, boolean forceUpdate, Map<String, String> dictParams) {
-        return NetworkUtils.downloadFeedRelative(httpClient, ctx, theRelativeUri, forceUpdate, dictParams);
+        // try current server for download
+        String currentServer = RadioBrowserServerManager.getCurrentServer(httpClient, ctx);
+        if (currentServer == null) {
+            return null;
+        }
+
+        String endpoint = RadioBrowserServerManager.constructEndpoint(currentServer, theRelativeUri);
+        String result = downloadFeed(httpClient, ctx, endpoint, forceUpdate, dictParams);
+        if (result != null) {
+            return result;
+        }
+
+        // try all other servers for download
+        String[] serverList = RadioBrowserServerManager.getServerList(false, httpClient, ctx);
+        for (String newServer : serverList) {
+            if (newServer.equals(currentServer)) {
+                continue;
+            }
+
+            endpoint = RadioBrowserServerManager.constructEndpoint(newServer, theRelativeUri);
+            result = downloadFeed(httpClient, ctx, endpoint, forceUpdate, dictParams);
+            if (result != null) {
+                // set the working server as new current server
+                RadioBrowserServerManager.setCurrentServer(newServer);
+                return result;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -245,7 +250,7 @@ public class Utils {
      */
     public static String getRealStationLink(OkHttpClient httpClient, Context ctx, String stationUuid) {
         Log.i("UTIL", "getRealStationLink for StationUUID:" + stationUuid);
-        String result = NetworkUtils.downloadFeedRelative(httpClient, ctx, "json/url/" + stationUuid, true, null);
+        String result = downloadFeedRelative(httpClient, ctx, "json/url/" + stationUuid, true, null);
         if (result != null) {
             Log.i("UTIL", "getRealStationLink response: " + result);
             try {
@@ -264,7 +269,7 @@ public class Utils {
 
     public static DataRadioStation getStationById(OkHttpClient httpClient, Context ctx, String stationId) {
         Log.w("UTIL", "Search by id:" + stationId);
-        String result = Utils.downloadFeed(httpClient, ctx, "json/stations/byid/" + stationId, true, null);
+        String result = downloadFeedRelative(httpClient, ctx, "json/stations/byid/" + stationId, true, null);
         if (result != null) {
             try {
                 List<DataRadioStation> list = DataRadioStation.DecodeJson(result);
@@ -283,7 +288,7 @@ public class Utils {
 
     public static DataRadioStation getStationByUuid(OkHttpClient httpClient, Context ctx, String stationUuid) {
         Log.w("UTIL", "Search by uuid:" + stationUuid);
-        String result = NetworkUtils.downloadFeedRelative(httpClient, ctx, "json/stations/byuuid/" + stationUuid, true, null);
+        String result = downloadFeedRelative(httpClient, ctx, "json/stations/byuuid/" + stationUuid, true, null);
         if (result != null) {
             try {
                 List<DataRadioStation> list = DataRadioStation.DecodeJson(result);
@@ -305,7 +310,7 @@ public class Utils {
         Log.d("UTIL", "Search by uuid for items");
         HashMap<String, String> p = new HashMap<String, String>();
         p.put("uuids", uuids);
-        String result = NetworkUtils.downloadFeedRelative(httpClient, ctx, "json/stations/byuuid", true, p);
+        String result = downloadFeedRelative(httpClient, ctx, "json/stations/byuuid", true, p);
         if (result != null) {
             try {
                 List<DataRadioStation> list = DataRadioStation.DecodeJson(result);
@@ -659,83 +664,5 @@ public class Utils {
             type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
         }
         return type;
-    }
-
-    public static OkHttpClient.Builder enableTls12OnPreLollipop(OkHttpClient.Builder client) {
-        if (Build.VERSION.SDK_INT >= 16 && Build.VERSION.SDK_INT < 22) {
-            try {
-                TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                trustManagerFactory.init((KeyStore)null);
-                TrustManager[] tmList = trustManagerFactory.getTrustManagers();
-                Log.i("OkHttpTLSCompat", "Found trustmanagers:"+tmList.length);
-                X509TrustManager tm = (X509TrustManager)tmList[0];
-
-                SSLContext sc = SSLContext.getInstance("TLSv1.2");
-                sc.init(null, null, null);
-                client.sslSocketFactory(new Tls12SocketFactory(sc.getSocketFactory()), tm);
-
-                ConnectionSpec cs = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
-                        .tlsVersions(TlsVersion.TLS_1_2)
-                        .build();
-
-                List<ConnectionSpec> specs = new ArrayList<>();
-                specs.add(cs);
-                specs.add(ConnectionSpec.COMPATIBLE_TLS);
-                specs.add(ConnectionSpec.CLEARTEXT);
-
-                client.connectionSpecs(specs);
-            } catch (Exception exc) {
-                Log.e("OkHttpTLSCompat", "Error while setting TLS 1.2", exc);
-            }
-        }
-        
-        // For Android API < 27, bypass SSL certificate validation for radio browser servers
-        if (Build.VERSION.SDK_INT < 27) {
-            try {
-                Log.i("OkHttpSSLCompat", "Configuring lenient SSL for API < 27");
-                configureLenientSSL(client);
-            } catch (Exception exc) {
-                Log.e("OkHttpSSLCompat", "Error while configuring lenient SSL", exc);
-            }
-        }
-
-        return client;
-    }
-    
-    private static void configureLenientSSL(OkHttpClient.Builder client) throws Exception {
-        // Create a trust manager that accepts all certificates
-        final TrustManager[] trustAllCerts = new TrustManager[] {
-            new X509TrustManager() {
-                @Override
-                public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-                    // Accept all client certificates
-                }
-
-                @Override
-                public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-                    // Accept all server certificates
-                }
-
-                @Override
-                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                    return new java.security.cert.X509Certificate[]{};
-                }
-            }
-        };
-
-        // Install the all-trusting trust manager
-        final SSLContext sslContext = SSLContext.getInstance("SSL");
-        sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-        
-        // Create an ssl socket factory with our all-trusting manager
-        final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-
-        client.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0]);
-        client.hostnameVerifier(new HostnameVerifier() {
-            @Override
-            public boolean verify(String hostname, SSLSession session) {
-                return true; // Accept all hostnames
-            }
-        });
     }
 }

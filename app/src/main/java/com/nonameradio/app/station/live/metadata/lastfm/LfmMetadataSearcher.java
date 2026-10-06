@@ -28,7 +28,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class LfmMetadataSearcher {
-    private static final String API_GET_TRACK_METADATA = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=%s&artist=%s&track=%s&format=json";
+    private static final String API_BASE_URL = "https://ws.audioscrobbler.com/2.0/";
 
     private final OkHttpClient httpClient;
     private final Gson gson = new Gson();
@@ -82,7 +82,14 @@ public class LfmMetadataSearcher {
     }
 
     private Request buildRequest(String LastFMApiKey, String artist, String track) {
-        HttpUrl url = HttpUrl.parse(String.format(API_GET_TRACK_METADATA, LastFMApiKey, artist, track));
+        // Build the query with HttpUrl so that artist/track names are properly encoded
+        HttpUrl url = HttpUrl.get(API_BASE_URL).newBuilder()
+                .addQueryParameter("method", "track.getInfo")
+                .addQueryParameter("api_key", LastFMApiKey)
+                .addQueryParameter("artist", artist)
+                .addQueryParameter("track", track)
+                .addQueryParameter("format", "json")
+                .build();
         Request.Builder requestBuilder = new Request.Builder().url(url).get();
         return requestBuilder.build();
     }

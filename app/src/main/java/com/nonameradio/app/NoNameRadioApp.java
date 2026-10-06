@@ -151,14 +151,16 @@ public class NoNameRadioApp extends android.app.Application {
 
         // Initialize Yandex Metrica after all other components
         try {
-            YandexMetricaConfig config = YandexMetricaConfig.newConfigBuilder("620825a5-2d14-47ce-af59-acb3618c547e")
-                    .withLogs()
+            YandexMetricaConfig.Builder configBuilder = YandexMetricaConfig.newConfigBuilder("620825a5-2d14-47ce-af59-acb3618c547e")
                     .withCrashReporting(true)
                     .withNativeCrashReporting(true)
                     .withLocationTracking(false)
-                    .withStatisticsSending(true)
-                    .build();
-            YandexMetrica.activate(this, config);
+                    .withStatisticsSending(true);
+            if (BuildConfig.DEBUG) {
+                // Verbose SDK logging only in debug builds
+                configBuilder.withLogs();
+            }
+            YandexMetrica.activate(this, configBuilder.build());
             YandexMetrica.enableActivityAutoTracking(this);
 
             // Report app start event
@@ -237,7 +239,7 @@ public class NoNameRadioApp extends android.app.Application {
             Toast toast = Toast.makeText(this, getResources().getString(R.string.ignore_proxy_settings_invalid), Toast.LENGTH_SHORT);
             toast.show();
         }
-        return Utils.enableTls12OnPreLollipop(builder);
+        return builder;
     }
 
     public OkHttpClient.Builder newHttpClientWithoutProxy() {
@@ -247,7 +249,7 @@ public class NoNameRadioApp extends android.app.Application {
             builder.addInterceptor(testsInterceptor);
         }
 
-        return Utils.enableTls12OnPreLollipop(builder);
+        return builder;
     }
 
     public boolean setCurrentOkHttpProxy(@NonNull OkHttpClient.Builder builder) {

@@ -5,6 +5,9 @@ on:
     tags:
       - "*"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,13 +18,15 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: "17"
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
       - name: Make Gradle executable
         run: chmod +x ./gradlew
       - name: Build Debug APK
         run: ./gradlew assembleFreeDebug assemblePlayDebug -x test -x lint
 
       - name: Release with Notes
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: app/build/outputs/apk/*/debug/NoNameRadio*.apk
         env:

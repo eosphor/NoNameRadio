@@ -159,7 +159,7 @@ public class FragmentHistory extends Fragment implements IAdapterRefreshable {
         EventBus.post(ShowLoadingEvent.INSTANCE);
 
         downloadTask = com.nonameradio.app.core.utils.AsyncExecutor.submitIOTask(() -> {
-            return Utils.getStationsByUuid(httpClient, getActivity(), listUUids);
+            return Utils.getStationsByUuid(httpClient, app, listUUids);
         });
 
         downloadTask.thenAccept(result -> {

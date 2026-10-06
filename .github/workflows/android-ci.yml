@@ -9,18 +9,40 @@ on:
       - master
 
 jobs:
-  test:
-    name: Run Tests
+  build:
+    name: Build
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
-    - name: set up JDK 17
+    - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: 17
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v4
     - name: Make Gradle executable
       run: chmod +x ./gradlew
-    - name: Build Tests
+    - name: Build debug APKs
       run: ./gradlew assembleFreeDebug assemblePlayDebug -x test -x lint
+
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    # Reported but not yet blocking until the unit test suite is confirmed green in CI
+    continue-on-error: true
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: 17
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v4
+    - name: Make Gradle executable
+      run: chmod +x ./gradlew
+    - name: Run unit tests
+      run: ./gradlew testFreeDebugUnitTest

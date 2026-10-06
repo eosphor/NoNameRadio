@@ -108,10 +108,11 @@ public class FragmentBase extends Fragment {
                 NoNameRadioApp app = (NoNameRadioApp) getActivity().getApplication();
                 final OkHttpClient httpClient = app.getHttpClient();
 
+                // Use the application context: the fragment may be detached before the task runs
                 downloadTask = com.nonameradio.app.core.utils.AsyncExecutor.submitIOTask(() -> {
                     HashMap<String, String> p = new HashMap<String, String>();
                     p.put("hidebroken", ""+(!show_broken));
-                    return Utils.downloadFeedRelative(httpClient, getActivity(), relativeUrl, forceUpdate, p);
+                    return Utils.downloadFeedRelative(httpClient, app, relativeUrl, forceUpdate, p);
                 });
 
                 downloadTask.thenAccept(result -> {

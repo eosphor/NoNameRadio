@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug-only components used for manual alarm testing (e.g. via adb). Not shipped in release builds. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <activity
+            android:name="com.nonameradio.app.TestAlarmActivity"
+            android:exported="true"
+            android:theme="@style/MyMaterialTheme" />
+
+        <receiver
+            android:name="com.nonameradio.app.alarm.AlarmSetupReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.nonameradio.app.CREATE_TEST_ALARM" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

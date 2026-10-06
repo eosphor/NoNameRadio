@@ -145,17 +145,20 @@ public class ExoPlayerWrapper implements PlayerWrapper, Player.Listener {
 
         player.setMediaItem(mediaItem);
         player.prepare();
-                player.setPlayWhenReady(true);
-                
-                // Record play start time
-                lastPlayStartTime = System.currentTimeMillis();
-                
-                // Report playback start event
-                try {
-                    YandexMetrica.reportEvent("radio_playback_started", "{\"url\":\"" + streamUrl + "\",\"is_hls\":" + isHls + "}");
-                } catch (Exception e) {
-                    Log.w("ExoPlayerWrapper", "Failed to report playback start event", e);
-                }
+        player.setPlayWhenReady(true);
+
+        // Record play start time
+        lastPlayStartTime = System.currentTimeMillis();
+
+        // Report playback start event (JSONObject takes care of escaping the URL)
+        try {
+            org.json.JSONObject eventParams = new org.json.JSONObject();
+            eventParams.put("url", streamUrl);
+            eventParams.put("is_hls", isHls);
+            YandexMetrica.reportEvent("radio_playback_started", eventParams.toString());
+        } catch (Exception e) {
+            Log.w("ExoPlayerWrapper", "Failed to report playback start event", e);
+        }
 
         if (connectivityManager == null) {
             connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

@@ -27,10 +27,8 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="com.android.providers.tv.permission.WRITE_EPG_DATA" />
-    
-    <!-- AppMetrica permissions -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- Location permissions are intentionally not requested: AppMetrica location tracking is disabled -->
 
     <uses-sdk tools:overrideLibrary="androidx.tvprovider"/>
 
@@ -75,12 +73,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".TestAlarmActivity"
-            android:exported="true"
-            android:theme="@style/MyMaterialTheme">
-        </activity>
-
         <service
             android:name="com.nonameradio.app.service.PlayerService"
             android:exported="true"
@@ -114,22 +106,14 @@
             </intent-filter>
         </service>
 
+        <!-- Only triggered by our own explicit PendingIntents from AlarmManager -->
         <receiver
             android:name="com.nonameradio.app.alarm.AlarmReceiver"
-            android:exported="true"
+            android:exported="false"
             android:enabled="true">
             <intent-filter>
                 <action android:name="com.nonameradio.app.ALARM_TRIGGERED" />
                 <action android:name="com.nonameradio.app.ALARM_TEST" />
-            </intent-filter>
-        </receiver>
-
-        <receiver
-            android:name="com.nonameradio.app.alarm.AlarmSetupReceiver"
-            android:exported="true"
-            android:enabled="true">
-            <intent-filter>
-                <action android:name="com.nonameradio.app.CREATE_TEST_ALARM" />
             </intent-filter>
         </receiver>
 

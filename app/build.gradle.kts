@@ -54,8 +54,8 @@ android {
         minSdk = 26
         targetSdk = 35
 
-        versionCode = 100
-        versionName = "0.87.0"
+        versionCode = 101
+        versionName = "0.87.2"
 
         vectorDrawables.useSupportLibrary = true
 
@@ -76,7 +76,6 @@ android {
         buildConfigField("boolean", "IS_TESTING", "false")
 
         multiDexKeepProguard = file("multidex-config.pro")
-        vectorDrawables.useSupportLibrary = true
     }
 
     testOptions {
@@ -255,9 +254,6 @@ dependencies {
 
     // Testing
     testImplementation(libs.junit4)
-    testImplementation(libs.junit.jupiter.api)
-    testRuntimeOnly(libs.junit.jupiter.engine)
-    testRuntimeOnly(libs.junit.vintage.engine)
 
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.androidx.test.ext.junit)
@@ -277,8 +273,8 @@ dependencies {
     testImplementation(libs.robolectric)
     androidTestImplementation(libs.mockito.android)
 
-    // Memory leak detection (debug only) - LeakCanary v3.0-alpha-8
-    debugImplementation("com.squareup.leakcanary:leakcanary-object-watcher-android:3.0-alpha-8")
+    // Memory leak detection (debug only)
+    debugImplementation(libs.leakcanary.android)
 }
 
 tasks.withType<JavaCompile>().configureEach {

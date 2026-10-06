@@ -11,6 +11,9 @@ A modern Android radio streaming application based on the [Radio Browser](http:/
 
 ## 🏆 **Latest Release: v0.87.1** 🎉
 
+> **Next: v0.87.2 (security & bug-fix update)** — TLS certificate validation restored on Android 8.0,
+> alarm components no longer exported, radio-browser request caching/encoding fixed. See [CHANGELOG.md](CHANGELOG.md).
+
 ### **🚀 Major Quality & Security Update (October 2025)**
 
 #### **🔧 Code Quality Revolution**
@@ -20,7 +23,7 @@ A modern Android radio streaming application based on the [Radio Browser](http:/
 - ✅ **Input Validation**: Comprehensive validation across all user inputs
 
 #### **🛡️ Security & Stability**
-- ✅ **LeakCanary v3.0 Integration**: Advanced memory leak detection (compatible with AGP 8.7.0)
+- ✅ **LeakCanary Integration**: Memory leak detection in debug builds (LeakCanary 2.14 since v0.87.2)
 - ✅ **SecurityUtils Implementation**: XSS, SQL injection, and input sanitization
 - ✅ **Secure Network Operations**: Domain whitelisting and UUID validation
 - ✅ **Input Sanitization**: Protection against malicious input patterns
@@ -249,7 +252,7 @@ We welcome contributions! This project follows Clean Architecture principles and
 
 ### **✅ Latest Release (v0.87.1 - October 2025)**
 - **🔧 Code Quality Revolution**: Complete AsyncTask migration, modern async architecture
-- **🛡️ Security & Stability**: LeakCanary v3.0, SecurityUtils, input sanitization
+- **🛡️ Security & Stability**: LeakCanary, SecurityUtils, input sanitization
 - **📱 Platform Modernization**: minSdk 24→26, AGP 8.7.0 compatibility, APK optimization
 - **🧪 Testing Infrastructure**: 13+ unit tests, Robolectric, Mockito integration
 
