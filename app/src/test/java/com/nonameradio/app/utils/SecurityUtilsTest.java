@@ -342,4 +342,16 @@ public class SecurityUtilsTest {
             assertTrue("UUID '" + uuid + "' should be valid", result);
         }
     }
+
+    @Test
+    public void testIsValidUrl_withRadioBrowserMirror_returnsTrue() {
+        assertTrue(SecurityUtils.isValidUrl("https://nl1.api.radio-browser.info/json/stats"));
+        assertTrue(SecurityUtils.isValidUrl("https://all.api.radio-browser.info/json/stats"));
+    }
+
+    @Test
+    public void testIsValidUrl_withLookalikeDomain_returnsFalse() {
+        assertFalse(SecurityUtils.isValidUrl("https://evilradio-browser.info/json/stats"));
+        assertFalse(SecurityUtils.isValidUrl("https://radio-browser.info.evil.com/json/stats"));
+    }
 }

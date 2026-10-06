@@ -6,23 +6,17 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
+import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient;
 
 /**
@@ -46,105 +40,28 @@ public class SecurityUtils {
     );
     
     /**
-     * Create a secure OkHttpClient with proper TLS configuration
-     * @param context Application context
+     * Create an OkHttpClient restricted to modern TLS.
+     * Certificate chain and hostname validation are left to the platform defaults (system trust
+     * store + standard hostname verification) - never replace them with custom implementations.
+     * @param context Application context (currently unused, kept for future extensibility)
      * @return Configured OkHttpClient
      */
     @NonNull
-    public static OkHttpClient createSecureHttpClient(@NonNull Context context) {
-        try {
-            // Create secure SSL context with TLS 1.2+
-            SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-            
-            // Use system default trust managers for production
-            // Only use custom trust managers in development/testing
-            sslContext.init(null, null, null);
-            
-            return new OkHttpClient.Builder()
-                .sslSocketFactory(sslContext.getSocketFactory(), createSecureTrustManager())
-                .hostnameVerifier(createSecureHostnameVerifier())
-                .build();
-                
-        } catch (NoSuchAlgorithmException | KeyManagementException e) {
-            Log.e(TAG, "Error creating secure HTTP client", e);
-            // Fallback to default client
-            return new OkHttpClient.Builder().build();
-        }
+    public static OkHttpClient createSecureHttpClient(@Nullable Context context) {
+        return new OkHttpClient.Builder()
+            .connectionSpecs(Collections.singletonList(ConnectionSpec.MODERN_TLS))
+            .build();
     }
-    
-    /**
-     * Create a secure trust manager that validates certificates properly
-     */
-    @NonNull
-    private static X509TrustManager createSecureTrustManager() {
-        return new X509TrustManager() {
-            @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType) 
-                    throws CertificateException {
-                // Validate client certificates properly
-                if (chain == null || chain.length == 0) {
-                    throw new CertificateException("No client certificates provided");
-                }
-                
-                // In production, implement proper certificate validation
-                // For now, we'll use a more restrictive approach
-                for (X509Certificate cert : chain) {
-                    cert.checkValidity();
-                }
-            }
-            
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType) 
-                    throws CertificateException {
-                // Validate server certificates properly
-                if (chain == null || chain.length == 0) {
-                    throw new CertificateException("No server certificates provided");
-                }
-                
-                // Check certificate validity
-                for (X509Certificate cert : chain) {
-                    cert.checkValidity();
-                }
-                
-                // Additional validation can be added here
-                // such as certificate pinning for specific domains
-            }
-            
-            @Override
-            public X509Certificate[] getAcceptedIssuers() {
-                // Return empty array to use system default issuers
-                return new X509Certificate[0];
-            }
-        };
-    }
-    
-    /**
-     * Create a secure hostname verifier
-     */
-    @NonNull
-    private static HostnameVerifier createSecureHostnameVerifier() {
-        return new HostnameVerifier() {
-            @Override
-            public boolean verify(String hostname, SSLSession session) {
-                if (hostname == null || hostname.isEmpty()) {
-                    return false;
-                }
-                
-                // Check against whitelist of allowed domains
-                return isAllowedDomain(hostname);
-            }
-        };
-    }
-    
+
     /**
      * Validate if a domain is in the allowed list
      */
     private static boolean isAllowedDomain(@NonNull String hostname) {
         // Remove port if present
-        String domain = hostname.split(":")[0];
-        
-        // Check against whitelist
-        return ALLOWED_DOMAINS.contains(domain.toLowerCase());
+        String domain = hostname.split(":")[0].toLowerCase(Locale.ROOT);
+
+        // Explicit whitelist, plus any API mirror under radio-browser.info (de1, nl1, at1, ...)
+        return ALLOWED_DOMAINS.contains(domain) || domain.endsWith(".radio-browser.info");
     }
     
     /**
@@ -229,7 +146,7 @@ public class SecurityUtils {
         
         try {
             java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(input.getBytes("UTF-8"));
+            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
             
             StringBuilder hexString = new StringBuilder();
             for (byte b : hash) {

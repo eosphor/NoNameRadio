@@ -45,12 +45,15 @@ public class AlarmReceiver extends BroadcastReceiver {
     private final String TAG = "RECV";
     static int BACKUP_NOTIFICATION_ID = 2;
     static String BACKUP_NOTIFICATION_NAME = "backup-alarm";
+    private static final long WAKELOCK_TIMEOUT_MS = 10 * 60 * 1000L;
 
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "AlarmReceiver.onReceive called with action: " + intent.getAction());
         if(BuildConfig.DEBUG) { Log.d(TAG,"received broadcast"); }
         aquireLocks(context);
+        // Safety net: also drop the wifi lock if playback never starts (releaseLocks is idempotent)
+        AsyncExecutor.runOnMainThreadDelayed(this::releaseLocks, WAKELOCK_TIMEOUT_MS);
         
         Toast toast = Toast.makeText(context, context.getResources().getText(R.string.alert_alarm_working), Toast.LENGTH_SHORT);
         toast.show();
@@ -87,7 +90,8 @@ public class AlarmReceiver extends BroadcastReceiver {
         }
         if (!wakeLock.isHeld()) {
             if(BuildConfig.DEBUG) { Log.d(TAG,"acquire wakelock"); }
-            wakeLock.acquire();
+            // Bounded, so a failed playback start can never keep the CPU awake indefinitely
+            wakeLock.acquire(WAKELOCK_TIMEOUT_MS);
         }
         WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         if (wm != null) {
@@ -109,12 +113,17 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     private void releaseLocks() {
         if (wakeLock != null) {
-            wakeLock.release();
+            // The wake lock may already have been released by its timeout
+            if (wakeLock.isHeld()) {
+                wakeLock.release();
+            }
             wakeLock = null;
             if(BuildConfig.DEBUG) { Log.d(TAG,"release wakelock"); }
         }
         if (wifiLock != null) {
-            wifiLock.release();
+            if (wifiLock.isHeld()) {
+                wifiLock.release();
+            }
             wifiLock = null;
             if(BuildConfig.DEBUG) { Log.d(TAG,"release wifilock"); }
         }
@@ -188,14 +197,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                             share.setClassName(packageName, activityName);
                             share.setDataAndType(Uri.parse(url), "audio/*");
                             context.startActivity(share);
-                            if (wakeLock != null) {
-                                wakeLock.release();
-                                wakeLock = null;
-                            }
-                            if (wifiLock != null) {
-                                wifiLock.release();
-                                wifiLock = null;
-                            }
+                            releaseLocks();
                         } else {
                             Intent anIntent = new Intent(context, PlayerService.class);
                             context.getApplicationContext().bindService(anIntent, svcConn, context.BIND_AUTO_CREATE);
@@ -210,14 +212,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                     Toast toast = Toast.makeText(context, context.getResources().getText(R.string.error_station_load), Toast.LENGTH_SHORT);
                     toast.show();
                     PlaySystemAlarm(context);
-                    if (wakeLock != null) {
-                        wakeLock.release();
-                        wakeLock = null;
-                    }
-                    if (wifiLock != null) {
-                        wifiLock.release();
-                        wifiLock = null;
-                    }
+                    releaseLocks();
                 }
             });
         }).exceptionally(throwable -> {
@@ -228,14 +223,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                 Toast toast = Toast.makeText(context, context.getResources().getText(R.string.error_station_load), Toast.LENGTH_SHORT);
                 toast.show();
                 PlaySystemAlarm(context);
-                if (wakeLock != null) {
-                    wakeLock.release();
-                    wakeLock = null;
-                }
-                if (wifiLock != null) {
-                    wifiLock.release();
-                    wifiLock = null;
-                }
+                releaseLocks();
             });
             return null;
         });

@@ -24,13 +24,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Background downloads no longer use `getActivity()` from worker threads (NPE when the fragment is detached)
 - Analytics playback event JSON is now properly escaped
 - `UtilsTest` used JUnit 5 annotations with the JUnit 4 runner and Kotlin `assert`, so it never ran
+- API response cache key now includes the POST parameters (e.g. toggling "show broken stations"
+  no longer returns a stale cached list for up to an hour); cache file names are length-limited
+  and streams/responses are closed with try-with-resources
+- Alarm wake lock is acquired with a timeout and both wake/wifi locks are released safely, so a
+  failed alarm can no longer keep the device awake indefinitely
+- `RadioBrowserServerManager` is thread-safe (concurrent server discovery from worker threads)
+- `EventBus` no longer delivers events to listeners that unregistered after the event was posted
+- Release builds: R8 keep rules for Gson-serialized classes (MPD servers, proxy settings,
+  country list, Last.fm responses) so their fields are not renamed
+- `SecurityUtils.createSecureHttpClient` uses platform certificate/hostname validation instead of
+  a custom trust manager and a radio-browser-only hostname verifier; domain checks accept all
+  `*.radio-browser.info` API mirrors
 
 ### Changed
 - LeakCanary: replaced `leakcanary-object-watcher-android:3.0-alpha-8` (watcher only, no analysis)
   with the stable `leakcanary-android:2.14`, declared via the version catalog
 - AppMetrica SDK logs are enabled only in debug builds
-- Removed unused/dead code: `NetworkUtils`, `Tls12SocketFactory`, pre-Lollipop TLS workarounds,
-  unused JUnit 5 dependencies
+- Removed unused/dead code: `NetworkUtils` (both copies), `Tls12SocketFactory`, pre-Lollipop TLS
+  workarounds, `ModernAsyncTask`, `HttpClient`, `FileUtils`, `PlaylistM3U*`, `IChanged`, empty
+  `ActivityRadioStationDetail`, commented-out `AsyncTask` code, unused JUnit 5 dependencies
+- Build script uses `providers.exec` instead of the deprecated `project.exec` for the git hash
+- Added Dependabot configuration for Gradle and GitHub Actions
+- Moved one-off reports to `docs/reports/`
 - CI: Gradle caching via `gradle/actions/setup-gradle`, unit tests job, `action-gh-release@v2`
 - Repository cleanup: removed committed `.git` backup directory, `.DS_Store`, build log;
   `.gitignore` no longer ignores the `gradle/` directory (version catalog and wrapper)

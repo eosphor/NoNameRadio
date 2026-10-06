@@ -21,8 +21,9 @@ import okhttp3.Response;
  */
 
 public class RadioBrowserServerManager {
-    static String currentServer = null;
-    static String[] serverList = null;
+    // Accessed from several worker threads; guarded by the class lock
+    static volatile String currentServer = null;
+    static volatile String[] serverList = null;
 
     /**
      * Test if a server is reachable
@@ -114,7 +115,7 @@ public class RadioBrowserServerManager {
      * @param httpClient the configured OkHttpClient to use for SSL/TLS handling
      * @param context the application context to access preferences
      */
-    public static String[] getServerList(boolean forceRefresh, OkHttpClient httpClient, Context context){
+    public static synchronized String[] getServerList(boolean forceRefresh, OkHttpClient httpClient, Context context){
         if (serverList == null || serverList.length == 0 || forceRefresh){
             serverList = doDnsServerListing(httpClient, context);
         }
@@ -127,7 +128,7 @@ public class RadioBrowserServerManager {
      * @param httpClient the configured OkHttpClient to use for SSL/TLS handling
      * @param context the application context to access preferences
      */
-    public static String getCurrentServer(OkHttpClient httpClient, Context context) {
+    public static synchronized String getCurrentServer(OkHttpClient httpClient, Context context) {
         if (currentServer == null){
             String[] serverList = getServerList(false, httpClient, context);
             if (serverList.length > 0){
@@ -145,7 +146,7 @@ public class RadioBrowserServerManager {
     /**
      * Set new server as current
      */
-    public static void setCurrentServer(String newServer){
+    public static synchronized void setCurrentServer(String newServer){
         currentServer = newServer;
     }
 

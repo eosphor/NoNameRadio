@@ -1,0 +1,27 @@
+version: 2
+updates:
+  # Gradle dependencies and plugins (gradle/libs.versions.toml)
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      androidx:
+        patterns:
+          - "androidx.*"
+      media3:
+        patterns:
+          - "androidx.media3:*"
+      test:
+        patterns:
+          - "junit:*"
+          - "org.mockito:*"
+          - "org.robolectric:*"
+          - "androidx.test*"
+
+  # GitHub Actions used by the workflows
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"

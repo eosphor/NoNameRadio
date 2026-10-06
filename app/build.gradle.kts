@@ -1,6 +1,5 @@
 import com.android.build.gradle.api.ApkVariantOutput
 import de.undercouch.gradle.tasks.download.Download
-import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -164,12 +163,9 @@ android.applicationVariants.configureEach {
     }
 
     val gitHash = runCatching {
-        val stdout = ByteArrayOutputStream()
-        project.exec {
+        providers.exec {
             commandLine("git", "rev-parse", "--short", "HEAD")
-            standardOutput = stdout
-        }
-        stdout.toString().trim()
+        }.standardOutput.asText.get().trim()
     }.getOrDefault("No commit hash")
 
     val buildDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date())
@@ -284,7 +280,7 @@ tasks.withType<JavaCompile>().configureEach {
 tasks.register<Download>("renewFallbackStations") {
     group = "Build Setup"
     description = "Renews the list of some popular and recently checked fallback stations"
-    src("https://de1.api.radio-browser.info/json/stations/search?limit=10&bitrateMax=128&hidebroken=true&has_extended_info=true&order=lastchecktime&reverse=true&bitrateMax=128")
+    src("https://de1.api.radio-browser.info/json/stations/search?limit=10&bitrateMax=128&hidebroken=true&has_extended_info=true&order=lastchecktime&reverse=true")
     dest(File(projectDir, "src/main/res/raw/fallback_stations.json"))
     overwrite(true)
     tempAndMove(true)

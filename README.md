@@ -12,20 +12,21 @@ A modern Android radio streaming application based on the [Radio Browser](http:/
 ## 🏆 **Latest Release: v0.87.1** 🎉
 
 > **Next: v0.87.2 (security & bug-fix update)** — TLS certificate validation restored on Android 8.0,
-> alarm components no longer exported, radio-browser request caching/encoding fixed. See [CHANGELOG.md](CHANGELOG.md).
+> alarm components no longer exported, radio-browser request caching fixed, wake lock leak in alarms fixed,
+> R8 rules for Gson models. See [CHANGELOG.md](CHANGELOG.md). Historical reports live in [`docs/reports/`](docs/reports/).
 
 ### **🚀 Major Quality & Security Update (October 2025)**
 
 #### **🔧 Code Quality Revolution**
-- ✅ **Complete AsyncTask Migration**: All 4 AsyncTask operations migrated to modern AsyncExecutor
+- ✅ **AsyncTask Migration**: All AsyncTask operations migrated to AsyncExecutor (thread pools + CompletableFuture)
 - ✅ **Modern Async Architecture**: Thread pools, CompletableFuture, resource management
 - ✅ **Enhanced Error Handling**: Centralized ErrorHandler with user-friendly messages
-- ✅ **Input Validation**: Comprehensive validation across all user inputs
+- ✅ **Input Validation**: `InputValidator` / `SecurityUtils` helpers for URLs, UUIDs and user input
 
 #### **🛡️ Security & Stability**
 - ✅ **LeakCanary Integration**: Memory leak detection in debug builds (LeakCanary 2.14 since v0.87.2)
-- ✅ **SecurityUtils Implementation**: XSS, SQL injection, and input sanitization
-- ✅ **Secure Network Operations**: Domain whitelisting and UUID validation
+- ✅ **SecurityUtils Implementation**: Input sanitization, UUID and URL validation helpers
+- ✅ **Secure Network Operations**: Platform TLS validation on all supported Android versions (since v0.87.2)
 - ✅ **Input Sanitization**: Protection against malicious input patterns
 
 #### **📱 Platform Modernization**
@@ -269,7 +270,7 @@ We welcome contributions! This project follows Clean Architecture principles and
 - **Code Coverage**: ~85% (core components + new utilities)
 - **Architecture Score**: Clean Architecture compliance
 - **Build Time**: Optimized Gradle configuration
-- **APK Size**: ~17MB (with LeakCanary v3.0 and enhanced features)
+- **APK Size**: ~17MB debug build (with LeakCanary)
 - **minSdk**: 26 (Android 8.0+)
 - **Target SDK**: 35 (Android 15)
 - **Unit Tests**: 13+ test cases covering critical functionality

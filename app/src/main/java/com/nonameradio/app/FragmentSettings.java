@@ -220,30 +220,6 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Shared
         return  getActivity().getSystemService(Context.UI_MODE_SERVICE);
     }
 
-    /*
-    private void setServersData(String[] list, ListPreference servers) {
-        servers.setEntries(list);
-        if (list.length > 0){
-            servers.setDefaultValue(list[0]);
-        }
-        servers.setEntryValues(list);
-    }
-
-    void updateDnsList(final ListPreference lp){
-        final AsyncTask<Void, Void, String[]> xxx = new AsyncTask<Void, Void, String[]>() {
-            @Override
-            protected String[] doInBackground(Void... params) {
-                return RadioBrowserServerManager.getServerList(false, HttpClient.getInstance(), getContext());
-            }
-
-            @Override
-            protected void onPostExecute(String[] result) {
-                setServersData(result, lp);
-                super.onPostExecute(result);
-            }
-        }.execute();
-    }
-    */
 
     @Override
     public void onResume() {

@@ -41,3 +41,12 @@
 
 # Prevent stripping of EventBus listeners (our custom bus uses generics lambdas; safe)
 -keep class com.nonameradio.app.core.event.** { *; }
+
+# Gson: classes (de)serialized by reflection must keep their field names, otherwise data stored in
+# preferences (MPD servers, proxy settings) and parsed API responses break in minified builds.
+-keepattributes Signature
+-keep class * extends com.google.gson.reflect.TypeToken
+-keepclassmembers class com.nonameradio.app.players.mpd.MPDServerData { <fields>; }
+-keepclassmembers class com.nonameradio.app.proxy.ProxySettings { <fields>; }
+-keepclassmembers class com.nonameradio.app.CountryCodeDictionary$Country { <fields>; }
+-keep class com.nonameradio.app.station.live.metadata.lastfm.data.** { <fields>; <init>(...); }

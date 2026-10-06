@@ -17,7 +17,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * - Type-safe event posting and subscription
  * - Automatic main thread delivery for UI updates
  * - Thread-safe operations
- * - Memory leak prevention with weak references
+ * - Listeners must unregister themselves (strong references are held)
  */
 public class EventBus {
     private static final String TAG = "EventBus";
@@ -79,7 +79,7 @@ public class EventBus {
         List<EventListener<?>> eventListeners = listeners.get(eventType);
 
         if (eventListeners == null || eventListeners.isEmpty()) {
-            Log.w(TAG, "No listeners registered for event: " + eventType.getSimpleName());
+            Log.d(TAG, "No listeners registered for event: " + eventType.getSimpleName());
             return;
         }
 
@@ -89,6 +89,11 @@ public class EventBus {
             try {
                 // Deliver on main thread for UI safety
                 mainHandler.post(() -> {
+                    // The listener may have unregistered (e.g. its fragment was destroyed)
+                    // between posting and delivery
+                    if (!eventListeners.contains(listener)) {
+                        return;
+                    }
                     try {
                         listener.onEvent(event);
                     } catch (Exception e) {

@@ -53,7 +53,6 @@ import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -97,34 +96,57 @@ public class Utils {
         return SystemUtils.parseIntWithDefault(number, defaultVal);
     }
 
+    // Cached API responses are reused for this long
+    private static final long CACHE_MAX_AGE_MS = 60 * 60 * 1000L;
+    // Keep cache file names well below the usual 255 byte file name limit
+    private static final int MAX_CACHE_FILE_NAME_LENGTH = 120;
+
+    private static File getCacheFileFor(Context ctx, String theURI) {
+        String aFileName = theURI.toLowerCase().replace("http://", "");
+        aFileName = aFileName.replace("https://", "");
+        aFileName = sanitizeName(aFileName);
+        if (aFileName.length() > MAX_CACHE_FILE_NAME_LENGTH) {
+            // Truncate, but keep the name unique for the full URI
+            aFileName = aFileName.substring(0, MAX_CACHE_FILE_NAME_LENGTH) + "_" + Integer.toHexString(theURI.hashCode());
+        }
+        return new File(ctx.getCacheDir(), aFileName);
+    }
+
+    /**
+     * Cache key for a request: the URI plus its (sorted) POST parameters, so that requests to the
+     * same endpoint with different parameters don't share a cache entry.
+     */
+    private static String getCacheKey(String theURI, Map<String, String> dictParams) {
+        if (dictParams == null || dictParams.isEmpty()) {
+            return theURI;
+        }
+        StringBuilder key = new StringBuilder(theURI).append('?');
+        for (Map.Entry<String, String> entry : new java.util.TreeMap<>(dictParams).entrySet()) {
+            key.append(entry.getKey()).append('=').append(entry.getValue()).append('&');
+        }
+        return key.substring(0, key.length() - 1);
+    }
+
     public static String getCacheFile(Context ctx, String theURI) {
-        StringBuilder chaine = new StringBuilder();
         try {
-            String aFileName = theURI.toLowerCase().replace("http://", "");
-            aFileName = aFileName.toLowerCase().replace("https://", "");
-            aFileName = sanitizeName(aFileName);
-
-            File file = new File(ctx.getCacheDir().getAbsolutePath() + "/" + aFileName);
-            Date lastModDate = new Date(file.lastModified());
-
-            Date now = new Date();
-            long millis = now.getTime() - file.lastModified();
-            long secs = millis / 1000;
-            long mins = secs / 60;
-            long hours = mins / 60;
-
-            if (BuildConfig.DEBUG) {
-                Log.d("UTIL", "File last modified : " + lastModDate + " secs=" + secs + "  mins=" + mins + " hours=" + hours);
+            File file = getCacheFileFor(ctx, theURI);
+            if (!file.exists()) {
+                return null;
             }
 
-            if (hours < 1) {
-                FileInputStream aStream = new FileInputStream(file);
-                BufferedReader rd = new BufferedReader(new InputStreamReader(aStream));
-                String line;
-                while ((line = rd.readLine()) != null) {
-                    chaine.append(line);
+            long ageMs = System.currentTimeMillis() - file.lastModified();
+            if (BuildConfig.DEBUG) {
+                Log.d("UTIL", "Cache file age: " + (ageMs / 1000) + "s for " + theURI);
+            }
+
+            if (ageMs < CACHE_MAX_AGE_MS) {
+                StringBuilder chaine = new StringBuilder();
+                try (BufferedReader rd = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+                    String line;
+                    while ((line = rd.readLine()) != null) {
+                        chaine.append(line);
+                    }
                 }
-                rd.close();
                 if (BuildConfig.DEBUG) {
                     Log.d("UTIL", "used cache for:" + theURI);
                 }
@@ -141,15 +163,8 @@ public class Utils {
     }
 
     public static void writeFileCache(Context ctx, String theURI, String content) {
-        try {
-            String aFileName = theURI.toLowerCase().replace("http://", "");
-            aFileName = aFileName.toLowerCase().replace("https://", "");
-            aFileName = sanitizeName(aFileName);
-
-            File f = new File(ctx.getCacheDir() + "/" + aFileName);
-            FileOutputStream aStream = new FileOutputStream(f);
+        try (FileOutputStream aStream = new FileOutputStream(getCacheFileFor(ctx, theURI))) {
             aStream.write(content.getBytes(StandardCharsets.UTF_8));
-            aStream.close();
         } catch (Exception e) {
             Log.e("UTIL", "writeFileCache() could not write to cache file for:" + theURI);
         }
@@ -157,8 +172,9 @@ public class Utils {
 
     private static String downloadFeed(OkHttpClient httpClient, Context ctx, String theURI, boolean forceUpdate, Map<String, String> dictParams) {
         Log.i("DOWN", "Url=" + theURI);
+        final String cacheKey = getCacheKey(theURI, dictParams);
         if (!forceUpdate) {
-            String cache = getCacheFile(ctx, theURI);
+            String cache = getCacheFile(ctx, cacheKey);
             if (cache != null) {
                 return cache;
             }
@@ -183,16 +199,17 @@ public class Utils {
             }
 
             Request request = requestBuilder.build();
-            okhttp3.Response response = httpClient.newCall(request).execute();
+            String responseStr;
+            try (okhttp3.Response response = httpClient.newCall(request).execute()) {
+                responseStr = response.body() != null ? response.body().string() : "";
 
-            String responseStr = response.body().string();
-
-            if (!response.isSuccessful()) {
-                Log.e("UTIL", "Unsuccessful response: " + response.message() + "\n" + responseStr);
-                return null;
+                if (!response.isSuccessful()) {
+                    Log.e("UTIL", "Unsuccessful response: " + response.message() + "\n" + responseStr);
+                    return null;
+                }
             }
 
-            writeFileCache(ctx, theURI, responseStr);
+            writeFileCache(ctx, cacheKey, responseStr);
             if (BuildConfig.DEBUG) {
                 Log.d("UTIL", "wrote cache file for:" + theURI);
             }
